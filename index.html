@@ -14,7 +14,7 @@
     }
 
     .box {
-      max-width: 700px;
+      max-width: 900px;
       margin: auto;
       background: #fff;
       padding: 24px;
@@ -27,7 +27,7 @@
       margin-top: 0;
     }
 
-    input, button {
+    input, button, textarea {
       width: 100%;
       padding: 12px;
       margin-top: 10px;
@@ -36,7 +36,7 @@
       font-size: 14px;
     }
 
-    input {
+    input, textarea {
       border: 1px solid #d1d5db;
     }
 
@@ -59,6 +59,20 @@
 
     .secondary-btn:hover {
       background: #000;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    .card {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 16px;
+      background: #f9fafb;
     }
 
     #msg {
@@ -87,18 +101,18 @@
       margin-top: 6px;
     }
 
-    .job-list {
+    .job-list, .handover-list {
       list-style: none;
       padding: 0;
       margin: 0;
     }
 
-    .job-item {
+    .job-item, .handover-item {
       border: 1px solid #e5e7eb;
       border-radius: 10px;
       padding: 12px 14px;
       margin-bottom: 10px;
-      background: #f9fafb;
+      background: #fff;
     }
 
     .job-ref {
@@ -107,7 +121,7 @@
       margin-bottom: 4px;
     }
 
-    .job-meta {
+    .job-meta, .handover-meta {
       font-size: 14px;
       color: #4b5563;
     }
@@ -116,6 +130,12 @@
       color: #6b7280;
       font-style: italic;
       padding: 8px 0;
+    }
+
+    .small {
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.5;
     }
   </style>
 </head>
@@ -140,8 +160,23 @@
 
     <button onclick="createJob()">+ New Job</button>
 
-    <h3 style="margin-top: 24px;">Jobs</h3>
-    <ul id="jobs" class="job-list"></ul>
+    <div class="row">
+      <div class="card">
+        <h3>Jobs</h3>
+        <ul id="jobs" class="job-list"></ul>
+      </div>
+
+      <div class="card">
+        <h3>BD Handover</h3>
+        <div class="small">Upload a BD handover file and save a record to Supabase.</div>
+        <input id="handover-file" type="file" />
+        <textarea id="handover-notes" rows="6" placeholder="Optional notes or pasted handover text"></textarea>
+        <button onclick="uploadHandover()">Upload BD Handover</button>
+
+        <h3 style="margin-top: 24px;">Uploaded Handovers</h3>
+        <ul id="handovers" class="handover-list"></ul>
+      </div>
+    </div>
 
     <button class="secondary-btn" onclick="logout()">Logout</button>
   </div>
@@ -151,7 +186,7 @@
 
     const supabase = createClient(
       'https://edxgkwkdgvsajfmkejbk.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek'
+      'YOUR_ANON_KEY_HERE'
     );
 
     window.login = async function () {
@@ -222,6 +257,46 @@
       });
     }
 
+    async function loadHandovers(userId, role) {
+      let query = supabase
+        .from('bd_handovers')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (role !== 'admin') {
+        query = query.eq('uploaded_by', userId);
+      }
+
+      const { data, error } = await query;
+      const list = document.getElementById('handovers');
+      list.innerHTML = '';
+
+      if (error) {
+        list.innerHTML = '<li class="empty">Could not load handovers.</li>';
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        list.innerHTML = '<li class="empty">No handovers uploaded yet.</li>';
+        return;
+      }
+
+      data.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'handover-item';
+        li.innerHTML = `
+          <div><strong>${item.filename || 'Unnamed file'}</strong></div>
+          <div class="handover-meta">
+            Status: ${item.parse_status || 'pending'}
+          </div>
+          <div class="handover-meta">
+            Uploaded: ${new Date(item.created_at).toLocaleString()}
+          </div>
+        `;
+        list.appendChild(li);
+      });
+    }
+
     window.createJob = async function () {
       const name = prompt('Customer name?');
       if (!name) return;
@@ -255,6 +330,46 @@
       await loadUser();
     };
 
+    window.uploadHandover = async function () {
+      const fileInput = document.getElementById('handover-file');
+      const notes = document.getElementById('handover-notes').value.trim();
+
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData?.user) {
+        alert('Could not get logged-in user.');
+        return;
+      }
+
+      const user = userData.user;
+      const file = fileInput.files[0];
+
+      if (!file && !notes) {
+        alert('Choose a file or enter notes.');
+        return;
+      }
+
+      let filename = file ? file.name : 'pasted-handover.txt';
+
+      const { error } = await supabase
+        .from('bd_handovers')
+        .insert({
+          filename: filename,
+          parsed_data: notes ? { raw_notes: notes } : {},
+          uploaded_by: user.id,
+          parse_status: 'pending'
+        });
+
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      alert('BD handover uploaded');
+      fileInput.value = '';
+      document.getElementById('handover-notes').value = '';
+      await loadUser();
+    };
+
     async function loadUser() {
       const { data: userData } = await supabase.auth.getUser();
       const user = userData.user;
@@ -285,6 +400,7 @@
       document.getElementById('role').innerText = 'Role: ' + profile.role;
 
       await loadJobs(user.id, profile.role);
+      await loadHandovers(user.id, profile.role);
     }
 
     document.getElementById('password').addEventListener('keydown', function (e) {
