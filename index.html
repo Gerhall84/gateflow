@@ -270,6 +270,30 @@
     }
 
     window.createJob = async function () {
+      window.uploadHandover = async function () {
+  const notes = prompt("Paste BD handover details here:");
+
+  if (!notes) return;
+
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData.user;
+
+  const { error } = await supabase
+    .from('bd_handovers')
+    .insert({
+      filename: 'manual-entry',
+      parsed_data: { raw_notes: notes },
+      uploaded_by: user.id,
+      parse_status: 'pending'
+    });
+
+  if (error) {
+    alert("Error: " + error.message);
+    return;
+  }
+
+  alert("BD handover saved");
+};
       const name = prompt('Customer name?');
       if (!name) return;
 
