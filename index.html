@@ -12,7 +12,6 @@
       margin: 0;
       color: #111827;
     }
-
     .box {
       max-width: 900px;
       margin: auto;
@@ -22,11 +21,7 @@
       box-shadow: 0 8px 24px rgba(0,0,0,.08);
       border: 1px solid #e5e7eb;
     }
-
-    h2, h3 {
-      margin-top: 0;
-    }
-
+    h2, h3 { margin-top: 0; }
     input, button, textarea {
       width: 100%;
       padding: 12px;
@@ -35,11 +30,9 @@
       border-radius: 8px;
       font-size: 14px;
     }
-
     input, textarea {
       border: 1px solid #d1d5db;
     }
-
     button {
       background: #2563eb;
       color: #fff;
@@ -47,40 +40,29 @@
       cursor: pointer;
       font-weight: 700;
     }
-
-    button:hover {
-      background: #1d4ed8;
-    }
-
+    button:hover { background: #1d4ed8; }
     .secondary-btn {
       background: #111827;
       margin-top: 20px;
     }
-
-    .secondary-btn:hover {
-      background: #000;
-    }
-
+    .secondary-btn:hover { background: #000; }
     .row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 24px;
       margin-top: 24px;
     }
-
     .card {
       border: 1px solid #e5e7eb;
       border-radius: 10px;
       padding: 16px;
       background: #f9fafb;
     }
-
     #msg {
       margin-top: 12px;
       color: #b91c1c;
       min-height: 20px;
     }
-
     .top-row {
       display: flex;
       justify-content: space-between;
@@ -89,7 +71,6 @@
       flex-wrap: wrap;
       margin-bottom: 20px;
     }
-
     .role-badge {
       display: inline-block;
       padding: 4px 10px;
@@ -100,13 +81,11 @@
       font-weight: 700;
       margin-top: 6px;
     }
-
     .job-list, .handover-list {
       list-style: none;
       padding: 0;
       margin: 0;
     }
-
     .job-item, .handover-item {
       border: 1px solid #e5e7eb;
       border-radius: 10px;
@@ -114,29 +93,27 @@
       margin-bottom: 10px;
       background: #fff;
     }
-
     .job-ref {
       font-weight: 700;
       color: #2563eb;
       margin-bottom: 4px;
     }
-
     .job-meta, .handover-meta {
       font-size: 14px;
       color: #4b5563;
     }
-
     .empty {
       color: #6b7280;
       font-style: italic;
       padding: 8px 0;
     }
-
     .small {
       font-size: 13px;
       color: #6b7280;
       line-height: 1.5;
     }
+    .ok { color: #166534; }
+    .error { color: #b91c1c; }
   </style>
 </head>
 <body>
@@ -168,10 +145,11 @@
 
       <div class="card">
         <h3>BD Handover</h3>
-        <div class="small">Upload a BD handover file and save a record to Supabase.</div>
+        <div class="small">For now this saves the handover as a database record. File storage and AI parsing come next.</div>
         <input id="handover-file" type="file" />
         <textarea id="handover-notes" rows="6" placeholder="Optional notes or pasted handover text"></textarea>
         <button onclick="uploadHandover()">Upload BD Handover</button>
+        <p id="handover-msg"></p>
 
         <h3 style="margin-top: 24px;">Uploaded Handovers</h3>
         <ul id="handovers" class="handover-list"></ul>
@@ -194,19 +172,19 @@
       const password = document.getElementById('password').value;
       const msg = document.getElementById('msg');
 
+      msg.className = '';
       msg.innerText = '';
 
       if (!email || !password) {
+        msg.className = 'error';
         msg.innerText = 'Please enter email and password.';
         return;
       }
 
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
+        msg.className = 'error';
         msg.innerText = error.message;
         return;
       }
@@ -234,7 +212,7 @@
       list.innerHTML = '';
 
       if (error) {
-        list.innerHTML = '<li class="empty">Could not load jobs.</li>';
+        list.innerHTML = '<li class="empty">Could not load jobs: ' + error.message + '</li>';
         return;
       }
 
@@ -249,9 +227,7 @@
         li.innerHTML = `
           <div class="job-ref">${job.ref || 'No Ref'}</div>
           <div><strong>${job.customer_name || 'No customer'}</strong></div>
-          <div class="job-meta">
-            Status: ${job.status || 'Open'}${job.vip ? ' • VIP' : ''}
-          </div>
+          <div class="job-meta">Status: ${job.status || 'Open'}${job.vip ? ' • VIP' : ''}</div>
         `;
         list.appendChild(li);
       });
@@ -272,7 +248,7 @@
       list.innerHTML = '';
 
       if (error) {
-        list.innerHTML = '<li class="empty">Could not load handovers.</li>';
+        list.innerHTML = '<li class="empty">Could not load handovers: ' + error.message + '</li>';
         return;
       }
 
@@ -286,12 +262,8 @@
         li.className = 'handover-item';
         li.innerHTML = `
           <div><strong>${item.filename || 'Unnamed file'}</strong></div>
-          <div class="handover-meta">
-            Status: ${item.parse_status || 'pending'}
-          </div>
-          <div class="handover-meta">
-            Uploaded: ${new Date(item.created_at).toLocaleString()}
-          </div>
+          <div class="handover-meta">Status: ${item.parse_status || 'pending'}</div>
+          <div class="handover-meta">Uploaded: ${new Date(item.created_at).toLocaleString()}</div>
         `;
         list.appendChild(li);
       });
@@ -313,7 +285,7 @@
       const { error } = await supabase
         .from('jobs')
         .insert({
-          ref: ref,
+          ref,
           customer_name: name,
           assigned_to: user.id,
           created_by: user.id,
@@ -322,21 +294,25 @@
         });
 
       if (error) {
-        alert(error.message);
+        alert('Create job failed: ' + error.message);
         return;
       }
 
-      alert('Job created');
       await loadUser();
     };
 
     window.uploadHandover = async function () {
       const fileInput = document.getElementById('handover-file');
       const notes = document.getElementById('handover-notes').value.trim();
+      const msg = document.getElementById('handover-msg');
+
+      msg.className = '';
+      msg.innerText = '';
 
       const { data: userData, error: userError } = await supabase.auth.getUser();
       if (userError || !userData?.user) {
-        alert('Could not get logged-in user.');
+        msg.className = 'error';
+        msg.innerText = 'Could not get logged-in user.';
         return;
       }
 
@@ -344,29 +320,32 @@
       const file = fileInput.files[0];
 
       if (!file && !notes) {
-        alert('Choose a file or enter notes.');
+        msg.className = 'error';
+        msg.innerText = 'Choose a file or enter notes.';
         return;
       }
 
-      let filename = file ? file.name : 'pasted-handover.txt';
+      const filename = file ? file.name : 'pasted-handover.txt';
 
-      const { error } = await supabase
-        .from('bd_handovers')
-        .insert({
-          filename: filename,
-          parsed_data: notes ? { raw_notes: notes } : {},
-          uploaded_by: user.id,
-          parse_status: 'pending'
-        });
+      const payload = {
+        filename,
+        parsed_data: notes ? { raw_notes: notes } : {},
+        uploaded_by: user.id,
+        parse_status: 'pending'
+      };
+
+      const { error } = await supabase.from('bd_handovers').insert(payload);
 
       if (error) {
-        alert(error.message);
+        msg.className = 'error';
+        msg.innerText = 'Upload failed: ' + error.message;
         return;
       }
 
-      alert('BD handover uploaded');
       fileInput.value = '';
       document.getElementById('handover-notes').value = '';
+      msg.className = 'ok';
+      msg.innerText = 'BD handover uploaded.';
       await loadUser();
     };
 
@@ -387,6 +366,7 @@
         .single();
 
       if (error || !profile) {
+        document.getElementById('msg').className = 'error';
         document.getElementById('msg').innerText = 'No profile found for this user.';
         document.getElementById('login').style.display = 'block';
         document.getElementById('app').style.display = 'none';
@@ -404,9 +384,7 @@
     }
 
     document.getElementById('password').addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
-        login();
-      }
+      if (e.key === 'Enter') login();
     });
 
     loadUser();
