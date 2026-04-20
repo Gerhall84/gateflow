@@ -5,75 +5,295 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>GateFlow</title>
   <style>
-    body { font-family: Arial; background:#f3f4f6; padding:40px; }
-    .box { max-width:400px; margin:auto; background:#fff; padding:20px; border-radius:10px; }
-    input,button { width:100%; padding:10px; margin-top:10px; }
-    button { background:#2563eb; color:#fff; border:none; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      padding: 40px;
+      margin: 0;
+      color: #111827;
+    }
+
+    .box {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
+      border: 1px solid #e5e7eb;
+    }
+
+    h2, h3 {
+      margin-top: 0;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    input {
+      border: 1px solid #d1d5db;
+    }
+
+    button {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .secondary-btn {
+      background: #111827;
+      margin-top: 20px;
+    }
+
+    .secondary-btn:hover {
+      background: #000;
+    }
+
+    #msg {
+      margin-top: 12px;
+      color: #b91c1c;
+      min-height: 20px;
+    }
+
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .role-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    .job-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .job-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      background: #f9fafb;
+    }
+
+    .job-ref {
+      font-weight: 700;
+      color: #2563eb;
+      margin-bottom: 4px;
+    }
+
+    .job-meta {
+      font-size: 14px;
+      color: #4b5563;
+    }
+
+    .empty {
+      color: #6b7280;
+      font-style: italic;
+      padding: 8px 0;
+    }
   </style>
 </head>
 <body>
 
-<div class="box" id="login">
-  <h2>GateFlow Login</h2>
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
-  <p id="msg"></p>
-</div>
+  <div class="box" id="login">
+    <h2>GateFlow Login</h2>
+    <input id="email" type="email" placeholder="Email" />
+    <input id="password" type="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+    <p id="msg"></p>
+  </div>
 
-<div class="box" id="app" style="display:none;">
-  <h2>GateFlow</h2>
-  <p id="user"></p>
-  <p id="role"></p>
-  <button onclick="logout()">Logout</button>
-</div>
+  <div class="box" id="app" style="display:none;">
+    <div class="top-row">
+      <div>
+        <h2 style="margin-bottom: 6px;">GateFlow</h2>
+        <div id="user"></div>
+        <div id="role" class="role-badge"></div>
+      </div>
+    </div>
 
-<script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+    <button onclick="createJob()">+ New Job</button>
 
-const supabase = createClient(
-  'https://edxgkwkdgvsajfmkejbk.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek'
-)
+    <h3 style="margin-top: 24px;">Jobs</h3>
+    <ul id="jobs" class="job-list"></ul>
 
-window.login = async function () {
-  const email = document.getElementById('email').value
-  const password = document.getElementById('password').value
+    <button class="secondary-btn" onclick="logout()">Logout</button>
+  </div>
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-  if (error) {
-    document.getElementById('msg').innerText = error.message
-    return
-  }
+    const supabase = createClient(
+      'https://edxgkwkdgvsajfmkejbk.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek'
+    );
 
-  loadUser()
-}
+    window.login = async function () {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const msg = document.getElementById('msg');
 
-window.logout = async function () {
-  await supabase.auth.signOut()
-  location.reload()
-}
+      msg.innerText = '';
 
-async function loadUser() {
-  const { data } = await supabase.auth.getUser()
-  const user = data.user
+      if (!email || !password) {
+        msg.innerText = 'Please enter email and password.';
+        return;
+      }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
-  document.getElementById('login').style.display = 'none'
-  document.getElementById('app').style.display = 'block'
+      if (error) {
+        msg.innerText = error.message;
+        return;
+      }
 
-  document.getElementById('user').innerText = profile.full_name
-  document.getElementById('role').innerText = "Role: " + profile.role
-}
+      await loadUser();
+    };
 
-loadUser()
-</script>
+    window.logout = async function () {
+      await supabase.auth.signOut();
+      location.reload();
+    };
 
+    async function loadJobs(userId, role) {
+      let query = supabase
+        .from('jobs')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (role !== 'admin') {
+        query = query.eq('assigned_to', userId);
+      }
+
+      const { data, error } = await query;
+      const list = document.getElementById('jobs');
+      list.innerHTML = '';
+
+      if (error) {
+        list.innerHTML = '<li class="empty">Could not load jobs.</li>';
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        list.innerHTML = '<li class="empty">No jobs found.</li>';
+        return;
+      }
+
+      data.forEach(job => {
+        const li = document.createElement('li');
+        li.className = 'job-item';
+        li.innerHTML = `
+          <div class="job-ref">${job.ref || 'No Ref'}</div>
+          <div><strong>${job.customer_name || 'No customer'}</strong></div>
+          <div class="job-meta">
+            Status: ${job.status || 'Open'}${job.vip ? ' • VIP' : ''}
+          </div>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    window.createJob = async function () {
+      const name = prompt('Customer name?');
+      if (!name) return;
+
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData?.user) {
+        alert('Could not get logged-in user.');
+        return;
+      }
+
+      const user = userData.user;
+      const ref = 'GF-' + String(Math.floor(Math.random() * 100000)).padStart(5, '0');
+
+      const { error } = await supabase
+        .from('jobs')
+        .insert({
+          ref: ref,
+          customer_name: name,
+          assigned_to: user.id,
+          created_by: user.id,
+          status: 'Open',
+          vip: false
+        });
+
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      alert('Job created');
+      await loadUser();
+    };
+
+    async function loadUser() {
+      const { data: userData } = await supabase.auth.getUser();
+      const user = userData.user;
+
+      if (!user) {
+        document.getElementById('login').style.display = 'block';
+        document.getElementById('app').style.display = 'none';
+        return;
+      }
+
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error || !profile) {
+        document.getElementById('msg').innerText = 'No profile found for this user.';
+        document.getElementById('login').style.display = 'block';
+        document.getElementById('app').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+
+      document.getElementById('user').innerText = profile.full_name + ' (' + profile.email + ')';
+      document.getElementById('role').innerText = 'Role: ' + profile.role;
+
+      await loadJobs(user.id, profile.role);
+    }
+
+    document.getElementById('password').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        login();
+      }
+    });
+
+    loadUser();
+  </script>
 </body>
 </html>
