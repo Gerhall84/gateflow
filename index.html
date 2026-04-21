@@ -623,8 +623,8 @@ select.fi{cursor:pointer;}
   <div id="sb-user-display" onclick="openUserPicker()" style="margin:6px 8px;display:flex;align-items:center;gap:8px;cursor:pointer;padding:7px 9px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);transition:background .15s;" onmouseenter="this.style.background='rgba(255,255,255,.08)'" onmouseleave="this.style.background='rgba(255,255,255,.04)'">
     <div id="sb-user-av" style="width:30px;height:30px;border-radius:50%;background:#1B44C8;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">?</div>
     <div style="flex:1;min-width:0;">
-      <div id="sb-user-name" style="font-size:12px;font-weight:600;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Select user</div>
-      <div id="sb-user-role" style="font-size:9px;color:rgba(255,255,255,.3);">Click to switch</div>
+      <div id="sb-user-name" style="font-size:12px;font-weight:600;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@username</div>
+      <div id="sb-user-role" style="font-size:9px;color:rgba(255,255,255,.3);">Select user</div>
     </div>
     <span style="font-size:9px;color:rgba(255,255,255,.2);">&#9660;</span>
   </div>
@@ -2062,7 +2062,7 @@ const jti=t=>JT.find(x=>x.id===t)||{cls:'',col:'#888',id:t};
 const jtBadge=t=>{const j=jti(t);return `<span class="jb ${j.cls}">${esc(t)}</span>`;};
 const sPill=s=>{const m={Open:'sp-o','In Progress':'sp-p','On Hold':'sp-h',Closed:'sp-c'};return `<span class="sp ${m[s]||'sp-o'}">${esc(s)}</span>`;};
 const uAv=(name,sz=20)=>{const u=USERS.find(x=>x.name===name);if(!u)return `<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:var(--sur2);border:1px solid var(--bor);display:flex;align-items:center;justify-content:center;font-size:${Math.round(sz*.38)}px;color:var(--tx3);">?</div>`;return `<div class="av" style="width:${sz}px;height:${sz}px;background:${u.col}22;color:${u.col};font-size:${Math.round(sz*.38)}px;">${u.ini}</div>`;};
-const aUsers=()=>USERS.filter(u=>u.active);
+const aUsers=()=>USERS.filter(u=>u && u.active!==false);
 const uOpts=sel=>'<option value="">-- Unassigned --</option>'+aUsers().map(u=>`<option${u.name===sel?' selected':''}>${esc(u.name)}</option>`).join('');
 
 function defaultPasswordForUser(u){
@@ -2082,6 +2082,7 @@ function usernameFromUser(u){
 
 function ensureUserMeta(){
   USERS.forEach(function(u){
+    if(typeof u.active === 'undefined') u.active = true;
     u.username = usernameFromUser(u);
     if(!u.password || !String(u.password).trim()) u.password = defaultPasswordForUser(u);
   });
@@ -2157,7 +2158,7 @@ function filterUserPicker(q){
 function setActiveUser(uid){
   if(!isAdmin()){ toast('(!)', 'Only admins can switch users'); return; }
   activeUserId = uid;
-  var chosen = USERS.find(function(x){return x.id===uid && x.active;});
+  var chosen = USERS.find(function(x){return x.id===uid && x.active!==false;});
   if(chosen && (chosen.role==='Administrator' || ADMIN_IDS.indexOf(chosen.id)>=0)) adminSessionUserId = uid;
   saveData();
   updateSbUser();
@@ -5112,6 +5113,31 @@ document.addEventListener('click', function(e){
 });
 
 //  LOGIN SCREEN 
+function rebuildLoginUsernames(){
+  var sel = document.getElementById('login-sel');
+  if(!sel) return;
+  ensureUserMeta();
+  sel.innerHTML = '<option value="">-- Choose your username --</option>';
+  USERS.filter(function(u){ return u && u.active!==false; })
+    .sort(function(a,b){ return usernameFromUser(a).localeCompare(usernameFromUser(b)); })
+    .forEach(function(u){
+      var opt = document.createElement('option');
+      opt.value = String(u.id);
+      opt.textContent = '@' + usernameFromUser(u);
+      opt.title = (u.name || '') + (u.email ? ' · ' + u.email : '');
+      sel.appendChild(opt);
+    });
+  if(sel.options.length <= 1){
+    USERS.forEach(function(u){
+      if(!u) return;
+      var opt = document.createElement('option');
+      opt.value = String(u.id || '');
+      opt.textContent = '@' + usernameFromUser(u);
+      sel.appendChild(opt);
+    });
+  }
+}
+
 function initLoginScreen(){
   // Show correct login form
   var sbFields = document.getElementById('login-sb-fields');
@@ -5123,24 +5149,17 @@ function initLoginScreen(){
     if(sbFields) sbFields.style.display='none';
     if(localFields) localFields.style.display='block';
   }
+  rebuildLoginUsernames();
   var sel = document.getElementById('login-sel');
   if(!sel) return;
-  USERS.filter(function(u){return u.active;})
-    .sort(function(a,b){return a.name.localeCompare(b.name);})
-    .forEach(function(u){
-      var opt = document.createElement('option');
-      opt.value = u.id;
-      opt.textContent = '@' + usernameFromUser(u) + ' \u00b7 ' + u.office;
-      sel.appendChild(opt);
-    });
   var pw = document.getElementById('login-local-password');
   if(pw){
     pw.onkeydown = function(e){ if(e.key==='Enter'){ e.preventDefault(); doLogin(); } };
     pw.oninput = updateLoginButton;
   }
   sel.onchange = updateLoginButton;
-  // Pre-select returning user but always show login screen
-  if(activeUserId && isAdmin()){ sel.value = activeUserId; }
+  // Pre-select returning admin user only
+  if(activeUserId && isAdmin()){ sel.value = String(activeUserId); }
   updateLoginButton();
 }
 
@@ -5164,7 +5183,7 @@ function doLogin(){
   var entered = pwEl ? pwEl.value.trim() : '';
   if(!uid){ toast('(!)','Choose your username first'); updateLoginButton(); return; }
   if(!entered){ toast('(!)','Enter your password'); updateLoginButton(); if(pwEl) pwEl.focus(); return; }
-  var u = USERS.find(function(x){return x.id===uid && x.active;});
+  var u = USERS.find(function(x){return x.id===uid && x.active!==false;});
   if(!u){ toast('(!)','User not found'); return; }
   var expected = defaultPasswordForUser(u);
   if(entered !== expected){
@@ -5174,7 +5193,7 @@ function doLogin(){
     return;
   }
   activeUserId = uid;
-  var chosen = USERS.find(function(x){return x.id===uid && x.active;});
+  var chosen = USERS.find(function(x){return x.id===uid && x.active!==false;});
   if(chosen && (chosen.role==='Administrator' || ADMIN_IDS.indexOf(chosen.id)>=0)) adminSessionUserId = uid;
   saveData();
   updateSbUser();
@@ -5491,8 +5510,9 @@ function showLoginScreen(){
   if(scr){
     scr.style.display='flex';
     scr.classList.remove('hiding');
+    rebuildLoginUsernames();
     var sel = document.getElementById('login-sel');
-    if(sel) sel.value = activeUserId ? String(activeUserId) : '';
+    if(sel) sel.value = activeUserId && isAdmin() ? String(activeUserId) : '';
     var pw = document.getElementById('login-local-password');
     if(pw) pw.value='';
     updateLoginButton();
