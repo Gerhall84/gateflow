@@ -1,279 +1,542 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GateFlow</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
-    body { margin:0; font-family:Arial; background:#f5f5f5; }
-
-    .hidden { display:none; }
+    :root{
+      --bg:#f3f4f6;
+      --panel:#ffffff;
+      --border:#d1d5db;
+      --text:#111827;
+      --muted:#6b7280;
+      --nav:#111827;
+      --nav-active:#2563eb;
+      --top:#1f2937;
+      --ok:#166534;
+      --danger:#b91c1c;
+      --warn:#92400e;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+    .hidden{display:none!important}
 
     /* LOGIN */
-    .login-wrapper {
-      width:100%;
-      height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-    }
-
-    .login-box {
-      background:white;
-      padding:30px;
-      border-radius:8px;
-      width:300px;
-      text-align:center;
-      box-shadow:0 0 10px rgba(0,0,0,0.1);
-    }
-
-    input, select {
-      width:100%;
-      padding:10px;
-      margin:10px 0;
-    }
-
-    button {
-      padding:10px;
-      width:100%;
-      background:#111;
-      color:white;
-      border:none;
-      cursor:pointer;
-    }
+    .login-shell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .login-card{width:100%;max-width:360px;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:28px;box-shadow:0 8px 30px rgba(0,0,0,.08)}
+    .login-title{font-size:28px;font-weight:700;margin:0 0 6px}
+    .login-sub{font-size:13px;color:var(--muted);margin:0 0 18px}
+    .field{margin-bottom:12px}
+    .label{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+    input,select,button,textarea{font:inherit}
+    input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;background:#fff}
+    button{padding:11px 14px;border:0;border-radius:8px;background:#111827;color:#fff;cursor:pointer;font-weight:700}
+    button:disabled{opacity:.6;cursor:not-allowed}
+    .error{color:var(--danger);font-size:13px;min-height:18px;margin-top:10px}
 
     /* APP */
-    #appScreen {
-      display:flex;
-      height:100vh;
-    }
+    #appScreen{display:flex;min-height:100vh}
+    .sidebar{width:230px;flex-shrink:0;background:var(--nav);color:#fff;padding:16px 14px;display:flex;flex-direction:column;gap:10px}
+    .brand{font-size:24px;font-weight:800;margin-bottom:4px}
+    .brand small{display:block;font-size:10px;letter-spacing:.12em;color:#9ca3af;text-transform:uppercase;margin-top:2px}
+    .nav-btn{padding:10px 12px;border-radius:8px;background:transparent;color:#e5e7eb;border:1px solid transparent;text-align:left;width:100%}
+    .nav-btn:hover{background:rgba(255,255,255,.06)}
+    .nav-btn.active{background:rgba(37,99,235,.18);border-color:rgba(37,99,235,.4);color:#fff}
+    .main{flex:1;display:flex;flex-direction:column;min-width:0}
+    .topbar{background:var(--top);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .top-left{display:flex;flex-direction:column;gap:2px}
+    .top-title{font-size:18px;font-weight:700}
+    .top-sub{font-size:12px;color:#cbd5e1}
+    .top-right{display:flex;align-items:center;gap:10px}
+    .user-chip{padding:7px 10px;border:1px solid rgba(255,255,255,.18);border-radius:999px;font-size:12px;color:#fff;background:rgba(255,255,255,.06)}
+    .logout-btn{width:auto;background:#dc2626;padding:9px 12px}
+    .content{padding:18px;overflow:auto}
+    .page{display:none}
+    .page.active{display:block}
+    .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px}
+    .panel h2,.panel h3{margin-top:0}
+    .grid{display:grid;gap:12px}
+    .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .stat{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px}
+    .stat-label{font-size:12px;text-transform:uppercase;color:var(--muted);font-weight:700;letter-spacing:.04em}
+    .stat-value{font-size:28px;font-weight:800;margin-top:6px}
+    .actions-row{display:flex;gap:10px;flex-wrap:wrap}
+    .secondary{background:#fff;color:var(--text);border:1px solid var(--border)}
+    .success{background:#166534}
+    .warn{background:#b45309}
+    .table-wrap{overflow:auto}
+    table{width:100%;border-collapse:collapse;background:#fff}
+    th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:14px;vertical-align:top}
+    th{font-size:12px;text-transform:uppercase;color:var(--muted);letter-spacing:.04em}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700;background:#eff6ff;color:#1d4ed8}
+    .muted{color:var(--muted)}
+    .job-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px}
+    .job-card strong{display:block;margin-bottom:6px}
+    .calendar-row{padding:10px 0;border-bottom:1px solid #e5e7eb}
+    .upload-note{font-size:13px;color:var(--muted);margin-top:8px}
+    .status{font-size:13px;margin-top:10px;min-height:18px}
+    .status.ok{color:var(--ok)}
+    .status.err{color:var(--danger)}
+    .status.warn{color:var(--warn)}
 
-    .sidebar {
-      width:220px;
-      background:#111;
-      color:white;
-      padding:15px;
-    }
-
-    .sidebar div {
-      margin:10px 0;
-      cursor:pointer;
-    }
-
-    .main {
-      flex:1;
-      display:flex;
-      flex-direction:column;
-    }
-
-    .topbar {
-      background:#222;
-      color:white;
-      padding:10px;
-      display:flex;
-      justify-content:space-between;
-    }
-
-    .content {
-      padding:20px;
-      overflow:auto;
-    }
-
-    .job {
-      background:white;
-      padding:10px;
-      margin:10px 0;
-      border-radius:5px;
+    @media (max-width:900px){
+      #appScreen{flex-direction:column}
+      .sidebar{width:100%;display:block}
+      .grid-2,.grid-3{grid-template-columns:1fr}
     }
   </style>
 </head>
-
 <body>
+  <!-- LOGIN -->
+  <div id="loginScreen" class="login-shell">
+    <div class="login-card">
+      <div class="login-title">GateFlow</div>
+      <p class="login-sub">Sign in with your email and Supabase password.</p>
 
-<!-- LOGIN -->
-<div id="loginScreen" class="login-wrapper">
-  <div class="login-box">
-    <h2>GateFlow Login</h2>
-
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-
-    <button id="loginBtn">Sign In</button>
-
-    <p id="loginError" style="color:red;"></p>
-  </div>
-</div>
-
-<!-- APP -->
-<div id="appScreen" class="hidden">
-
-  <div class="sidebar">
-    <h3>GateFlow</h3>
-    <div onclick="showPage('dashboard')">Dashboard</div>
-    <div onclick="showPage('jobs')">Jobs</div>
-    <div onclick="showPage('bd')">BD Handovers</div>
-    <div onclick="showPage('calendar')">Calendar</div>
-  </div>
-
-  <div class="main">
-    <div class="topbar">
-      <div id="userDisplay"></div>
-      <button onclick="logout()">Logout</button>
-    </div>
-
-    <div class="content">
-
-      <div id="dashboardPage">
-        <h2>Dashboard</h2>
+      <div class="field">
+        <div class="label">Email</div>
+        <input id="email" type="email" placeholder="you@company.com" autocomplete="username" />
       </div>
 
-      <div id="jobsPage" class="hidden">
-        <h2>Create Job</h2>
-
-        <select id="jobType">
-          <option>Air Import</option>
-          <option>Air Export</option>
-          <option>Ocean Import</option>
-          <option>Ocean Export</option>
-        </select>
-
-        <input id="customer" placeholder="Customer">
-        <input id="shipper" placeholder="Shipper">
-        <input id="consignee" placeholder="Consignee">
-        <input id="ref" placeholder="AWB / Ref">
-        <input id="pieces" placeholder="Pieces">
-        <input id="weight" placeholder="Weight">
-        <input id="collectionDate" type="date">
-        <input id="etd" type="date">
-        <input id="eta" type="date">
-        <input id="transport" placeholder="Airline / Haulier">
-
-        <button onclick="createJob()">Save Job</button>
-
-        <h3>Jobs</h3>
-        <div id="jobList"></div>
+      <div class="field">
+        <div class="label">Password</div>
+        <input id="password" type="password" placeholder="Your password" autocomplete="current-password" />
       </div>
 
-      <div id="bdPage" class="hidden">
-        <h2>BD Handovers</h2>
-        <input type="file">
-      </div>
-
-      <div id="calendarPage" class="hidden">
-        <h2>Calendar</h2>
-      </div>
-
+      <button id="loginBtn" type="button">Sign In</button>
+      <div id="loginError" class="error"></div>
     </div>
   </div>
 
-</div>
+  <!-- APP -->
+  <div id="appScreen" class="hidden">
+    <aside class="sidebar">
+      <div class="brand">GateFlow<small>Shared Operations</small></div>
+      <button class="nav-btn active" data-page="dashboard">Dashboard</button>
+      <button class="nav-btn" data-page="jobs">Jobs</button>
+      <button class="nav-btn" data-page="calendar">Calendar</button>
+      <button class="nav-btn" data-page="bd">BD Handovers</button>
+    </aside>
 
-<script>
-const SUPABASE_URL = 'https://edxgkwkdgvsajfmkejbk.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+    <main class="main">
+      <div class="topbar">
+        <div class="top-left">
+          <div class="top-title" id="pageTitle">Dashboard</div>
+          <div class="top-sub" id="pageSub">Shared operational view</div>
+        </div>
+        <div class="top-right">
+          <div id="userDisplay" class="user-chip">@user</div>
+          <button id="logoutBtn" class="logout-btn" type="button">Logout</button>
+        </div>
+      </div>
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      <div class="content">
+        <!-- DASHBOARD -->
+        <section id="dashboardPage" class="page active">
+          <div class="grid grid-3" id="statsGrid">
+            <div class="stat"><div class="stat-label">Total Jobs</div><div class="stat-value" id="statTotal">0</div></div>
+            <div class="stat"><div class="stat-label">Upcoming ETA</div><div class="stat-value" id="statUpcoming">0</div></div>
+            <div class="stat"><div class="stat-label">BD Files</div><div class="stat-value" id="statBD">0</div></div>
+          </div>
+          <div class="panel">
+            <h3>Latest Jobs</h3>
+            <div id="latestJobs"></div>
+          </div>
+        </section>
 
-let CURRENT_USER = null;
+        <!-- JOBS -->
+        <section id="jobsPage" class="page">
+          <div class="panel">
+            <h2>Create Job</h2>
+            <div class="grid grid-3">
+              <div><div class="label">Job Type</div><select id="jobType"><option>Air Import</option><option>Air Export</option><option>Ocean Import</option><option>Ocean Export</option></select></div>
+              <div><div class="label">Customer</div><input id="customer" placeholder="Customer" /></div>
+              <div><div class="label">Reference / AWB</div><input id="ref" placeholder="AWB / Ref" /></div>
+            </div>
+            <div class="grid grid-2">
+              <div><div class="label">Shipper</div><input id="shipper" placeholder="Shipper" /></div>
+              <div><div class="label">Consignee</div><input id="consignee" placeholder="Consignee" /></div>
+            </div>
+            <div class="grid grid-3">
+              <div><div class="label">Pieces</div><input id="pieces" type="number" min="0" placeholder="Pieces" /></div>
+              <div><div class="label">Weight</div><input id="weight" type="number" step="0.01" min="0" placeholder="Weight" /></div>
+              <div><div class="label">Transport</div><input id="transport" placeholder="Airline / Haulier" /></div>
+            </div>
+            <div class="grid grid-3">
+              <div><div class="label">Collection Date</div><input id="collectionDate" type="date" /></div>
+              <div><div class="label">ETD</div><input id="etd" type="date" /></div>
+              <div><div class="label">ETA</div><input id="eta" type="date" /></div>
+            </div>
+            <div class="actions-row">
+              <button id="saveJobBtn" type="button">Save Job</button>
+            </div>
+            <div id="jobStatus" class="status"></div>
+          </div>
 
-/* FIXED EVENT WIRING */
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("loginBtn").addEventListener("click", login);
+          <div class="panel">
+            <h3>All Jobs</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Customer</th>
+                    <th>Reference</th>
+                    <th>Shipper</th>
+                    <th>Consignee</th>
+                    <th>ETA</th>
+                    <th>Created By</th>
+                  </tr>
+                </thead>
+                <tbody id="jobTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
 
-  document.getElementById("password").addEventListener("keypress", function(e){
-    if(e.key === "Enter") login();
-  });
-});
+        <!-- CALENDAR -->
+        <section id="calendarPage" class="page">
+          <div class="panel">
+            <h2>Calendar</h2>
+            <p class="muted">Upcoming ETA dates from shared jobs.</p>
+            <div id="calendarList"></div>
+          </div>
+        </section>
 
-/* LOGIN */
-async function login(){
-  const email = emailInput();
-  const password = passwordInput();
+        <!-- BD -->
+        <section id="bdPage" class="page">
+          <div class="panel">
+            <h2>BD Handovers</h2>
+            <input id="bdFile" type="file" />
+            <div class="actions-row">
+              <button id="uploadBDBtn" type="button">Upload</button>
+            </div>
+            <div class="upload-note">Uploads go to: documents / bd_handovers / ...</div>
+            <div id="bdStatus" class="status"></div>
+          </div>
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+          <div class="panel">
+            <h3>Uploaded BD Files</h3>
+            <div id="bdList"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
 
-  if(error){
-    showError(error.message);
-    return;
-  }
+  <script>
+    // YOUR SUPABASE SETTINGS
+    const SUPABASE_URL = 'https://edxgkwkdgvsajfmkejbk.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek';
 
-  const { data:user } = await supabase
-    .from('gf_users')
-    .select('*')
-    .eq('email', email)
-    .single();
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let CURRENT_USER = null;
+    let JOBS = [];
+    let BD_FILES = [];
 
-  if(!user){
-    showError("User not in system");
-    return;
-  }
+    const loginScreen = document.getElementById('loginScreen');
+    const appScreen = document.getElementById('appScreen');
+    const emailEl = document.getElementById('email');
+    const passwordEl = document.getElementById('password');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginError = document.getElementById('loginError');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userDisplay = document.getElementById('userDisplay');
+    const saveJobBtn = document.getElementById('saveJobBtn');
+    const uploadBDBtn = document.getElementById('uploadBDBtn');
+    const pageTitle = document.getElementById('pageTitle');
+    const pageSub = document.getElementById('pageSub');
 
-  CURRENT_USER = user;
-  startApp();
-}
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => showPage(btn.dataset.page));
+    });
 
-function emailInput(){ return document.getElementById("email").value.trim(); }
-function passwordInput(){ return document.getElementById("password").value; }
-function showError(msg){ document.getElementById("loginError").innerText = msg; }
+    loginBtn.addEventListener('click', login);
+    passwordEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') login();
+    });
+    logoutBtn.addEventListener('click', logout);
+    saveJobBtn.addEventListener('click', createJob);
+    uploadBDBtn.addEventListener('click', uploadBD);
 
-/* START */
-function startApp(){
-  document.getElementById("loginScreen").classList.add("hidden");
-  document.getElementById("appScreen").classList.remove("hidden");
+    async function login(){
+      loginError.textContent = '';
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Signing In...';
 
-  document.getElementById("userDisplay").innerText =
-    "@" + (CURRENT_USER.username || CURRENT_USER.email);
+      const email = emailEl.value.trim().toLowerCase();
+      const password = passwordEl.value;
 
-  loadJobs();
-}
+      try {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
 
-/* LOGOUT */
-async function logout(){
-  await supabase.auth.signOut();
-  location.reload();
-}
+        const { data:user, error:userErr } = await supabase
+          .from('gf_users')
+          .select('*')
+          .eq('email', email)
+          .single();
 
-/* NAV */
-function showPage(page){
-  document.querySelectorAll(".content > div").forEach(d => d.classList.add("hidden"));
-  document.getElementById(page+"Page").classList.remove("hidden");
-}
+        if (userErr || !user) {
+          throw new Error('Signed in to Supabase, but this email was not found in gf_users / GateFlow team list.');
+        }
 
-/* JOBS */
-async function createJob(){
-  const job = {
-    type: jobType.value,
-    customer: customer.value,
-    shipper: shipper.value,
-    consignee: consignee.value,
-    ref: ref.value,
-    pieces: parseInt(pieces.value),
-    weight: parseFloat(weight.value),
-    collection_date: collectionDate.value,
-    etd: etd.value,
-    eta: eta.value,
-    transport: transport.value,
-    created_by: CURRENT_USER.email
-  };
+        CURRENT_USER = user;
+        userDisplay.textContent = '@' + (user.username || user.email);
+        loginScreen.classList.add('hidden');
+        appScreen.classList.remove('hidden');
 
-  await supabase.from('gf_jobs').insert([job]);
-  loadJobs();
-}
+        await Promise.all([loadJobs(), loadBDFiles()]);
+        renderAll();
+        showPage('dashboard');
+      } catch (err) {
+        console.error(err);
+        loginError.textContent = err.message || 'Login failed';
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Sign In';
+      }
+    }
 
-async function loadJobs(){
-  const { data } = await supabase.from('gf_jobs').select('*');
+    async function logout(){
+      await supabase.auth.signOut();
+      CURRENT_USER = null;
+      JOBS = [];
+      BD_FILES = [];
+      emailEl.value = '';
+      passwordEl.value = '';
+      loginError.textContent = '';
+      appScreen.classList.add('hidden');
+      loginScreen.classList.remove('hidden');
+    }
 
-  const list = document.getElementById("jobList");
-  list.innerHTML = "";
+    function showPage(page){
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(page + 'Page').classList.add('active');
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.page === page));
 
-  data.forEach(j=>{
-    const div = document.createElement("div");
-    div.className = "job";
-    div.innerHTML = `${j.type} | ${j.customer} | ETA: ${j.eta}`;
-    list.appendChild(div);
-  });
-}
-</script>
+      const titles = {
+        dashboard:['Dashboard','Shared operational view'],
+        jobs:['Jobs','Create and view shared jobs'],
+        calendar:['Calendar','Upcoming ETA dates'],
+        bd:['BD Handovers','Upload and review BD files']
+      };
+      pageTitle.textContent = titles[page][0];
+      pageSub.textContent = titles[page][1];
+    }
 
+    async function createJob(){
+      const status = document.getElementById('jobStatus');
+      status.className = 'status';
+      status.textContent = '';
+
+      const job = {
+        type: document.getElementById('jobType').value,
+        customer: document.getElementById('customer').value.trim(),
+        shipper: document.getElementById('shipper').value.trim(),
+        consignee: document.getElementById('consignee').value.trim(),
+        ref: document.getElementById('ref').value.trim(),
+        pieces: parseInt(document.getElementById('pieces').value || '0', 10),
+        weight: parseFloat(document.getElementById('weight').value || '0'),
+        collection_date: document.getElementById('collectionDate').value || null,
+        etd: document.getElementById('etd').value || null,
+        eta: document.getElementById('eta').value || null,
+        transport: document.getElementById('transport').value.trim(),
+        created_by: CURRENT_USER.email
+      };
+
+      if (!job.customer) {
+        status.className = 'status err';
+        status.textContent = 'Customer is required.';
+        return;
+      }
+
+      try {
+        const { error } = await supabase.from('gf_jobs').insert([job]);
+        if (error) throw error;
+
+        status.className = 'status ok';
+        status.textContent = 'Job saved.';
+        clearJobForm();
+        await loadJobs();
+        renderAll();
+      } catch (err) {
+        console.error(err);
+        status.className = 'status err';
+        status.textContent = err.message || 'Job save failed.';
+      }
+    }
+
+    function clearJobForm(){
+      ['customer','shipper','consignee','ref','pieces','weight','collectionDate','etd','eta','transport'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('jobType').value = 'Air Import';
+    }
+
+    async function loadJobs(){
+      const { data, error } = await supabase
+        .from('gf_jobs')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error(error);
+        JOBS = [];
+        return;
+      }
+      JOBS = data || [];
+    }
+
+    async function uploadBD(){
+      const status = document.getElementById('bdStatus');
+      status.className = 'status';
+      status.textContent = '';
+
+      const fileInput = document.getElementById('bdFile');
+      const file = fileInput.files[0];
+      if (!file) {
+        status.className = 'status warn';
+        status.textContent = 'Choose a file first.';
+        return;
+      }
+
+      const path = `bd_handovers/${Date.now()}_${file.name}`;
+
+      try {
+        const { error } = await supabase.storage
+          .from('documents')
+          .upload(path, file, { upsert: true });
+
+        if (error) throw error;
+
+        status.className = 'status ok';
+        status.textContent = 'BD handover uploaded.';
+        fileInput.value = '';
+        await loadBDFiles();
+        renderBDFiles();
+        renderDashboard();
+      } catch (err) {
+        console.error(err);
+        status.className = 'status err';
+        status.textContent = err.message || 'Upload failed.';
+      }
+    }
+
+    async function loadBDFiles(){
+      try {
+        const { data, error } = await supabase.storage.from('documents').list('bd_handovers', {
+          limit: 100,
+          sortBy: { column: 'name', order: 'desc' }
+        });
+        if (error) throw error;
+        BD_FILES = data || [];
+      } catch (err) {
+        console.error(err);
+        BD_FILES = [];
+      }
+    }
+
+    function renderAll(){
+      renderJobs();
+      renderCalendar();
+      renderBDFiles();
+      renderDashboard();
+    }
+
+    function renderJobs(){
+      const tbody = document.getElementById('jobTableBody');
+      const latest = document.getElementById('latestJobs');
+      tbody.innerHTML = '';
+      latest.innerHTML = '';
+
+      if (!JOBS.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="muted">No jobs yet.</td></tr>';
+        latest.innerHTML = '<div class="muted">No jobs yet.</div>';
+        return;
+      }
+
+      JOBS.forEach(j => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span class="badge">${escapeHtml(j.type || '')}</span></td>
+          <td>${escapeHtml(j.customer || '')}</td>
+          <td>${escapeHtml(j.ref || '')}</td>
+          <td>${escapeHtml(j.shipper || '')}</td>
+          <td>${escapeHtml(j.consignee || '')}</td>
+          <td>${escapeHtml(j.eta || '')}</td>
+          <td>${escapeHtml(j.created_by || '')}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      JOBS.slice(0,5).forEach(j => {
+        const div = document.createElement('div');
+        div.className = 'job-card';
+        div.innerHTML = `
+          <strong>${escapeHtml(j.customer || '')}</strong>
+          <div class="muted">${escapeHtml(j.type || '')} · ${escapeHtml(j.ref || '')}</div>
+          <div>ETA: ${escapeHtml(j.eta || '—')}</div>
+        `;
+        latest.appendChild(div);
+      });
+    }
+
+    function renderCalendar(){
+      const list = document.getElementById('calendarList');
+      list.innerHTML = '';
+
+      const items = JOBS
+        .filter(j => j.eta)
+        .sort((a,b) => String(a.eta).localeCompare(String(b.eta)));
+
+      if (!items.length) {
+        list.innerHTML = '<div class="muted">No ETA dates available.</div>';
+        return;
+      }
+
+      items.forEach(j => {
+        const row = document.createElement('div');
+        row.className = 'calendar-row';
+        row.innerHTML = `<strong>${escapeHtml(j.eta)}</strong> — ${escapeHtml(j.customer || '')} <span class="muted">(${escapeHtml(j.type || '')})</span>`;
+        list.appendChild(row);
+      });
+    }
+
+    function renderBDFiles(){
+      const list = document.getElementById('bdList');
+      list.innerHTML = '';
+
+      if (!BD_FILES.length) {
+        list.innerHTML = '<div class="muted">No BD files uploaded yet.</div>';
+        return;
+      }
+
+      BD_FILES.forEach(f => {
+        const div = document.createElement('div');
+        div.className = 'job-card';
+        div.innerHTML = `<strong>${escapeHtml(f.name || '')}</strong><div class="muted">${f.created_at ? escapeHtml(f.created_at) : 'Uploaded file'}</div>`;
+        list.appendChild(div);
+      });
+    }
+
+    function renderDashboard(){
+      document.getElementById('statTotal').textContent = JOBS.length;
+      document.getElementById('statUpcoming').textContent = JOBS.filter(j => j.eta).length;
+      document.getElementById('statBD').textContent = BD_FILES.length;
+    }
+
+    function escapeHtml(value){
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+  </script>
 </body>
 </html>
