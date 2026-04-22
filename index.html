@@ -117,44 +117,70 @@ input,select { width:100%; padding:8px; margin:5px 0; }
 </div>
 
 <script>
-
 const supabase = window.supabase.createClient(
   "https://edxgkwkdgvsajfmkejbk.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
+  "YOUR_ANON_KEY_HERE"
 );
 
 function openModal(){
-  document.getElementById("modal").style.display="block";
+  document.getElementById("modal").style.display = "block";
 }
 
 async function add(){
-
-  const client = document.getElementById("client").value;
-  const origin = document.getElementById("origin").value;
-  const destination = document.getElementById("destination").value;
+  const client = document.getElementById("client").value.trim();
+  const origin = document.getElementById("origin").value.trim();
+  const destination = document.getElementById("destination").value.trim();
   const status = document.getElementById("status").value;
 
-  const id = "SHP" + Math.floor(Math.random()*10000);
+  if (!client || !origin || !destination) {
+    alert("Please fill in all fields.");
+    return;
+  }
 
-  await supabase.from("shipments").insert({
-    shipment_ref:id,
-    client,
-    origin,
-    destination,
-    shipment_type:"Road",
-    status
-  });
+  const id = "SHP" + Date.now();
 
-  load();
-  document.getElementById("modal").style.display="none";
+  const { data, error } = await supabase
+    .from("shipments")
+    .insert([{
+      shipment_ref: id,
+      client: client,
+      origin: origin,
+      destination: destination,
+      shipment_type: "Road",
+      status: status,
+      priority: "Medium"
+    }])
+    .select();
+
+  if (error) {
+    console.error("Save failed:", error);
+    alert("Save failed: " + error.message);
+    return;
+  }
+
+  console.log("Saved:", data);
+  document.getElementById("modal").style.display = "none";
+  document.getElementById("client").value = "";
+  document.getElementById("origin").value = "";
+  document.getElementById("destination").value = "";
+  document.getElementById("status").value = "Pending";
+
+  await load();
 }
 
 async function load(){
+  const { data, error } = await supabase
+    .from("shipments")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-  const { data } = await supabase.from("shipments").select("*");
+  if (error) {
+    console.error("Load failed:", error);
+    alert("Load failed: " + error.message);
+    return;
+  }
 
   const table = document.getElementById("table");
-
   table.innerHTML = `
     <tr>
       <th>ID</th>
@@ -164,7 +190,7 @@ async function load(){
     </tr>
   `;
 
-  data.forEach(s=>{
+  data.forEach(s => {
     table.innerHTML += `
       <tr>
         <td>${s.shipment_ref}</td>
@@ -174,10 +200,10 @@ async function load(){
       </tr>
     `;
   });
-
 }
 
 load();
+<script>
 
 </script>
 
