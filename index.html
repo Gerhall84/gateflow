@@ -183,3 +183,188 @@ load();
 
 </body>
 </html>
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GateFlow</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body { margin:0; font-family:Arial; background:#f4f7f8; }
+
+/* SIDEBAR */
+.sidebar {
+  width:250px; height:100vh;
+  background:linear-gradient(#041a3a,#00152f);
+  color:white; position:fixed; padding:20px;
+}
+
+.sidebar img { width:180px; display:block; margin:auto; }
+
+.nav a {
+  display:block; padding:12px; color:white;
+  text-decoration:none; border-radius:10px;
+}
+
+.nav a.active { background:rgba(0,169,157,0.2); }
+
+/* MAIN */
+.main { margin-left:260px; padding:20px; }
+
+/* TOP */
+.topbar { display:flex; justify-content:space-between; }
+
+/* BUTTON */
+.add-btn {
+  background:#00a99d; color:white;
+  padding:10px 15px; border-radius:10px;
+  cursor:pointer;
+}
+
+/* TABLE */
+.table { background:white; margin-top:20px; padding:10px; border-radius:12px; }
+table { width:100%; }
+td,th { padding:10px; border-bottom:1px solid #eee; }
+
+/* MODAL */
+.modal {
+  display:none; position:fixed; top:0; left:0;
+  width:100%; height:100%; background:rgba(0,0,0,0.5);
+}
+
+.modal-box {
+  background:white; width:400px;
+  margin:100px auto; padding:20px;
+  border-radius:10px;
+}
+
+input,select { width:100%; padding:8px; margin:5px 0; }
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+  <img src="logo.png">
+  <div class="nav">
+    <a class="active">Dashboard</a>
+    <a>Shipments</a>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="topbar">
+    <h2>GateFlow Dashboard</h2>
+    <div class="add-btn" onclick="openModal()">+ Add Shipment</div>
+  </div>
+
+  <div class="table">
+    <h3>Shipments</h3>
+    <table id="table">
+      <tr>
+        <th>ID</th>
+        <th>Client</th>
+        <th>Route</th>
+        <th>Status</th>
+      </tr>
+    </table>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h3>Add Shipment</h3>
+
+```
+<input id="client" placeholder="Client">
+<input id="origin" placeholder="Origin">
+<input id="destination" placeholder="Destination">
+
+<select id="status">
+  <option>Pending</option>
+  <option>In Transit</option>
+  <option>Delivered</option>
+</select>
+
+<button onclick="add()">Save</button>
+```
+
+  </div>
+</div>
+
+<script>
+
+const supabase = window.supabase.createClient(
+  "https://edxgkwkdgvsajfmkejbk.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
+);
+
+function openModal(){
+  document.getElementById("modal").style.display="block";
+}
+
+async function add(){
+
+  const client = document.getElementById("client").value;
+  const origin = document.getElementById("origin").value;
+  const destination = document.getElementById("destination").value;
+  const status = document.getElementById("status").value;
+
+  const id = "SHP" + Math.floor(Math.random()*10000);
+
+  await supabase.from("shipments").insert({
+    shipment_ref:id,
+    client,
+    origin,
+    destination,
+    shipment_type:"Road",
+    status
+  });
+
+  load();
+  document.getElementById("modal").style.display="none";
+}
+
+async function load(){
+
+  const { data } = await supabase.from("shipments").select("*");
+
+  const table = document.getElementById("table");
+
+  table.innerHTML = `
+    <tr>
+      <th>ID</th>
+      <th>Client</th>
+      <th>Route</th>
+      <th>Status</th>
+    </tr>
+  `;
+
+  data.forEach(s=>{
+    table.innerHTML += `
+      <tr>
+        <td>${s.shipment_ref}</td>
+        <td>${s.client}</td>
+        <td>${s.origin} → ${s.destination}</td>
+        <td>${s.status}</td>
+      </tr>
+    `;
+  });
+
+}
+
+load();
+
+</script>
+
+</body>
+</html>
