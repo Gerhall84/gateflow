@@ -117,127 +117,69 @@ input,select { width:100%; padding:8px; margin:5px 0; }
 </div>
 
 <script>
+
 const supabase = window.supabase.createClient(
   "https://edxgkwkdgvsajfmkejbk.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
 );
 
-function debug(msg) {
-  const box = document.getElementById("debug");
-  if (box) box.innerText = "Debug: " + msg;
-  console.log(msg);
+function openModal(){
+  document.getElementById("modal").style.display="block";
 }
 
-function openModal() {
-  document.getElementById("modal").style.display = "block";
-  debug("Modal opened");
-}
+async function add(){
 
-function closeModal() {
-  document.getElementById("modal").style.display = "none";
-}
+  const client = document.getElementById("client").value;
+  const origin = document.getElementById("origin").value;
+  const destination = document.getElementById("destination").value;
+  const status = document.getElementById("status").value;
 
-async function add() {
-  try {
-    const client = document.getElementById("client").value.trim();
-    const origin = document.getElementById("origin").value.trim();
-    const destination = document.getElementById("destination").value.trim();
-    const status = document.getElementById("status").value;
+  const id = "SHP" + Math.floor(Math.random()*10000);
 
-    if (!client || !origin || !destination) {
-      alert("Please fill in Client, Origin and Destination.");
-      debug("Missing fields");
-      return;
-    }
-
-    const id = "SHP" + Date.now();
-
-    const { error } = await supabase
-      .from("shipments")
-      .insert([{
-        shipment_ref: id,
-        client: client,
-        origin: origin,
-        destination: destination,
-        shipment_type: "Road",
-        status: status,
-        priority: "Medium"
-      }]);
-
-    if (error) {
-      alert("Save failed: " + error.message);
-      debug("Save failed: " + error.message);
-      return;
-    }
-
-    closeModal();
-    document.getElementById("client").value = "";
-    document.getElementById("origin").value = "";
-    document.getElementById("destination").value = "";
-    document.getElementById("status").value = "Pending";
-
-    debug("Saved OK");
-    await load();
-  } catch (err) {
-    alert("Script error: " + err.message);
-    debug("Script error: " + err.message);
-  }
-}
-
-async function load() {
-  try {
-    const { data, error } = await supabase
-      .from("shipments")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      debug("Load failed: " + error.message);
-      return;
-    }
-
-    const table = document.getElementById("table");
-    table.innerHTML = `
-      <tr>
-        <th>ID</th>
-        <th>Client</th>
-        <th>Route</th>
-        <th>Status</th>
-      </tr>
-    `;
-
-    data.forEach(s => {
-      table.innerHTML += `
-        <tr>
-          <td>${s.shipment_ref}</td>
-          <td>${s.client}</td>
-          <td>${s.origin} → ${s.destination}</td>
-          <td>${s.status}</td>
-        </tr>
-      `;
-    });
-
-    debug("Loaded " + data.length + " shipment(s)");
-  } catch (err) {
-    debug("Load script error: " + err.message);
-  }
-}
-
-window.onload = function () {
-  const openBtn = document.getElementById("openShipmentBtn");
-  if (openBtn) {
-    openBtn.addEventListener("click", openModal);
-    debug("Add Shipment button connected");
-  } else {
-    debug("Button not found");
-  }
+  await supabase.from("shipments").insert({
+    shipment_ref:id,
+    client,
+    origin,
+    destination,
+    shipment_type:"Road",
+    status
+  });
 
   load();
-};
+  document.getElementById("modal").style.display="none";
+}
+
+async function load(){
+
+  const { data } = await supabase.from("shipments").select("*");
+
+  const table = document.getElementById("table");
+
+  table.innerHTML = `
+    <tr>
+      <th>ID</th>
+      <th>Client</th>
+      <th>Route</th>
+      <th>Status</th>
+    </tr>
+  `;
+
+  data.forEach(s=>{
+    table.innerHTML += `
+      <tr>
+        <td>${s.shipment_ref}</td>
+        <td>${s.client}</td>
+        <td>${s.origin} → ${s.destination}</td>
+        <td>${s.status}</td>
+      </tr>
+    `;
+  });
+
+}
+
+load();
+
 </script>
 
 </body>
 </html>
-<div id="debug" style="margin-top:10px;padding:10px;background:#fff3cd;border-radius:8px;font-size:14px;">
-  Debug: waiting...
-</div>
