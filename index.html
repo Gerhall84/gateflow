@@ -1034,6 +1034,220 @@
       const d = new Date(dateStr);
       const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       return `${String(d.getDate()).padStart(2,'0')} ${months[d.getMonth()]}`;
+      <!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GateFlow</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f7f8;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 240px;
+  height: 100vh;
+  background: linear-gradient(#041a3a, #02122a);
+  color: white;
+  position: fixed;
+  padding: 20px;
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.logo img {
+  width: 150px;
+}
+
+.nav a {
+  display: block;
+  padding: 12px;
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+}
+
+.nav a.active {
+  background: rgba(0,169,157,0.2);
+}
+
+/* MAIN */
+.main {
+  margin-left: 260px;
+  padding: 20px;
+}
+
+/* TOPBAR */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.add-btn {
+  background: #00a99d;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* CARDS */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(5,1fr);
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+}
+
+/* TABLE */
+.table {
+  background: white;
+  margin-top: 20px;
+  border-radius: 12px;
+  padding: 10px;
+}
+
+table {
+  width: 100%;
+}
+
+td, th {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+/* MODAL */
+.modal {
+  display: none;
+  position: fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background: rgba(0,0,0,0.5);
+}
+
+.modal-box {
+  background: white;
+  width: 400px;
+  margin: 100px auto;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+input {
+  width: 100%;
+  margin: 5px 0;
+  padding: 8px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+  <div class="logo">
+    <img src="logo.png">
+  </div>
+
+  <div class="nav">
+    <a class="active">Dashboard</a>
+    <a>Shipments</a>
+    <a>Calendar</a>
+    <a>Map</a>
+    <a>Quotation</a>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="topbar">
+    <h2>Welcome back, GateKeeper 👋</h2>
+    <div class="add-btn" onclick="openModal()">+ Add Shipment</div>
+  </div>
+
+  <div class="cards">
+    <div class="card">Total Shipments<br><b>24</b></div>
+    <div class="card">In Transit<br><b>12</b></div>
+    <div class="card">Pending<br><b>7</b></div>
+    <div class="card">Delivered<br><b>5</b></div>
+    <div class="card">Delayed<br><b>3</b></div>
+  </div>
+
+  <div class="table">
+    <h3>Recent Shipments</h3>
+    <table id="table">
+      <tr>
+        <th>ID</th>
+        <th>Client</th>
+        <th>Route</th>
+        <th>Status</th>
+      </tr>
+    </table>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h3>Add Shipment</h3>
+
+```
+<input id="client" placeholder="Client">
+<input id="route" placeholder="Route">
+<input id="status" placeholder="Status">
+
+<button onclick="add()">Save</button>
+```
+
+  </div>
+</div>
+
+<script>
+function openModal(){
+  document.getElementById("modal").style.display="block";
+}
+
+function add(){
+  const c = document.getElementById("client").value;
+  const r = document.getElementById("route").value;
+  const s = document.getElementById("status").value;
+
+  const table = document.getElementById("table");
+
+  table.innerHTML += `
+    <tr>
+      <td>SHP${Math.floor(Math.random()*1000)}</td>
+      <td>${c}</td>
+      <td>${r}</td>
+      <td>${s}</td>
+    </tr>
+  `;
+
+  document.getElementById("modal").style.display="none";
+}
+</script>
+
+</body>
+</html>
+
     }
   </script>
 </body>
