@@ -122,6 +122,11 @@ const supabase = window.supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
 );
 
+function debug(msg) {
+  document.getElementById("debug").innerText = "Debug: " + msg;
+  console.log(msg);
+}
+
 function openModal(){
   document.getElementById("modal").style.display = "block";
 }
@@ -133,11 +138,13 @@ async function add(){
   const status = document.getElementById("status").value;
 
   if (!client || !origin || !destination) {
-    alert("Please fill in all fields.");
+    debug("Missing required fields");
     return;
   }
 
   const id = "SHP" + Date.now();
+
+  debug("Saving shipment " + id + "...");
 
   const { data, error } = await supabase
     .from("shipments")
@@ -153,12 +160,12 @@ async function add(){
     .select();
 
   if (error) {
-    console.error("Save failed:", error);
-    alert("Save failed: " + error.message);
+    debug("SAVE FAILED: " + error.message);
     return;
   }
 
-  console.log("Saved:", data);
+  debug("Saved OK: " + id);
+
   document.getElementById("modal").style.display = "none";
   document.getElementById("client").value = "";
   document.getElementById("origin").value = "";
@@ -169,16 +176,19 @@ async function add(){
 }
 
 async function load(){
+  debug("Loading shipments...");
+
   const { data, error } = await supabase
     .from("shipments")
     .select("*")
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Load failed:", error);
-    alert("Load failed: " + error.message);
+    debug("LOAD FAILED: " + error.message);
     return;
   }
+
+  debug("Loaded " + data.length + " shipment(s)");
 
   const table = document.getElementById("table");
   table.innerHTML = `
@@ -203,9 +213,10 @@ async function load(){
 }
 
 load();
-<script>
-
 </script>
 
 </body>
 </html>
+<div id="debug" style="margin-top:10px;padding:10px;background:#fff3cd;border-radius:8px;font-size:14px;">
+  Debug: waiting...
+</div>
