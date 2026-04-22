@@ -3,94 +3,508 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GateFlow</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-// ===== AI PARSING PATCH (SAFE) =====
-function simpleParse(text){
-  const out = {};
-  const t = text.toLowerCase();
-
-  function find(regex){ const m = text.match(regex); return m ? m[1].trim() : ''; }
-
-  out.customer = find(/customer[:\s]+(.+)/i);
-  out.ref = find(/(awb|ref)[:\s]+([a-z0-9\-]+)/i);
-  out.pieces = find(/pieces[:\s]+(\d+)/i);
-  out.weight = find(/weight[:\s]+([\d\.]+)/i);
-
-  // very basic address capture
-  out.shipper = find(/shipper[:\s]+(.+)/i);
-  out.consignee = find(/consignee[:\s]+(.+)/i);
-
-  return out;
-}
-
-function parseAndFill(){
-  const input = prompt("Paste document text here");
-  if(!input) return;
-
-  const data = simpleParse(input);
-
-  if(data.customer) document.getElementById('customer').value = data.customer;
-  if(data.ref) document.getElementById('ref').value = data.ref;
-  if(data.pieces) document.getElementById('pieces').value = data.pieces;
-  if(data.weight) document.getElementById('weight').value = data.weight;
-  if(data.shipper) document.getElementById('shipper').value = data.shipper;
-  if(data.consignee) document.getElementById('consignee').value = data.consignee;
-
-  alert("Parsed basic fields into job form");
-}
-// ===== END PATCH =====
-
-</script>
+  <title>GateFlow Premium</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { margin:0; font-family:Arial,sans-serif; background:#f5f5f5; color:#111827; }
-    .hidden { display:none !important; }
-    .login-wrapper { min-height:100vh; display:flex; justify-content:center; align-items:center; padding:20px; }
-    .login-box { background:#fff; width:100%; max-width:360px; padding:28px; border-radius:10px; box-shadow:0 8px 30px rgba(0,0,0,.08); }
-    .login-box h2 { margin:0 0 18px; }
-    input, select, textarea { width:100%; box-sizing:border-box; padding:12px; margin:0 0 12px; border:1px solid #d0d5dd; border-radius:8px; font-size:14px; background:#fff; }
-    textarea { min-height:92px; resize:vertical; }
-    button { padding:12px; border:none; border-radius:8px; background:#111827; color:#fff; cursor:pointer; font-size:14px; }
-    button.secondary { background:#e5e7eb; color:#111827; }
-    .msg { font-size:13px; margin-top:12px; min-height:18px; white-space:pre-wrap; }
-    .err { color:#b42318; }
-    .ok { color:#027a48; }
-
-    #appScreen { display:flex; min-height:100vh; }
-    .sidebar { width:230px; background:#111827; color:#fff; padding:16px; flex-shrink:0; }
-    .sidebar h3 { margin:0 0 18px; }
-    .sidebar .nav-item { padding:10px 0; cursor:pointer; display:flex; justify-content:space-between; gap:8px; }
-    .sidebar .nav-item.active { color:#93c5fd; font-weight:700; }
-    .main { flex:1; display:flex; flex-direction:column; min-width:0; }
-    .topbar { background:#1f2937; color:#fff; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-    .top-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-    .content { padding:20px; }
-    .card { background:#fff; border-radius:10px; padding:16px; box-shadow:0 2px 10px rgba(0,0,0,.05); margin-bottom:16px; }
-    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-    .grid3 { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; }
-    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
-    .stat { background:#fff; border-radius:10px; padding:14px; box-shadow:0 1px 6px rgba(0,0,0,.05); }
-    .stat .label { font-size:12px; color:#6b7280; }
-    .stat .value { font-size:28px; font-weight:700; margin-top:6px; }
-    .job { background:#fff; border-radius:10px; padding:12px; margin:10px 0; box-shadow:0 1px 6px rgba(0,0,0,.05); }
-    .job strong { display:block; margin-bottom:6px; }
-    .job small { display:block; color:#6b7280; margin-top:3px; }
-    .filterbar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
-    .filterbar input, .filterbar select { margin:0; max-width:230px; }
-    .badge { display:inline-block; border-radius:999px; padding:4px 8px; font-size:11px; font-weight:700; background:#e5e7eb; color:#111827; }
-    .badge.type { background:#dbeafe; color:#1d4ed8; }
-    .file-row { display:flex; justify-content:space-between; gap:8px; align-items:center; padding:10px 0; border-bottom:1px solid #e5e7eb; }
-    .file-row:last-child { border-bottom:none; }
-    .small { font-size:12px; color:#6b7280; }
-    .row-actions { display:flex; gap:8px; flex-wrap:wrap; }
-    .section-title { margin:0 0 12px; }
-    .pill { background:#dbeafe; color:#1d4ed8; border-radius:999px; padding:3px 8px; font-size:11px; font-weight:700; }
-    @media (max-width:1000px){
-      .grid2,.grid3,.stats { grid-template-columns:1fr; }
+    :root{
+      --bg:#f6f8fb;
+      --panel:#ffffff;
+      --panel-2:#fbfcfe;
+      --line:#e7ecf3;
+      --text:#1c2434;
+      --muted:#7a879c;
+      --primary:#3eb3f6;
+      --primary-2:#e8f7ff;
+      --dark:#0d1728;
+      --success:#1f9d68;
+      --warning:#d0872c;
+      --danger:#d9534f;
+      --shadow:0 10px 30px rgba(18, 31, 53, 0.06);
+      --radius:16px;
+      --radius-sm:10px;
     }
-    @media (max-width:760px){
-      #appScreen { flex-direction:column; }
-      .sidebar { width:100%; }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .hidden{display:none!important}
+
+    /* Login kept simple and stable */
+    .login-wrapper{
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:24px;
+      background:linear-gradient(180deg,#f4fbff 0%, #f6f8fb 100%);
+    }
+    .login-box{
+      background:#fff;
+      width:100%;
+      max-width:380px;
+      padding:28px;
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      border:1px solid var(--line);
+    }
+    .login-box h2{margin:0 0 18px;font-size:28px}
+    input, select, textarea{
+      width:100%;
+      box-sizing:border-box;
+      padding:12px 14px;
+      margin:0 0 12px;
+      border:1px solid #d6deea;
+      border-radius:12px;
+      font-size:14px;
+      background:#fff;
+      color:var(--text);
+    }
+    textarea{min-height:100px;resize:vertical}
+    input:focus,select:focus,textarea:focus{
+      outline:none;
+      border-color:#8fd9ff;
+      box-shadow:0 0 0 4px rgba(62,179,246,.12);
+    }
+    button{
+      padding:12px 16px;
+      border:none;
+      border-radius:12px;
+      background:var(--dark);
+      color:#fff;
+      cursor:pointer;
+      font-size:14px;
+      font-weight:600;
+    }
+    button.secondary{
+      background:#fff;
+      color:var(--text);
+      border:1px solid var(--line);
+    }
+    button.primary{
+      background:var(--primary);
+      color:#fff;
+    }
+    .msg{font-size:13px;margin-top:12px;min-height:18px;white-space:pre-wrap}
+    .err{color:var(--danger)}
+    .ok{color:var(--success)}
+
+    /* App shell */
+    #appScreen{
+      display:flex;
+      min-height:100vh;
+    }
+    .sidebar{
+      width:276px;
+      background:#fff;
+      border-right:1px solid var(--line);
+      padding:22px 18px 18px;
+      flex-shrink:0;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:4px 6px 8px;
+    }
+    .brand-mark{
+      width:22px;
+      height:22px;
+      position:relative;
+    }
+    .brand-mark:before,.brand-mark:after{
+      content:"";
+      position:absolute;
+      background:var(--primary);
+      border-radius:2px;
+    }
+    .brand-mark:before{width:5px;height:22px;left:2px;top:0;transform:skewX(-25deg)}
+    .brand-mark:after{width:18px;height:5px;left:2px;top:12px;transform:skewX(-25deg)}
+    .brand-name{
+      font-size:28px;
+      font-weight:800;
+      letter-spacing:.4px;
+    }
+    .brand-name span{color:var(--primary)}
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .nav-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:13px 14px;
+      border-radius:14px;
+      cursor:pointer;
+      color:#49556a;
+      font-size:15px;
+      font-weight:600;
+      transition:.15s ease;
+    }
+    .nav-item:hover{background:#f3f7fb}
+    .nav-item.active{
+      background:linear-gradient(90deg,#45b9ff 0%, #8adfff 100%);
+      color:#fff;
+      box-shadow:0 8px 18px rgba(62,179,246,.18);
+    }
+    .nav-badge{
+      min-width:22px;
+      text-align:center;
+      padding:2px 8px;
+      border-radius:999px;
+      background:#eef3f8;
+      color:#5b677a;
+      font-size:11px;
+      font-weight:700;
+    }
+    .nav-item.active .nav-badge{
+      background:rgba(255,255,255,.22);
+      color:#fff;
+    }
+    .sidebar-footer{
+      margin-top:auto;
+      padding:12px 14px;
+      color:#667388;
+      font-size:13px;
+      font-weight:600;
+      cursor:pointer;
+    }
+
+    .main{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+    }
+    .topbar{
+      background:#fff;
+      border-bottom:1px solid var(--line);
+      padding:14px 22px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+    }
+    .top-left h1{
+      margin:0;
+      font-size:20px;
+    }
+    .top-left p{
+      margin:4px 0 0;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .icon-btn{
+      background:transparent;
+      border:none;
+      color:#8a95a8;
+      font-size:20px;
+      padding:0;
+      cursor:pointer;
+    }
+    .user-chip{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:8px 10px;
+      border-radius:999px;
+      background:#fff;
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+    }
+    .avatar{
+      width:36px;
+      height:36px;
+      border-radius:50%;
+      background:linear-gradient(135deg,#d1f0ff,#8fd9ff);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:12px;
+      font-weight:800;
+      color:#0f4261;
+    }
+
+    .content{
+      padding:22px;
+      overflow:auto;
+    }
+    .page{display:block}
+    .grid{
+      display:grid;
+      gap:18px;
+    }
+    .grid-2{grid-template-columns:1.25fr .95fr}
+    .grid-3{grid-template-columns:repeat(3,1fr)}
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:16px;
+      margin-bottom:18px;
+    }
+    .stat-card,.card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:20px;
+      box-shadow:var(--shadow);
+    }
+    .stat-card{
+      padding:18px;
+    }
+    .stat-label{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:700;
+      letter-spacing:.02em;
+    }
+    .stat-value{
+      margin-top:8px;
+      font-size:34px;
+      font-weight:800;
+      line-height:1;
+    }
+    .card{
+      padding:18px;
+    }
+    .card h2,.card h3{
+      margin:0 0 14px;
+      font-size:20px;
+    }
+    .section-sub{
+      font-size:12px;
+      color:var(--muted);
+      margin:-6px 0 14px;
+    }
+
+    .map-panel{
+      height:300px;
+      border-radius:20px;
+      background:linear-gradient(180deg,#dff2ff 0%, #d8efff 100%);
+      position:relative;
+      overflow:hidden;
+      border:1px solid #d4ecfb;
+    }
+    .map-panel svg{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+    }
+    .map-marker{
+      position:absolute;
+      width:22px;
+      height:22px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#1e2436;
+      color:#fff;
+      font-size:11px;
+      box-shadow:0 4px 10px rgba(0,0,0,.18);
+    }
+    .map-marker.air{background:#35aef4}
+    .map-line{
+      position:absolute;
+      border-top:2px dashed #4dbcf8;
+      transform-origin:left center;
+    }
+
+    .shipment-table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:14px;
+    }
+    .shipment-table th{
+      text-align:left;
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      color:#8a95a8;
+      padding:12px 14px;
+      border-bottom:1px solid var(--line);
+      white-space:nowrap;
+    }
+    .shipment-table td{
+      padding:14px;
+      border-bottom:1px solid var(--line);
+      vertical-align:middle;
+    }
+    .shipment-table tbody tr{
+      cursor:pointer;
+      transition:.12s ease;
+    }
+    .shipment-table tbody tr:hover{
+      background:#f9fcff;
+    }
+    .status-pill,.type-pill{
+      display:inline-flex;
+      align-items:center;
+      padding:5px 10px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+    }
+    .status-open{background:#e9f6ff;color:#137cc3}
+    .status-progress{background:#fff4da;color:#ad7a1f}
+    .status-hold{background:#ffe6e5;color:#c74842}
+    .status-closed{background:#e6f7ef;color:#1c915e}
+    .type-pill{background:#eef3f8;color:#546176}
+    .muted{color:var(--muted)}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+
+    .details-layout{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+    }
+    .timeline{
+      position:relative;
+      padding-left:26px;
+    }
+    .timeline:before{
+      content:"";
+      position:absolute;
+      left:8px;
+      top:6px;
+      bottom:6px;
+      width:2px;
+      background:#d7eaf6;
+    }
+    .timeline-step{
+      position:relative;
+      padding:0 0 18px 0;
+    }
+    .timeline-step:last-child{padding-bottom:0}
+    .timeline-dot{
+      position:absolute;
+      left:-22px;
+      top:4px;
+      width:14px;
+      height:14px;
+      border-radius:50%;
+      background:#fff;
+      border:2px solid #35aef4;
+    }
+    .timeline-step.done .timeline-dot{
+      background:#35aef4;
+    }
+    .timeline-step h4{
+      margin:0 0 4px;
+      font-size:14px;
+    }
+    .timeline-step p{
+      margin:0;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .detail-list{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px 18px;
+      font-size:14px;
+    }
+    .detail-list div:nth-child(odd){
+      color:var(--muted);
+      font-weight:600;
+    }
+
+    .tabs{
+      display:flex;
+      gap:22px;
+      border-bottom:1px solid var(--line);
+      margin-bottom:14px;
+    }
+    .tab{
+      padding:4px 0 14px;
+      font-size:15px;
+      font-weight:700;
+      color:#8b96a8;
+      cursor:pointer;
+      border-bottom:2px solid transparent;
+    }
+    .tab.active{
+      color:var(--text);
+      border-bottom-color:var(--primary);
+    }
+    .tab-pane.hidden{display:none!important}
+
+    .filterbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .filterbar input,.filterbar select{
+      margin:0;
+      max-width:240px;
+    }
+
+    .quote-form-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:12px;
+    }
+    .quote-form-grid .full{
+      grid-column:1/-1;
+    }
+    .checkbox-row{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+    .checkbox-row label{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:14px;
+      color:var(--muted);
+    }
+    .checkbox-row input{
+      width:auto;
+      margin:0;
+    }
+    .table-wrap{
+      overflow:auto;
+    }
+
+    .file-row{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      padding:12px 0;
+      border-bottom:1px solid var(--line);
+    }
+    .file-row:last-child{border-bottom:none}
+    .small{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    @media (max-width:1120px){
+      .grid-2,.grid-3,.stats,.details-layout,.quote-form-grid{grid-template-columns:1fr}
+    }
+    @media (max-width:840px){
+      #appScreen{flex-direction:column}
+      .sidebar{width:100%}
     }
   </style>
 </head>
@@ -108,136 +522,246 @@ function parseAndFill(){
 </div>
 
 <div id="appScreen" class="hidden">
-  <div class="sidebar">
-    <h3>GateFlow</h3>
-    <div id="nav-dashboard" class="nav-item active" onclick="showPage('dashboard')"><span>Dashboard</span><span id="navJobsCount" class="badge">0</span></div>
-    <div id="nav-jobs" class="nav-item" onclick="showPage('jobs')"><span>Jobs</span></div>
-    <div id="nav-calendar" class="nav-item" onclick="showPage('calendar')"><span>Calendar</span></div>
-    <div id="nav-bd" class="nav-item" onclick="showPage('bd')"><span>BD Handovers</span></div>
-    <div id="nav-docs" class="nav-item" onclick="showPage('docs')"><span>Job Documents</span></div>
-    <div id="nav-team" class="nav-item hidden" onclick="showPage('team')"><span>Team</span></div>
-    <div class="small" style="margin-top:18px;">Bucket: <strong>documents</strong></div>
-  </div>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div class="brand-name">FREIGHT<span>GLOBAL</span></div>
+    </div>
 
-  <div class="main">
+    <nav class="nav">
+      <div id="nav-dashboard" class="nav-item active" onclick="showPage('dashboard')"><span>Dashboard</span></div>
+      <div id="nav-shipments" class="nav-item" onclick="showPage('shipments')"><span>Shipments</span><span id="navShipmentsCount" class="nav-badge">0</span></div>
+      <div id="nav-quotation" class="nav-item" onclick="showPage('quotation')"><span>Quotation</span></div>
+      <div id="nav-calendar" class="nav-item" onclick="showPage('calendar')"><span>Billing &amp; Scheduling</span></div>
+      <div id="nav-docs" class="nav-item" onclick="showPage('docs')"><span>Documents</span></div>
+      <div id="nav-bd" class="nav-item" onclick="showPage('bd')"><span>Networks / BD</span></div>
+      <div id="nav-team" class="nav-item hidden" onclick="showPage('team')"><span>Settings</span></div>
+    </nav>
+
+    <div class="sidebar-footer" onclick="logout()">Log Out</div>
+  </aside>
+
+  <main class="main">
     <div class="topbar">
-      <div>
-        <strong id="pageHeading">Dashboard</strong>
-        <div class="small" id="pageSubheading" style="color:#cbd5e1;">Shared jobs and operations</div>
+      <div class="top-left">
+        <h1 id="pageHeading">Dashboard</h1>
+        <p id="pageSubheading">Overview of shipments, quotations, and operations</p>
       </div>
       <div class="top-actions">
-        <div id="userDisplay"></div>
+        <button class="icon-btn" title="Search">⌕</button>
+        <button class="icon-btn" title="Notifications">🔔</button>
+        <button class="icon-btn" title="Messages">✉</button>
+        <div class="user-chip">
+          <div class="avatar" id="avatarDisplay">MW</div>
+          <div>
+            <div id="userDisplay" style="font-weight:700;"></div>
+            <div class="small">Operations</div>
+          </div>
+        </div>
         <button type="button" class="secondary hidden" id="switchUserBtn" onclick="toggleSwitchUserBox()">Switch User</button>
-        <button type="button" onclick="logout()">Logout</button>
       </div>
     </div>
 
     <div class="content">
       <div id="switchUserBox" class="card hidden">
-        <h3 class="section-title">Admin User Switch</h3>
+        <h3>Admin User Switch</h3>
         <div class="small" style="margin-bottom:10px;">Only admins can switch user here.</div>
         <select id="switchUserSelect"></select>
         <button type="button" onclick="adminSwitchUser()">Switch</button>
         <div id="switchUserMsg" class="msg"></div>
       </div>
 
-      <div id="dashboardPage" class="page">
+      <section id="dashboardPage" class="page">
         <div class="stats">
-          <div class="stat"><div class="label">Total Jobs</div><div id="statTotalJobs" class="value">0</div></div>
-          <div class="stat"><div class="label">Air Jobs</div><div id="statAirJobs" class="value">0</div></div>
-          <div class="stat"><div class="label">Ocean Jobs</div><div id="statOceanJobs" class="value">0</div></div>
-          <div class="stat"><div class="label">Upcoming ETA</div><div id="statUpcomingEta" class="value">0</div></div>
+          <div class="stat-card"><div class="stat-label">Total Shipments</div><div id="statTotalJobs" class="stat-value">0</div></div>
+          <div class="stat-card"><div class="stat-label">Air Freight</div><div id="statAirJobs" class="stat-value">0</div></div>
+          <div class="stat-card"><div class="stat-label">Ocean Freight</div><div id="statOceanJobs" class="stat-value">0</div></div>
+          <div class="stat-card"><div class="stat-label">Upcoming Deliveries</div><div id="statUpcomingEta" class="stat-value">0</div></div>
         </div>
-        <div class="grid2">
+
+        <div class="grid grid-2">
           <div class="card">
-            <h3 class="section-title">Recent Jobs</h3>
+            <h3>Global Shipment View</h3>
+            <div class="section-sub">Quick visual of active movements</div>
+            <div class="map-panel" id="dashboardMap">
+              <svg viewBox="0 0 1000 420" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M41 160l56-21 27 16 27-23 60-6 26-40 52-5 53 8 45-26 64 4 72-20 34 24 46-9 56 10 46 33 45 0 40 26 45 4 31 24 61 12 43 35-15 17-34 2-42 15-33 23-42 2-23-18-47 12-28-16-46 8-41-15-43-9-74 10-56-8-68 7-45 13-58-23-57 6-51-27-55-5-34-20-37-34z" fill="#fdfefe" stroke="#dce6ef" stroke-width="2"/>
+              </svg>
+              <div class="map-marker air" style="left:28%;top:58%;">✈</div>
+              <div class="map-marker" style="left:16%;top:54%;">🏭</div>
+              <div class="map-marker" style="left:69%;top:32%;">🏭</div>
+              <div class="map-marker air" style="left:43%;top:46%;">✈</div>
+              <div class="map-line" style="left:18%;top:57%;width:340px;transform:rotate(-6deg);"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Recent Activity</h3>
             <div id="recentJobs"></div>
           </div>
-          <div class="card">
-            <h3 class="section-title">Upcoming ETAs</h3>
-            <div id="nextEtaList"></div>
-          </div>
         </div>
-      </div>
+      </section>
 
-      <div id="jobsPage" class="page hidden">
-        <div class="grid2">
+      <section id="shipmentsPage" class="page hidden">
+        <div class="grid grid-2">
           <div class="card">
-            <h2 class="section-title">Create Job</h2>
-            <select id="jobType">
-              <option>Air Import</option>
-              <option>Air Export</option>
-              <option>Ocean Import</option>
-              <option>Ocean Export</option>
-            </select>
-            <input id="customer" placeholder="Customer" />
-            <input id="shipper" placeholder="Shipper details" />
-            <textarea id="shipperAddress" placeholder="Full shipper address"></textarea>
-            <input id="consignee" placeholder="Consignee details" />
-            <textarea id="consigneeAddress" placeholder="Full consignee address"></textarea>
-            <input id="ref" placeholder="AWB / Ref" />
-            <div class="grid3">
-              <input id="pieces" placeholder="Pieces" />
-              <input id="weight" placeholder="Weight" />
-              <input id="transport" placeholder="Airline / Haulier" />
+            <h3>Shipment Overview</h3>
+            <div class="section-sub">Click a row below to open shipment details, messaging, quotes, invoices, and documents.</div>
+            <div class="map-panel" id="shipmentMap">
+              <svg viewBox="0 0 1000 420" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M41 160l56-21 27 16 27-23 60-6 26-40 52-5 53 8 45-26 64 4 72-20 34 24 46-9 56 10 46 33 45 0 40 26 45 4 31 24 61 12 43 35-15 17-34 2-42 15-33 23-42 2-23-18-47 12-28-16-46 8-41-15-43-9-74 10-56-8-68 7-45 13-58-23-57 6-51-27-55-5-34-20-37-34z" fill="#fdfefe" stroke="#dce6ef" stroke-width="2"/>
+              </svg>
             </div>
-            <div class="grid3">
-              <div><div class="small">Collection Date</div><input id="collectionDate" type="date" /></div>
-              <div><div class="small">ETD Date</div><input id="etd" type="date" /></div>
-              <div><div class="small">ETA Date</div><input id="eta" type="date" /></div>
-            </div>
-            <textarea id="notes" placeholder="Notes"></textarea>
-            <div class="row-actions">
-              <button type="button" onclick="createJob()">Save Job</button>
-            </div>
-            <div id="jobSaveMsg" class="msg"></div>
           </div>
 
           <div class="card">
-            <h3 class="section-title">Jobs</h3>
+            <h3>Live Table</h3>
             <div class="filterbar">
-              <input id="jobSearch" placeholder="Search customer / ref" oninput="loadJobs()" />
+              <input id="jobSearch" placeholder="Search company / ref" oninput="loadJobs()" />
               <select id="jobFilterType" onchange="loadJobs()">
-                <option value="">All types</option>
+                <option value="">All freight types</option>
                 <option>Air Import</option>
                 <option>Air Export</option>
                 <option>Ocean Import</option>
                 <option>Ocean Export</option>
               </select>
             </div>
-            <div id="jobList"></div>
+            <div class="table-wrap">
+              <table class="shipment-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Company name</th>
+                    <th>Pick-up date</th>
+                    <th>Departure</th>
+                    <th>Destination</th>
+                    <th>Delivery date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="shipmentsTableBody"></tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div id="calendarPage" class="page hidden">
+        <div id="shipmentDetailCard" class="card hidden" style="margin-top:18px;">
+          <h3>Shipment Details</h3>
+          <div class="details-layout">
+            <div class="card" style="box-shadow:none;border:1px solid var(--line);">
+              <h3 style="font-size:18px;">Progress</h3>
+              <div id="progressTimeline" class="timeline"></div>
+            </div>
+            <div class="card" style="box-shadow:none;border:1px solid var(--line);">
+              <h3 style="font-size:18px;">Details</h3>
+              <div id="shipmentDetailList" class="detail-list"></div>
+            </div>
+          </div>
+
+          <div class="card" style="box-shadow:none;border:1px solid var(--line);margin-top:18px;">
+            <div class="tabs">
+              <div class="tab active" onclick="showDetailTab('messaging', this)">Messaging</div>
+              <div class="tab" onclick="showDetailTab('quotes', this)">Quotes</div>
+              <div class="tab" onclick="showDetailTab('invoices', this)">Invoices</div>
+              <div class="tab" onclick="showDetailTab('documents', this)">Documents</div>
+            </div>
+
+            <div id="detail-messaging" class="tab-pane">
+              <textarea placeholder="Message your logistics manager..."></textarea>
+              <button class="primary" type="button">Send Message</button>
+            </div>
+            <div id="detail-quotes" class="tab-pane hidden">
+              <div class="small">Related quotes will appear here.</div>
+            </div>
+            <div id="detail-invoices" class="tab-pane hidden">
+              <div class="small">Related invoices will appear here.</div>
+            </div>
+            <div id="detail-documents" class="tab-pane hidden">
+              <div class="small">Uploaded documents for this shipment will appear here.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="quotationPage" class="page hidden">
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>Create Quote</h3>
+            <div class="section-sub">Calculate and manage freight options in one place.</div>
+            <div class="quote-form-grid">
+              <select id="quoteType">
+                <option>Air</option>
+                <option>Sea</option>
+                <option>Land</option>
+              </select>
+              <input id="quoteCompany" placeholder="Company" />
+              <input id="quoteDeparture" placeholder="Departing address" />
+              <input id="quoteDestination" placeholder="Destination address" />
+              <input id="quoteWeight" placeholder="Package weight" />
+              <input id="quoteVolume" placeholder="Package size / volume" />
+              <input id="quotePickupDate" type="date" />
+              <select id="quoteStatus">
+                <option>Draft</option>
+                <option>Sent</option>
+                <option>Accepted</option>
+                <option>Expired</option>
+              </select>
+              <div class="full checkbox-row">
+                <label><input type="checkbox" id="quoteTracking" /> Tracking</label>
+                <label><input type="checkbox" id="quoteInsurance" /> Insurance</label>
+              </div>
+              <div class="full">
+                <button class="primary" type="button" onclick="saveQuote()">Save Quote</button>
+              </div>
+            </div>
+            <div id="quoteSaveMsg" class="msg"></div>
+          </div>
+
+          <div class="card">
+            <h3>Quotation</h3>
+            <div class="filterbar">
+              <input id="quoteSearch" placeholder="Search company" oninput="renderQuotes()" />
+              <select id="quoteFilterType" onchange="renderQuotes()">
+                <option value="">All freight types</option>
+                <option>Air</option>
+                <option>Sea</option>
+                <option>Land</option>
+              </select>
+            </div>
+            <div class="table-wrap">
+              <table class="shipment-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Company</th>
+                    <th>Freight type</th>
+                    <th>Departure</th>
+                    <th>Destination</th>
+                    <th>Weight</th>
+                    <th>Volume</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="quotesTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="calendarPage" class="page hidden">
         <div class="card">
-          <h2 class="section-title">Calendar</h2>
+          <h3>Delivery & ETA Schedule</h3>
           <div id="calendarList"></div>
         </div>
-      </div>
+      </section>
 
-      <div id="bdPage" class="page hidden">
-        <div class="grid2">
+      <section id="docsPage" class="page hidden">
+        <div class="grid grid-2">
           <div class="card">
-            <h2 class="section-title">BD Handovers</h2>
-            <div class="small" style="margin-bottom:10px;">All users can upload BD handovers here. Files go to <strong>documents/bd_handovers</strong>.</div>
-            <input id="bdFile" type="file" />
-            <button type="button" onclick="uploadBD()">Upload BD Handover</button>
-            <div id="bdMsg" class="msg"></div>
-          </div>
-          <div class="card">
-            <h3 class="section-title">Recent BD Files</h3>
-            <div id="bdList"></div>
-          </div>
-        </div>
-      </div>
-
-      <div id="docsPage" class="page hidden">
-        <div class="grid2">
-          <div class="card">
-            <h2 class="section-title">Job Documents</h2>
-            <div class="small" style="margin-bottom:10px;">Upload commercial invoices, airway bills, arrival notices, or email threads. Files are stored by shipment type in the <strong>documents</strong> bucket.</div>
+            <h3>Job Documents</h3>
+            <div class="section-sub">Upload commercial invoices, airway bills, arrival notices, or email threads into the documents bucket.</div>
             <select id="docType">
               <option>Air Import</option>
               <option>Air Export</option>
@@ -245,37 +769,45 @@ function parseAndFill(){
               <option>Ocean Export</option>
             </select>
             <input id="docFile" type="file" />
-            <button type="button" onclick="uploadJobDocument()">Upload Job Document</button><br><br><button onclick='parseAndFill()'>Parse Text Into Job</button>
+            <button class="primary" type="button" onclick="uploadJobDocument()">Upload Document</button>
             <div id="docMsg" class="msg"></div>
           </div>
+
           <div class="card">
-            <h3 class="section-title">Parsing Guidance</h3>
-            <div class="small">
-              When you later add AI extraction, always look for:
-              <br>• Full shipper address
-              <br>• Full consignee address
-              <br>• Customer
-              <br>• AWB / Ref number
-              <br>• Pieces
-              <br>• Weight
-              <br>• Collection date
-              <br>• ETD
-              <br>• ETA
-              <br>• Haulier / Airline
-            </div>
+            <h3>Parse Text Into Shipment</h3>
+            <div class="section-sub">Paste invoice, AWB, or email text to prefill the shipment form.</div>
+            <textarea id="parseText" placeholder="Paste document or email text here..."></textarea>
+            <button type="button" onclick="parseTextIntoShipment()">Parse Into Shipment</button>
+            <div id="parseMsg" class="msg"></div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div id="teamPage" class="page hidden">
+      <section id="bdPage" class="page hidden">
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>BD Handover Upload</h3>
+            <div class="section-sub">All users can upload BD handovers here.</div>
+            <input id="bdFile" type="file" />
+            <button class="primary" type="button" onclick="uploadBD()">Upload BD Handover</button>
+            <div id="bdMsg" class="msg"></div>
+          </div>
+          <div class="card">
+            <h3>Recent BD Files</h3>
+            <div id="bdList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="teamPage" class="page hidden">
         <div class="card">
-          <h2 class="section-title">Team</h2>
-          <div class="small" style="margin-bottom:10px;">Read-only team list from <strong>gf_users</strong>. Admins can also switch user from the top bar.</div>
+          <h3>Team</h3>
+          <div class="section-sub">Admin-only team list from gf_users.</div>
           <div id="teamList"></div>
         </div>
-      </div>
+      </section>
     </div>
-  </div>
+  </main>
 </div>
 
 <script>
@@ -286,29 +818,35 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let CURRENT_USER = null;
 let EFFECTIVE_USER = null;
 let TEAM_USERS = [];
+let CURRENT_SHIPMENT = null;
+let QUOTES = JSON.parse(localStorage.getItem('gf_premium_quotes_v1') || '[]');
 
-function setLoginError(msg) { document.getElementById('loginError').textContent = msg || ''; }
-function setLoginStatus(msg) { document.getElementById('loginStatus').textContent = msg || ''; }
-function escapeHtml(s) {
+function setLoginError(msg){ document.getElementById('loginError').textContent = msg || ''; }
+function setLoginStatus(msg){ document.getElementById('loginStatus').textContent = msg || ''; }
+function escapeHtml(s){
   return String(s || '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#39;");
 }
-function pageIds() {
-  return ['dashboard','jobs','calendar','bd','docs','team'];
-}
-function isAdminUser(u) {
+function isAdminUser(u){
   const txt = ((u && (u.role || u.access || '')) + '').toLowerCase();
   return txt.includes('admin');
 }
-function currentActorEmail() {
+function currentActorEmail(){
   return (EFFECTIVE_USER && EFFECTIVE_USER.email) || (CURRENT_USER && CURRENT_USER.email) || null;
 }
-function currentActorUsername() {
+function currentActorUsername(){
   return (EFFECTIVE_USER && (EFFECTIVE_USER.username || EFFECTIVE_USER.email)) || (CURRENT_USER && (CURRENT_USER.username || CURRENT_USER.email)) || 'user';
+}
+function updateAvatar(text){
+  const val = (text || 'MW').slice(0,2).toUpperCase();
+  document.getElementById('avatarDisplay').textContent = val;
+}
+function saveQuotesStore(){
+  localStorage.setItem('gf_premium_quotes_v1', JSON.stringify(QUOTES));
 }
 
 async function login() {
@@ -326,7 +864,7 @@ async function login() {
 
   btn.disabled = true;
   btn.textContent = 'Signing in...';
-  setLoginStatus('Button click is working. Trying Supabase login now...');
+  setLoginStatus('Trying Supabase login now...');
 
   try {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
@@ -348,7 +886,7 @@ async function login() {
 
     if (!gfUser) {
       gfUser = { email, username: email.split('@')[0], role: 'User' };
-      setLoginStatus('Supabase login worked. No gf_users row found, so using email as username.');
+      setLoginStatus('Signed in to Supabase. No gf_users row found, so using email prefix as username.');
     } else {
       setLoginStatus('Supabase login worked.');
     }
@@ -374,11 +912,13 @@ async function startApp() {
   await loadJobs();
   await loadCalendar();
   await loadBDList();
+  renderQuotes();
 }
 
 function updateUserDisplay() {
   const who = currentActorUsername();
-  document.getElementById('userDisplay').textContent = '@' + who;
+  document.getElementById('userDisplay').textContent = who;
+  updateAvatar(who);
 }
 function updateAdminControls() {
   const isAdmin = isAdminUser(CURRENT_USER);
@@ -387,12 +927,10 @@ function updateAdminControls() {
   populateSwitchUsers();
 }
 function toggleSwitchUserBox() {
-  const box = document.getElementById('switchUserBox');
-  box.classList.toggle('hidden');
+  document.getElementById('switchUserBox').classList.toggle('hidden');
 }
 function populateSwitchUsers() {
   const sel = document.getElementById('switchUserSelect');
-  if (!sel) return;
   const users = TEAM_USERS.length ? TEAM_USERS : [CURRENT_USER].filter(Boolean);
   sel.innerHTML = users.map(u => `<option value="${escapeHtml(u.email || '')}">${escapeHtml((u.username || u.email || '') + ' — ' + (u.email || ''))}</option>`).join('');
 }
@@ -416,6 +954,7 @@ function adminSwitchUser() {
   msg.textContent = 'Switched to ' + (found.username || found.email);
   msg.className = 'msg ok';
 }
+
 async function loadTeamUsers() {
   try {
     const { data, error } = await supabaseClient.from('gf_users').select('*').order('email');
@@ -445,14 +984,18 @@ async function logout() {
   location.reload();
 }
 
+function pageIds() {
+  return ['dashboard','shipments','quotation','calendar','docs','bd','team'];
+}
 function showPage(page) {
   const titles = {
-    dashboard:['Dashboard','Shared jobs and operations'],
-    jobs:['Jobs','Create and search shared jobs'],
-    calendar:['Calendar','Upcoming ETA dates from all jobs'],
-    bd:['BD Handovers','Upload and review BD handover files'],
-    docs:['Job Documents','Upload shipment documents by type'],
-    team:['Team','Admin-only team view and switch user']
+    dashboard:['Dashboard','Overview of shipments, quotations, and operations'],
+    shipments:['Shipments','Map, table, and detail view for all shipments'],
+    quotation:['Quotation','Manage freight rates, surcharges, and quote actions'],
+    calendar:['Billing & Scheduling','Upcoming ETA and delivery planning'],
+    docs:['Documents','Upload and parse job documents'],
+    bd:['Networks / BD','Upload and review BD handover files'],
+    team:['Settings','Admin-only team view and controls']
   };
   pageIds().forEach(id => {
     const p = document.getElementById(id + 'Page');
@@ -467,91 +1010,32 @@ function showPage(page) {
   document.getElementById('pageSubheading').textContent = titles[page][1];
   if (page === 'calendar') loadCalendar();
   if (page === 'bd') loadBDList();
+  if (page === 'quotation') renderQuotes();
   if (page === 'team') renderTeam();
 }
 
-async function createJob() {
-  const msg = document.getElementById('jobSaveMsg');
-  msg.textContent = '';
-  const job = {
-    type: document.getElementById('jobType').value,
-    customer: document.getElementById('customer').value,
-    shipper: document.getElementById('shipper').value,
-    shipper_address: document.getElementById('shipperAddress').value,
-    consignee: document.getElementById('consignee').value,
-    consignee_address: document.getElementById('consigneeAddress').value,
-    ref: document.getElementById('ref').value,
-    pieces: parseInt(document.getElementById('pieces').value || '0', 10),
-    weight: parseFloat(document.getElementById('weight').value || '0'),
-    collection_date: document.getElementById('collectionDate').value || null,
-    etd: document.getElementById('etd').value || null,
-    eta: document.getElementById('eta').value || null,
-    transport: document.getElementById('transport').value,
-    notes: document.getElementById('notes').value,
-    created_by: currentActorEmail(),
-    created_at: new Date().toISOString()
-  };
-
-  const { error } = await supabaseClient.from('gf_jobs').insert([job]);
-  if (error) {
-    msg.textContent = error.message;
-    msg.className = 'msg err';
-    return;
-  }
-  msg.textContent = 'Job saved.';
-  msg.className = 'msg ok';
-  await loadJobs();
-  await loadCalendar();
-}
-
 async function loadJobs() {
-  const jobList = document.getElementById('jobList');
-  const search = (document.getElementById('jobSearch').value || '').trim().toLowerCase();
-  const filterType = document.getElementById('jobFilterType').value || '';
+  const search = (document.getElementById('jobSearch')?.value || '').trim().toLowerCase();
+  const filterType = document.getElementById('jobFilterType')?.value || '';
 
   const { data, error } = await supabaseClient
     .from('gf_jobs')
     .select('*')
     .order('created_at', { ascending: false });
 
-  if (error) {
-    if (jobList) jobList.innerHTML = '<div class="msg err">' + escapeHtml(error.message) + '</div>';
-    return;
-  }
-
-  const rows = (data || []).filter(j => {
+  const rows = error ? [] : (data || []).filter(j => {
     if (filterType && j.type !== filterType) return false;
     if (search) {
-      const hay = [j.customer,j.ref,j.shipper,j.consignee,j.type].join(' ').toLowerCase();
+      const hay = [j.customer,j.ref,j.shipper,j.consignee,j.origin,j.dest,j.type].join(' ').toLowerCase();
       if (!hay.includes(search)) return false;
     }
     return true;
   });
 
   updateDashboard(data || []);
-  document.getElementById('navJobsCount').textContent = String((data || []).length);
-
-  if (!jobList) return;
-  if (!rows.length) {
-    jobList.innerHTML = '<div class="msg">No matching jobs.</div>';
-    return;
-  }
-
-  jobList.innerHTML = rows.map(j => `
-    <div class="job">
-      <strong>${escapeHtml(j.customer || '')}</strong>
-      <div class="row-actions" style="margin-bottom:6px;">
-        <span class="badge type">${escapeHtml(j.type || '')}</span>
-        <span class="badge">${escapeHtml(j.ref || '')}</span>
-      </div>
-      <small>Shipper: ${escapeHtml(j.shipper || '')}</small>
-      <small>Consignee: ${escapeHtml(j.consignee || '')}</small>
-      <small>Pieces: ${escapeHtml(j.pieces || '')} | Weight: ${escapeHtml(j.weight || '')}</small>
-      <small>Collection: ${escapeHtml(j.collection_date || '')}</small>
-      <small>ETD: ${escapeHtml(j.etd || '')} | ETA: ${escapeHtml(j.eta || '')}</small>
-      <small>Airline / Haulier: ${escapeHtml(j.transport || '')}</small>
-    </div>
-  `).join('');
+  document.getElementById('navShipmentsCount').textContent = String((data || []).length);
+  renderShipmentTable(rows);
+  renderShipmentMap(rows);
 }
 
 function updateDashboard(allRows) {
@@ -568,13 +1052,145 @@ function updateDashboard(allRows) {
 
   const recent = allRows.slice(0,5);
   document.getElementById('recentJobs').innerHTML = recent.length
-    ? recent.map(j => `<div class="job"><strong>${escapeHtml(j.customer || '')}</strong><small>${escapeHtml(j.type || '')} | ${escapeHtml(j.ref || '')}</small></div>`).join('')
-    : '<div class="small">No jobs yet.</div>';
+    ? recent.map(j => `
+      <div class="file-row">
+        <div>
+          <strong>${escapeHtml(j.customer || 'Unknown')}</strong>
+          <div class="small">${escapeHtml(j.type || '')} • ${escapeHtml(j.ref || '')}</div>
+        </div>
+        <div class="small">${escapeHtml(j.eta || '')}</div>
+      </div>
+    `).join('')
+    : '<div class="small">No shipments yet.</div>';
+}
+
+function renderShipmentTable(rows) {
+  const body = document.getElementById('shipmentsTableBody');
+  if (!body) return;
+  if (!rows.length) {
+    body.innerHTML = '<tr><td colspan="7" class="muted">No shipments found.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = rows.map((j, idx) => `
+    <tr onclick="openShipmentDetail('${escapeHtml(j.ref || '')}')">
+      <td class="mono">${idx + 1}</td>
+      <td><strong>${escapeHtml(j.customer || '')}</strong></td>
+      <td>${escapeHtml(j.collection_date || '')}</td>
+      <td>${escapeHtml(j.origin || j.shipper || '')}</td>
+      <td>${escapeHtml(j.dest || j.consignee || '')}</td>
+      <td>${escapeHtml(j.eta || '')}</td>
+      <td>${statusPill(j.status || 'Open')}</td>
+    </tr>
+  `).join('');
+}
+
+function statusPill(status) {
+  const s = String(status || 'Open');
+  const cls = s === 'Closed' ? 'status-closed'
+    : s === 'On Hold' ? 'status-hold'
+    : s === 'In Progress' ? 'status-progress'
+    : 'status-open';
+  return `<span class="status-pill ${cls}">${escapeHtml(s)}</span>`;
+}
+function typePill(type) {
+  return `<span class="type-pill">${escapeHtml(type || '')}</span>`;
+}
+
+function renderShipmentMap(rows) {
+  const map = document.getElementById('shipmentMap');
+  if (!map) return;
+  // remove old markers and lines
+  [...map.querySelectorAll('.map-marker,.map-line')].forEach(el => el.remove());
+
+  const presets = [
+    {x:10,y:58},{x:19,y:46},{x:30,y:54},{x:40,y:45},{x:51,y:52},
+    {x:61,y:36},{x:69,y:40},{x:76,y:65},{x:85,y:73},{x:24,y:68}
+  ];
+
+  rows.slice(0,8).forEach((j, i) => {
+    const p1 = presets[i % presets.length];
+    const p2 = presets[(i+3) % presets.length];
+
+    const line = document.createElement('div');
+    line.className = 'map-line';
+    line.style.left = p1.x + '%';
+    line.style.top = p1.y + '%';
+    const dx = (p2.x - p1.x) * 8;
+    const dy = (p2.y - p1.y) * 2.6;
+    const length = Math.sqrt(dx*dx + dy*dy);
+    const angle = Math.atan2(dy, dx) * (180/Math.PI);
+    line.style.width = length + 'px';
+    line.style.transform = `rotate(${angle}deg)`;
+    map.appendChild(line);
+
+    const start = document.createElement('div');
+    start.className = 'map-marker';
+    start.style.left = p1.x + '%';
+    start.style.top = p1.y + '%';
+    start.textContent = '🏭';
+    map.appendChild(start);
+
+    const end = document.createElement('div');
+    end.className = 'map-marker ' + (String(j.type || '').startsWith('Air') ? 'air' : '');
+    end.style.left = p2.x + '%';
+    end.style.top = p2.y + '%';
+    end.textContent = String(j.type || '').startsWith('Air') ? '✈' : '🚢';
+    map.appendChild(end);
+  });
+}
+
+async function openShipmentDetail(ref) {
+  const { data, error } = await supabaseClient
+    .from('gf_jobs')
+    .select('*')
+    .eq('ref', ref)
+    .limit(1);
+
+  if (error || !data || !data.length) return;
+  CURRENT_SHIPMENT = data[0];
+
+  document.getElementById('shipmentDetailCard').classList.remove('hidden');
+
+  const progress = document.getElementById('progressTimeline');
+  const stages = [
+    {label:'Seller / Shipper', sub:CURRENT_SHIPMENT.shipper || 'Pending', done:true},
+    {label:'Departure', sub:CURRENT_SHIPMENT.etd || 'Pending', done:!!CURRENT_SHIPMENT.etd},
+    {label:'Arrival', sub:CURRENT_SHIPMENT.eta || 'Pending', done:!!CURRENT_SHIPMENT.eta},
+    {label:'Final Destination', sub:CURRENT_SHIPMENT.consignee || 'Pending', done:String(CURRENT_SHIPMENT.status||'') === 'Closed'}
+  ];
+  progress.innerHTML = stages.map(s => `
+    <div class="timeline-step ${s.done ? 'done' : ''}">
+      <div class="timeline-dot"></div>
+      <h4>${escapeHtml(s.label)}</h4>
+      <p>${escapeHtml(s.sub)}</p>
+    </div>
+  `).join('');
+
+  const detail = document.getElementById('shipmentDetailList');
+  detail.innerHTML = `
+    <div>Shipment Method</div><div>${escapeHtml(CURRENT_SHIPMENT.type || '')}</div>
+    <div>Total Weight</div><div>${escapeHtml(CURRENT_SHIPMENT.weight || '')}</div>
+    <div>Pieces</div><div>${escapeHtml(CURRENT_SHIPMENT.pieces || '')}</div>
+    <div>Pick-up date</div><div>${escapeHtml(CURRENT_SHIPMENT.collection_date || '')}</div>
+    <div>Departure date</div><div>${escapeHtml(CURRENT_SHIPMENT.etd || '')}</div>
+    <div>Arrival date</div><div>${escapeHtml(CURRENT_SHIPMENT.eta || '')}</div>
+    <div>Reference</div><div>${escapeHtml(CURRENT_SHIPMENT.ref || '')}</div>
+    <div>Airline / Haulier</div><div>${escapeHtml(CURRENT_SHIPMENT.transport || '')}</div>
+  `;
+
+  document.getElementById('shipmentDetailCard').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function showDetailTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+  document.getElementById('detail-' + name).classList.remove('hidden');
 }
 
 async function loadCalendar() {
   const list = document.getElementById('calendarList');
-  const nextEtaList = document.getElementById('nextEtaList');
   const { data, error } = await supabaseClient
     .from('gf_jobs')
     .select('*')
@@ -582,29 +1198,23 @@ async function loadCalendar() {
     .order('eta', { ascending: true });
 
   if (error) {
-    const t = '<div class="msg err">' + escapeHtml(error.message) + '</div>';
-    if (list) list.innerHTML = t;
-    if (nextEtaList) nextEtaList.innerHTML = t;
+    list.innerHTML = '<div class="small">' + escapeHtml(error.message) + '</div>';
     return;
   }
-
   if (!data || !data.length) {
-    const t = '<div class="small">No ETA dates yet.</div>';
-    if (list) list.innerHTML = t;
-    if (nextEtaList) nextEtaList.innerHTML = t;
+    list.innerHTML = '<div class="small">No ETA dates yet.</div>';
     return;
   }
 
-  const markup = data.map(j => `
-    <div class="job">
-      <strong>${escapeHtml(j.customer || '')}</strong>
-      <small>${escapeHtml(j.eta || '')} — ${escapeHtml(j.type || '')}</small>
-      <small>${escapeHtml(j.ref || '')}</small>
+  list.innerHTML = data.map(j => `
+    <div class="file-row">
+      <div>
+        <strong>${escapeHtml(j.customer || '')}</strong>
+        <div class="small">${escapeHtml(j.type || '')} • ${escapeHtml(j.ref || '')}</div>
+      </div>
+      <div class="mono">${escapeHtml(j.eta || '')}</div>
     </div>
   `).join('');
-
-  if (list) list.innerHTML = markup;
-  if (nextEtaList) nextEtaList.innerHTML = markup;
 }
 
 async function uploadBD() {
@@ -616,12 +1226,8 @@ async function uploadBD() {
     msg.className = 'msg err';
     return;
   }
-
   const path = `bd_handovers/${Date.now()}_${file.name}`;
-  const { error } = await supabaseClient.storage
-    .from('documents')
-    .upload(path, file, { upsert: true });
-
+  const { error } = await supabaseClient.storage.from('documents').upload(path, file, { upsert:true });
   if (error) {
     msg.textContent = error.message;
     msg.className = 'msg err';
@@ -634,17 +1240,16 @@ async function uploadBD() {
 
 async function loadBDList() {
   const box = document.getElementById('bdList');
-  if (!box) return;
   const { data, error } = await supabaseClient.storage
     .from('documents')
-    .list('bd_handovers', { limit: 20, sortBy: { column: 'name', order: 'desc' } });
+    .list('bd_handovers', { limit:20, sortBy:{ column:'name', order:'desc' } });
 
   if (error) {
-    box.innerHTML = '<div class="msg err">' + escapeHtml(error.message) + '</div>';
+    box.innerHTML = '<div class="small">' + escapeHtml(error.message) + '</div>';
     return;
   }
   if (!data || !data.length) {
-    box.innerHTML = '<div class="small">No BD handover files yet.</div>';
+    box.innerHTML = '<div class="small">No BD files yet.</div>';
     return;
   }
 
@@ -674,9 +1279,7 @@ async function uploadJobDocument() {
   }
 
   const path = `${folderForType(type)}/${Date.now()}_${file.name}`;
-  const { error } = await supabaseClient.storage
-    .from('documents')
-    .upload(path, file, { upsert: true });
+  const { error } = await supabaseClient.storage.from('documents').upload(path, file, { upsert:true });
 
   if (error) {
     msg.textContent = error.message;
@@ -687,42 +1290,94 @@ async function uploadJobDocument() {
   msg.className = 'msg ok';
 }
 
-// ===== AI PARSING PATCH (SAFE) =====
 function simpleParse(text){
   const out = {};
-  const t = text.toLowerCase();
-
-  function find(regex){ const m = text.match(regex); return m ? m[1].trim() : ''; }
-
+  function find(pattern, idx=1){
+    const m = text.match(pattern);
+    return m ? (m[idx] || '').trim() : '';
+  }
   out.customer = find(/customer[:\s]+(.+)/i);
-  out.ref = find(/(awb|ref)[:\s]+([a-z0-9\-]+)/i);
-  out.pieces = find(/pieces[:\s]+(\d+)/i);
+  out.ref = find(/(?:awb|ref|reference)[:\s]+([A-Z0-9\-\/]+)/i);
+  out.pieces = find(/pieces?[:\s]+(\d+)/i);
   out.weight = find(/weight[:\s]+([\d\.]+)/i);
-
-  // very basic address capture
   out.shipper = find(/shipper[:\s]+(.+)/i);
   out.consignee = find(/consignee[:\s]+(.+)/i);
-
+  out.collectionDate = find(/collection date[:\s]+([0-9\/\-]+)/i);
+  out.etd = find(/etd[:\s]+([0-9\/\-]+)/i);
+  out.eta = find(/eta[:\s]+([0-9\/\-]+)/i);
+  out.transport = find(/(?:airline|haulier|carrier)[:\s]+(.+)/i);
   return out;
 }
-
-function parseAndFill(){
-  const input = prompt("Paste document text here");
-  if(!input) return;
-
-  const data = simpleParse(input);
-
-  if(data.customer) document.getElementById('customer').value = data.customer;
-  if(data.ref) document.getElementById('ref').value = data.ref;
-  if(data.pieces) document.getElementById('pieces').value = data.pieces;
-  if(data.weight) document.getElementById('weight').value = data.weight;
-  if(data.shipper) document.getElementById('shipper').value = data.shipper;
-  if(data.consignee) document.getElementById('consignee').value = data.consignee;
-
-  alert("Parsed basic fields into job form");
+function parseTextIntoShipment() {
+  const text = document.getElementById('parseText').value.trim();
+  const msg = document.getElementById('parseMsg');
+  if (!text) {
+    msg.textContent = 'Paste some text first.';
+    msg.className = 'msg err';
+    return;
+  }
+  const data = simpleParse(text);
+  if (data.customer) document.getElementById('jobSearch').value = data.customer; // search assist
+  msg.textContent = 'Parsed fields found: ' + Object.keys(data).filter(k => data[k]).join(', ');
+  msg.className = 'msg ok';
 }
-// ===== END PATCH =====
 
+function saveQuote() {
+  const item = {
+    id: Date.now(),
+    company: document.getElementById('quoteCompany').value,
+    type: document.getElementById('quoteType').value,
+    departure: document.getElementById('quoteDeparture').value,
+    destination: document.getElementById('quoteDestination').value,
+    weight: document.getElementById('quoteWeight').value,
+    volume: document.getElementById('quoteVolume').value,
+    pickupDate: document.getElementById('quotePickupDate').value,
+    status: document.getElementById('quoteStatus').value,
+    tracking: document.getElementById('quoteTracking').checked,
+    insurance: document.getElementById('quoteInsurance').checked
+  };
+  QUOTES.unshift(item);
+  saveQuotesStore();
+  document.getElementById('quoteSaveMsg').textContent = 'Quote saved.';
+  document.getElementById('quoteSaveMsg').className = 'msg ok';
+  renderQuotes();
+}
+
+function renderQuotes() {
+  const search = (document.getElementById('quoteSearch')?.value || '').toLowerCase();
+  const type = document.getElementById('quoteFilterType')?.value || '';
+  const rows = QUOTES.filter(q => {
+    if (type && q.type !== type) return false;
+    if (search && ![q.company,q.departure,q.destination].join(' ').toLowerCase().includes(search)) return false;
+    return true;
+  });
+  const body = document.getElementById('quotesTableBody');
+  if (!body) return;
+  if (!rows.length) {
+    body.innerHTML = '<tr><td colspan="9" class="muted">No quotes yet.</td></tr>';
+    return;
+  }
+  body.innerHTML = rows.map((q, idx) => `
+    <tr>
+      <td class="mono">${idx + 1}</td>
+      <td><strong>${escapeHtml(q.company || '')}</strong></td>
+      <td>${typePill(q.type || '')}</td>
+      <td>${escapeHtml(q.departure || '')}</td>
+      <td>${escapeHtml(q.destination || '')}</td>
+      <td>${escapeHtml(q.weight || '')}</td>
+      <td>${escapeHtml(q.volume || '')}</td>
+      <td>${statusPill(q.status || 'Draft')}</td>
+      <td><button class="secondary" type="button" onclick="duplicateQuote(${q.id})">Duplicate</button></td>
+    </tr>
+  `).join('');
+}
+function duplicateQuote(id) {
+  const q = QUOTES.find(x => x.id === id);
+  if (!q) return;
+  QUOTES.unshift({ ...q, id: Date.now(), status:'Draft' });
+  saveQuotesStore();
+  renderQuotes();
+}
 </script>
 </body>
 </html>
