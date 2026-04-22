@@ -1,126 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GateFlow</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root{
-      --bg:#f5f7fb;
-      --panel:#ffffff;
-      --line:#e5e7eb;
-      --text:#0f172a;
-      --muted:#64748b;
-      --sidebar:#0f172a;
-      --sidebar-2:#172033;
-      --accent:#2563eb;
-      --accent-soft:#dbeafe;
-      --good:#047857;
-      --err:#b42318;
-      --shadow:0 8px 24px rgba(15,23,42,.06);
-      --radius:14px;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
-    .hidden{display:none!important}
+    body { margin:0; font-family:Arial,sans-serif; background:#f5f5f5; color:#111827; }
+    .hidden { display:none !important; }
+    .login-wrapper { min-height:100vh; display:flex; justify-content:center; align-items:center; padding:20px; }
+    .login-box { background:#fff; width:100%; max-width:360px; padding:28px; border-radius:10px; box-shadow:0 8px 30px rgba(0,0,0,.08); }
+    .login-box h2 { margin:0 0 18px; }
+    input, select, textarea { width:100%; box-sizing:border-box; padding:12px; margin:0 0 12px; border:1px solid #d0d5dd; border-radius:8px; font-size:14px; background:#fff; }
+    textarea { min-height:92px; resize:vertical; }
+    button { padding:12px; border:none; border-radius:8px; background:#111827; color:#fff; cursor:pointer; font-size:14px; }
+    button.secondary { background:#e5e7eb; color:#111827; }
+    .msg { font-size:13px; margin-top:12px; min-height:18px; white-space:pre-wrap; }
+    .err { color:#b42318; }
+    .ok { color:#027a48; }
 
-    .login-shell{
-      min-height:100vh;
-      display:grid;
-      place-items:center;
-      padding:20px;
-      background:linear-gradient(135deg,#eff6ff 0%, #f8fafc 100%);
+    #appScreen { display:flex; min-height:100vh; }
+    .sidebar { width:230px; background:#111827; color:#fff; padding:16px; flex-shrink:0; }
+    .sidebar h3 { margin:0 0 18px; }
+    .sidebar .nav-item { padding:10px 0; cursor:pointer; display:flex; justify-content:space-between; gap:8px; }
+    .sidebar .nav-item.active { color:#93c5fd; font-weight:700; }
+    .main { flex:1; display:flex; flex-direction:column; min-width:0; }
+    .topbar { background:#1f2937; color:#fff; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .top-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .content { padding:20px; }
+    .card { background:#fff; border-radius:10px; padding:16px; box-shadow:0 2px 10px rgba(0,0,0,.05); margin-bottom:16px; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .grid3 { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+    .stat { background:#fff; border-radius:10px; padding:14px; box-shadow:0 1px 6px rgba(0,0,0,.05); }
+    .stat .label { font-size:12px; color:#6b7280; }
+    .stat .value { font-size:28px; font-weight:700; margin-top:6px; }
+    .job { background:#fff; border-radius:10px; padding:12px; margin:10px 0; box-shadow:0 1px 6px rgba(0,0,0,.05); }
+    .job strong { display:block; margin-bottom:6px; }
+    .job small { display:block; color:#6b7280; margin-top:3px; }
+    .filterbar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+    .filterbar input, .filterbar select { margin:0; max-width:230px; }
+    .badge { display:inline-block; border-radius:999px; padding:4px 8px; font-size:11px; font-weight:700; background:#e5e7eb; color:#111827; }
+    .badge.type { background:#dbeafe; color:#1d4ed8; }
+    .file-row { display:flex; justify-content:space-between; gap:8px; align-items:center; padding:10px 0; border-bottom:1px solid #e5e7eb; }
+    .file-row:last-child { border-bottom:none; }
+    .small { font-size:12px; color:#6b7280; }
+    .row-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .section-title { margin:0 0 12px; }
+    .pill { background:#dbeafe; color:#1d4ed8; border-radius:999px; padding:3px 8px; font-size:11px; font-weight:700; }
+    @media (max-width:1000px){
+      .grid2,.grid3,.stats { grid-template-columns:1fr; }
     }
-    .login-card{
-      width:100%;
-      max-width:380px;
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:20px;
-      padding:28px;
-      box-shadow:var(--shadow);
+    @media (max-width:760px){
+      #appScreen { flex-direction:column; }
+      .sidebar { width:100%; }
     }
-    .logo-mark{
-      width:54px;height:54px;border-radius:14px;
-      background:linear-gradient(135deg,#1d4ed8,#60a5fa);
-      display:grid;place-items:center;
-      color:#fff;font-weight:700;font-size:18px;
-      margin-bottom:14px;
-    }
-    .login-title{font-size:28px;font-weight:700;margin:0 0 4px}
-    .login-sub{font-size:13px;color:var(--muted);margin:0 0 18px}
-    input,select,textarea{
-      width:100%;border:1px solid #d1d5db;background:#fff;border-radius:12px;
-      padding:12px 14px;font-size:14px;margin:0 0 12px
-    }
-    textarea{min-height:90px;resize:vertical}
-    button{
-      border:none;border-radius:12px;padding:12px 14px;background:#0f172a;color:#fff;
-      font-size:14px;cursor:pointer
-    }
-    button.secondary{background:#fff;color:#0f172a;border:1px solid var(--line)}
-    .msg{font-size:13px;min-height:18px;white-space:pre-wrap}
-    .err{color:var(--err)}
-    .ok{color:var(--good)}
-
-    #appScreen{display:flex;min-height:100vh}
-    .sidebar{
-      width:248px;background:var(--sidebar);color:#fff;padding:20px 16px;flex-shrink:0
-    }
-    .brand{font-size:24px;font-weight:700;margin:0}
-    .brand small{display:block;margin-top:4px;font-size:11px;color:#93c5fd;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
-    .nav-item{
-      border-radius:12px;padding:11px 12px;cursor:pointer;margin-bottom:6px;
-      color:#dbe4f0;font-size:14px
-    }
-    .nav-item:hover,.nav-item.active{background:var(--sidebar-2);color:#fff}
-    .nav-note{font-size:11px;color:#94a3b8;margin-top:18px;line-height:1.5}
-
-    .main{flex:1;display:flex;flex-direction:column;min-width:0}
-    .topbar{
-      background:#fff;border-bottom:1px solid var(--line);padding:14px 20px;
-      display:flex;align-items:center;justify-content:space-between;gap:16px
-    }
-    .page-title{font-size:20px;font-weight:700;margin:0 0 4px}
-    .page-sub{font-size:12px;color:var(--muted);margin:0}
-    .topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-    .user-pill{
-      background:var(--accent-soft);color:var(--accent);border-radius:999px;
-      padding:8px 12px;font-size:12px;font-weight:700
-    }
-
-    .content{padding:20px;overflow:auto}
-    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
-    .kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
-    .kpi-label{font-size:12px;color:var(--muted);margin-bottom:8px}
-    .kpi-value{font-size:30px;font-weight:700;line-height:1}
-    .grid{display:grid;gap:16px}
-    .grid-2{grid-template-columns:1.1fr .9fr}
-    .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
-    .card h2,.card h3{margin:0 0 14px;font-size:18px}
-    .filterbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-    .filterbar input,.filterbar select{margin:0;max-width:240px}
-    .job{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
-    .job strong{display:block;margin-bottom:4px}
-    .job small{display:block;color:var(--muted);margin-top:3px}
-    .calendar-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
-    .calendar-row:last-child{border-bottom:none}
-    .small-muted{font-size:12px;color:var(--muted)}
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-    .upload-note{font-size:12px;color:var(--muted);margin-top:-4px;margin-bottom:12px}
-    .list-empty{font-size:14px;color:var(--muted)}
-    @media (max-width:1100px){.kpi-grid,.grid-2{grid-template-columns:1fr}}
-    @media (max-width:780px){#appScreen{flex-direction:column}.sidebar{width:100%}}
   </style>
 </head>
 <body>
 
-<div id="loginScreen" class="login-shell">
-  <div class="login-card">
-    <div class="logo-mark">MW</div>
-    <h1 class="login-title">GateFlow</h1>
-    <p class="login-sub">Sign in with your Supabase email and password.</p>
+<div id="loginScreen" class="login-wrapper">
+  <div class="login-box">
+    <h2>GateFlow Login</h2>
     <input id="email" type="email" placeholder="Email" autocomplete="username" />
     <input id="password" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter'){login();}" />
     <button id="loginBtn" type="button" onclick="login()">Sign In</button>
@@ -130,46 +71,62 @@
 </div>
 
 <div id="appScreen" class="hidden">
-  <aside class="sidebar">
-    <h1 class="brand">MAURICE WARD<small>GateFlow Operations</small></h1>
-    <div id="nav-dashboard" class="nav-item active" onclick="showPage('dashboard')">Dashboard</div>
-    <div id="nav-jobs" class="nav-item" onclick="showPage('jobs')">Jobs</div>
-    <div id="nav-calendar" class="nav-item" onclick="showPage('calendar')">Calendar</div>
-    <div id="nav-bd" class="nav-item" onclick="showPage('bd')">BD Handovers</div>
-    <div id="nav-docs" class="nav-item" onclick="showPage('docs')">Documents</div>
-    <div class="nav-note">Working login preserved from the debug version.</div>
-  </aside>
+  <div class="sidebar">
+    <h3>GateFlow</h3>
+    <div id="nav-dashboard" class="nav-item active" onclick="showPage('dashboard')"><span>Dashboard</span><span id="navJobsCount" class="badge">0</span></div>
+    <div id="nav-jobs" class="nav-item" onclick="showPage('jobs')"><span>Jobs</span></div>
+    <div id="nav-calendar" class="nav-item" onclick="showPage('calendar')"><span>Calendar</span></div>
+    <div id="nav-bd" class="nav-item" onclick="showPage('bd')"><span>BD Handovers</span></div>
+    <div id="nav-docs" class="nav-item" onclick="showPage('docs')"><span>Job Documents</span></div>
+    <div id="nav-team" class="nav-item hidden" onclick="showPage('team')"><span>Team</span></div>
+    <div class="small" style="margin-top:18px;">Bucket: <strong>documents</strong></div>
+  </div>
 
-  <main class="main">
+  <div class="main">
     <div class="topbar">
       <div>
-        <div id="pageTitle" class="page-title">Dashboard</div>
-        <p id="pageSub" class="page-sub">Shared jobs, ETA visibility, and uploads</p>
+        <strong id="pageHeading">Dashboard</strong>
+        <div class="small" id="pageSubheading" style="color:#cbd5e1;">Shared jobs and operations</div>
       </div>
-      <div class="topbar-right">
-        <div id="userDisplay" class="user-pill">@user</div>
-        <button class="secondary" type="button" onclick="logout()">Logout</button>
+      <div class="top-actions">
+        <div id="userDisplay"></div>
+        <button type="button" class="secondary hidden" id="switchUserBtn" onclick="toggleSwitchUserBox()">Switch User</button>
+        <button type="button" onclick="logout()">Logout</button>
       </div>
     </div>
 
     <div class="content">
-      <section id="dashboardPage">
-        <div class="kpi-grid">
-          <div class="kpi"><div class="kpi-label">Total Jobs</div><div id="statTotalJobs" class="kpi-value">0</div></div>
-          <div class="kpi"><div class="kpi-label">Air Jobs</div><div id="statAirJobs" class="kpi-value">0</div></div>
-          <div class="kpi"><div class="kpi-label">Ocean Jobs</div><div id="statOceanJobs" class="kpi-value">0</div></div>
-          <div class="kpi"><div class="kpi-label">Upcoming ETA</div><div id="statUpcomingEta" class="kpi-value">0</div></div>
-        </div>
-        <div class="grid grid-2">
-          <div class="card"><h3>Recent Jobs</h3><div id="recentJobs"></div></div>
-          <div class="card"><h3>Next ETA Dates</h3><div id="nextEtaList"></div></div>
-        </div>
-      </section>
+      <div id="switchUserBox" class="card hidden">
+        <h3 class="section-title">Admin User Switch</h3>
+        <div class="small" style="margin-bottom:10px;">Only admins can switch user here.</div>
+        <select id="switchUserSelect"></select>
+        <button type="button" onclick="adminSwitchUser()">Switch</button>
+        <div id="switchUserMsg" class="msg"></div>
+      </div>
 
-      <section id="jobsPage" class="hidden">
-        <div class="grid grid-2">
+      <div id="dashboardPage" class="page">
+        <div class="stats">
+          <div class="stat"><div class="label">Total Jobs</div><div id="statTotalJobs" class="value">0</div></div>
+          <div class="stat"><div class="label">Air Jobs</div><div id="statAirJobs" class="value">0</div></div>
+          <div class="stat"><div class="label">Ocean Jobs</div><div id="statOceanJobs" class="value">0</div></div>
+          <div class="stat"><div class="label">Upcoming ETA</div><div id="statUpcomingEta" class="value">0</div></div>
+        </div>
+        <div class="grid2">
           <div class="card">
-            <h2>Create Job</h2>
+            <h3 class="section-title">Recent Jobs</h3>
+            <div id="recentJobs"></div>
+          </div>
+          <div class="card">
+            <h3 class="section-title">Upcoming ETAs</h3>
+            <div id="nextEtaList"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="jobsPage" class="page hidden">
+        <div class="grid2">
+          <div class="card">
+            <h2 class="section-title">Create Job</h2>
             <select id="jobType">
               <option>Air Import</option>
               <option>Air Export</option>
@@ -177,23 +134,30 @@
               <option>Ocean Export</option>
             </select>
             <input id="customer" placeholder="Customer" />
-            <input id="shipper" placeholder="Shipper" />
-            <input id="consignee" placeholder="Consignee" />
-            <input id="shipperAddress" placeholder="Shipper address" />
-            <input id="consigneeAddress" placeholder="Consignee address" />
+            <input id="shipper" placeholder="Shipper details" />
+            <textarea id="shipperAddress" placeholder="Full shipper address"></textarea>
+            <input id="consignee" placeholder="Consignee details" />
+            <textarea id="consigneeAddress" placeholder="Full consignee address"></textarea>
             <input id="ref" placeholder="AWB / Ref" />
-            <input id="pieces" placeholder="Pieces" />
-            <input id="weight" placeholder="Weight" />
-            <input id="collectionDate" type="date" />
-            <input id="etd" type="date" />
-            <input id="eta" type="date" />
-            <input id="transport" placeholder="Airline / Haulier" />
+            <div class="grid3">
+              <input id="pieces" placeholder="Pieces" />
+              <input id="weight" placeholder="Weight" />
+              <input id="transport" placeholder="Airline / Haulier" />
+            </div>
+            <div class="grid3">
+              <div><div class="small">Collection Date</div><input id="collectionDate" type="date" /></div>
+              <div><div class="small">ETD Date</div><input id="etd" type="date" /></div>
+              <div><div class="small">ETA Date</div><input id="eta" type="date" /></div>
+            </div>
             <textarea id="notes" placeholder="Notes"></textarea>
-            <button type="button" onclick="createJob()">Save Job</button>
+            <div class="row-actions">
+              <button type="button" onclick="createJob()">Save Job</button>
+            </div>
             <div id="jobSaveMsg" class="msg"></div>
           </div>
+
           <div class="card">
-            <h2>Jobs</h2>
+            <h3 class="section-title">Jobs</h3>
             <div class="filterbar">
               <input id="jobSearch" placeholder="Search customer / ref" oninput="loadJobs()" />
               <select id="jobFilterType" onchange="loadJobs()">
@@ -207,52 +171,108 @@
             <div id="jobList"></div>
           </div>
         </div>
-      </section>
+      </div>
 
-      <section id="calendarPage" class="hidden">
-        <div class="card"><h2>Calendar</h2><div id="calendarList"></div></div>
-      </section>
+      <div id="calendarPage" class="page hidden">
+        <div class="card">
+          <h2 class="section-title">Calendar</h2>
+          <div id="calendarList"></div>
+        </div>
+      </div>
 
-      <section id="bdPage" class="hidden">
-        <div class="grid grid-2">
+      <div id="bdPage" class="page hidden">
+        <div class="grid2">
           <div class="card">
-            <h2>BD Handover Upload</h2>
+            <h2 class="section-title">BD Handovers</h2>
+            <div class="small" style="margin-bottom:10px;">All users can upload BD handovers here. Files go to <strong>documents/bd_handovers</strong>.</div>
             <input id="bdFile" type="file" />
-            <div class="upload-note">Uploads to <span class="mono">documents/bd_handovers/...</span></div>
             <button type="button" onclick="uploadBD()">Upload BD Handover</button>
             <div id="bdMsg" class="msg"></div>
           </div>
-          <div class="card"><h2>Recent BD Files</h2><div id="bdList"></div></div>
+          <div class="card">
+            <h3 class="section-title">Recent BD Files</h3>
+            <div id="bdList"></div>
+          </div>
         </div>
-      </section>
+      </div>
 
-      <section id="docsPage" class="hidden">
-        <div class="card">
-          <h2>Job Document Upload</h2>
-          <select id="docType">
-            <option>Air Import</option>
-            <option>Air Export</option>
-            <option>Ocean Import</option>
-            <option>Ocean Export</option>
-          </select>
-          <input id="docFile" type="file" />
-          <div class="upload-note">Uploads to the shipment-type folder in <span class="mono">documents</span>.</div>
-          <button type="button" onclick="uploadJobDocument()">Upload Document</button>
-          <div id="docMsg" class="msg"></div>
+      <div id="docsPage" class="page hidden">
+        <div class="grid2">
+          <div class="card">
+            <h2 class="section-title">Job Documents</h2>
+            <div class="small" style="margin-bottom:10px;">Upload commercial invoices, airway bills, arrival notices, or email threads. Files are stored by shipment type in the <strong>documents</strong> bucket.</div>
+            <select id="docType">
+              <option>Air Import</option>
+              <option>Air Export</option>
+              <option>Ocean Import</option>
+              <option>Ocean Export</option>
+            </select>
+            <input id="docFile" type="file" />
+            <button type="button" onclick="uploadJobDocument()">Upload Job Document</button>
+            <div id="docMsg" class="msg"></div>
+          </div>
+          <div class="card">
+            <h3 class="section-title">Parsing Guidance</h3>
+            <div class="small">
+              When you later add AI extraction, always look for:
+              <br>• Full shipper address
+              <br>• Full consignee address
+              <br>• Customer
+              <br>• AWB / Ref number
+              <br>• Pieces
+              <br>• Weight
+              <br>• Collection date
+              <br>• ETD
+              <br>• ETA
+              <br>• Haulier / Airline
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
+
+      <div id="teamPage" class="page hidden">
+        <div class="card">
+          <h2 class="section-title">Team</h2>
+          <div class="small" style="margin-bottom:10px;">Read-only team list from <strong>gf_users</strong>. Admins can also switch user from the top bar.</div>
+          <div id="teamList"></div>
+        </div>
+      </div>
     </div>
-  </main>
+  </div>
 </div>
 
 <script>
 const SUPABASE_URL = 'https://edxgkwkdgvsajfmkejbk.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek';
+
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let CURRENT_USER = null;
+let EFFECTIVE_USER = null;
+let TEAM_USERS = [];
 
 function setLoginError(msg) { document.getElementById('loginError').textContent = msg || ''; }
 function setLoginStatus(msg) { document.getElementById('loginStatus').textContent = msg || ''; }
+function escapeHtml(s) {
+  return String(s || '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+function pageIds() {
+  return ['dashboard','jobs','calendar','bd','docs','team'];
+}
+function isAdminUser(u) {
+  const txt = ((u && (u.role || u.access || '')) + '').toLowerCase();
+  return txt.includes('admin');
+}
+function currentActorEmail() {
+  return (EFFECTIVE_USER && EFFECTIVE_USER.email) || (CURRENT_USER && CURRENT_USER.email) || null;
+}
+function currentActorUsername() {
+  return (EFFECTIVE_USER && (EFFECTIVE_USER.username || EFFECTIVE_USER.email)) || (CURRENT_USER && (CURRENT_USER.username || CURRENT_USER.email)) || 'user';
+}
 
 async function login() {
   const btn = document.getElementById('loginBtn');
@@ -278,6 +298,8 @@ async function login() {
       return;
     }
 
+    await loadTeamUsers();
+
     let gfUser = null;
     const { data: teamUser, error: teamErr } = await supabaseClient
       .from('gf_users')
@@ -285,18 +307,17 @@ async function login() {
       .eq('email', email)
       .single();
 
-    if (!teamErr && teamUser) {
-      gfUser = teamUser;
-    }
+    if (!teamErr && teamUser) gfUser = teamUser;
 
     if (!gfUser) {
-      gfUser = { email, username: email.split('@')[0] };
+      gfUser = { email, username: email.split('@')[0], role: 'User' };
       setLoginStatus('Supabase login worked. No gf_users row found, so using email as username.');
     } else {
       setLoginStatus('Supabase login worked.');
     }
 
     CURRENT_USER = gfUser;
+    EFFECTIVE_USER = gfUser;
     startApp();
   } catch (err) {
     setLoginError(err && err.message ? err.message : 'Unexpected login error.');
@@ -306,12 +327,80 @@ async function login() {
   }
 }
 
-function startApp() {
+async function startApp() {
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('appScreen').classList.remove('hidden');
-  document.getElementById('userDisplay').textContent = '@' + (CURRENT_USER.username || CURRENT_USER.email || 'user');
+  updateUserDisplay();
+  updateAdminControls();
+  renderTeam();
   showPage('dashboard');
-  loadJobs();
+  await loadJobs();
+  await loadCalendar();
+  await loadBDList();
+}
+
+function updateUserDisplay() {
+  const who = currentActorUsername();
+  document.getElementById('userDisplay').textContent = '@' + who;
+}
+function updateAdminControls() {
+  const isAdmin = isAdminUser(CURRENT_USER);
+  document.getElementById('switchUserBtn').classList.toggle('hidden', !isAdmin);
+  document.getElementById('nav-team').classList.toggle('hidden', !isAdmin);
+  populateSwitchUsers();
+}
+function toggleSwitchUserBox() {
+  const box = document.getElementById('switchUserBox');
+  box.classList.toggle('hidden');
+}
+function populateSwitchUsers() {
+  const sel = document.getElementById('switchUserSelect');
+  if (!sel) return;
+  const users = TEAM_USERS.length ? TEAM_USERS : [CURRENT_USER].filter(Boolean);
+  sel.innerHTML = users.map(u => `<option value="${escapeHtml(u.email || '')}">${escapeHtml((u.username || u.email || '') + ' — ' + (u.email || ''))}</option>`).join('');
+}
+function adminSwitchUser() {
+  const msg = document.getElementById('switchUserMsg');
+  msg.textContent = '';
+  if (!isAdminUser(CURRENT_USER)) {
+    msg.textContent = 'Only admins can switch user.';
+    msg.className = 'msg err';
+    return;
+  }
+  const email = document.getElementById('switchUserSelect').value;
+  const found = TEAM_USERS.find(u => (u.email || '') === email);
+  if (!found) {
+    msg.textContent = 'User not found.';
+    msg.className = 'msg err';
+    return;
+  }
+  EFFECTIVE_USER = found;
+  updateUserDisplay();
+  msg.textContent = 'Switched to ' + (found.username || found.email);
+  msg.className = 'msg ok';
+}
+async function loadTeamUsers() {
+  try {
+    const { data, error } = await supabaseClient.from('gf_users').select('*').order('email');
+    if (!error && data) TEAM_USERS = data;
+  } catch (e) {}
+}
+function renderTeam() {
+  const box = document.getElementById('teamList');
+  if (!box) return;
+  if (!TEAM_USERS.length) {
+    box.innerHTML = '<div class="small">No gf_users rows loaded.</div>';
+    return;
+  }
+  box.innerHTML = TEAM_USERS.map(u => `
+    <div class="file-row">
+      <div>
+        <strong>${escapeHtml(u.username || u.email || '')}</strong>
+        <div class="small">${escapeHtml(u.email || '')}</div>
+      </div>
+      <div class="small">${escapeHtml(u.role || u.access || 'User')}</div>
+    </div>
+  `).join('');
 }
 
 async function logout() {
@@ -321,28 +410,27 @@ async function logout() {
 
 function showPage(page) {
   const titles = {
-    dashboard:['Dashboard','Shared jobs, ETA visibility, and uploads'],
+    dashboard:['Dashboard','Shared jobs and operations'],
     jobs:['Jobs','Create and search shared jobs'],
     calendar:['Calendar','Upcoming ETA dates from all jobs'],
     bd:['BD Handovers','Upload and review BD handover files'],
-    docs:['Documents','Upload shipment documents by type']
+    docs:['Job Documents','Upload shipment documents by type'],
+    team:['Team','Admin-only team view and switch user']
   };
-  ['dashboardPage','jobsPage','calendarPage','bdPage','docsPage'].forEach(id => {
-    document.getElementById(id).classList.add('hidden');
-  });
-  ['nav-dashboard','nav-jobs','nav-calendar','nav-bd','nav-docs'].forEach(id => {
-    document.getElementById(id).classList.remove('active');
+  pageIds().forEach(id => {
+    const p = document.getElementById(id + 'Page');
+    const n = document.getElementById('nav-' + id);
+    if (p) p.classList.add('hidden');
+    if (n) n.classList.remove('active');
   });
   document.getElementById(page + 'Page').classList.remove('hidden');
-  document.getElementById('nav-' + page).classList.add('active');
-  document.getElementById('pageTitle').textContent = titles[page][0];
-  document.getElementById('pageSub').textContent = titles[page][1];
+  const nav = document.getElementById('nav-' + page);
+  if (nav) nav.classList.add('active');
+  document.getElementById('pageHeading').textContent = titles[page][0];
+  document.getElementById('pageSubheading').textContent = titles[page][1];
   if (page === 'calendar') loadCalendar();
   if (page === 'bd') loadBDList();
-}
-
-function jobFolderForType(type){
-  return String(type || '').toLowerCase().replaceAll(' ', '_');
+  if (page === 'team') renderTeam();
 }
 
 async function createJob() {
@@ -352,8 +440,8 @@ async function createJob() {
     type: document.getElementById('jobType').value,
     customer: document.getElementById('customer').value,
     shipper: document.getElementById('shipper').value,
-    consignee: document.getElementById('consignee').value,
     shipper_address: document.getElementById('shipperAddress').value,
+    consignee: document.getElementById('consignee').value,
     consignee_address: document.getElementById('consigneeAddress').value,
     ref: document.getElementById('ref').value,
     pieces: parseInt(document.getElementById('pieces').value || '0', 10),
@@ -363,7 +451,7 @@ async function createJob() {
     eta: document.getElementById('eta').value || null,
     transport: document.getElementById('transport').value,
     notes: document.getElementById('notes').value,
-    created_by: CURRENT_USER ? CURRENT_USER.email : null,
+    created_by: currentActorEmail(),
     created_at: new Date().toISOString()
   };
 
@@ -390,12 +478,11 @@ async function loadJobs() {
     .order('created_at', { ascending: false });
 
   if (error) {
-    jobList.innerHTML = '<div class="list-empty">' + escapeHtml(error.message) + '</div>';
+    if (jobList) jobList.innerHTML = '<div class="msg err">' + escapeHtml(error.message) + '</div>';
     return;
   }
 
-  const allRows = data || [];
-  const rows = allRows.filter(j => {
+  const rows = (data || []).filter(j => {
     if (filterType && j.type !== filterType) return false;
     if (search) {
       const hay = [j.customer,j.ref,j.shipper,j.consignee,j.type].join(' ').toLowerCase();
@@ -404,21 +491,28 @@ async function loadJobs() {
     return true;
   });
 
-  document.getElementById('jobsBadge').textContent = allRows.length;
-  updateDashboard(allRows);
+  updateDashboard(data || []);
+  document.getElementById('navJobsCount').textContent = String((data || []).length);
 
+  if (!jobList) return;
   if (!rows.length) {
-    jobList.innerHTML = '<div class="list-empty">No matching jobs.</div>';
+    jobList.innerHTML = '<div class="msg">No matching jobs.</div>';
     return;
   }
 
   jobList.innerHTML = rows.map(j => `
     <div class="job">
       <strong>${escapeHtml(j.customer || '')}</strong>
-      <small>${escapeHtml(j.type || '')} | ${escapeHtml(j.ref || '')}</small>
+      <div class="row-actions" style="margin-bottom:6px;">
+        <span class="badge type">${escapeHtml(j.type || '')}</span>
+        <span class="badge">${escapeHtml(j.ref || '')}</span>
+      </div>
       <small>Shipper: ${escapeHtml(j.shipper || '')}</small>
       <small>Consignee: ${escapeHtml(j.consignee || '')}</small>
-      <small>ETA: ${escapeHtml(j.eta || '')}</small>
+      <small>Pieces: ${escapeHtml(j.pieces || '')} | Weight: ${escapeHtml(j.weight || '')}</small>
+      <small>Collection: ${escapeHtml(j.collection_date || '')}</small>
+      <small>ETD: ${escapeHtml(j.etd || '')} | ETA: ${escapeHtml(j.eta || '')}</small>
+      <small>Airline / Haulier: ${escapeHtml(j.transport || '')}</small>
     </div>
   `).join('');
 }
@@ -427,7 +521,8 @@ function updateDashboard(allRows) {
   const total = allRows.length;
   const air = allRows.filter(j => String(j.type || '').startsWith('Air')).length;
   const ocean = allRows.filter(j => String(j.type || '').startsWith('Ocean')).length;
-  const upcoming = allRows.filter(j => j.eta && j.eta >= new Date().toISOString().slice(0,10)).length;
+  const today = new Date().toISOString().slice(0,10);
+  const upcoming = allRows.filter(j => j.eta && j.eta >= today).length;
 
   document.getElementById('statTotalJobs').textContent = total;
   document.getElementById('statAirJobs').textContent = air;
@@ -437,7 +532,7 @@ function updateDashboard(allRows) {
   const recent = allRows.slice(0,5);
   document.getElementById('recentJobs').innerHTML = recent.length
     ? recent.map(j => `<div class="job"><strong>${escapeHtml(j.customer || '')}</strong><small>${escapeHtml(j.type || '')} | ${escapeHtml(j.ref || '')}</small></div>`).join('')
-    : '<div class="list-empty">No jobs yet.</div>';
+    : '<div class="small">No jobs yet.</div>';
 }
 
 async function loadCalendar() {
@@ -450,30 +545,29 @@ async function loadCalendar() {
     .order('eta', { ascending: true });
 
   if (error) {
-    const t = '<div class="list-empty">' + escapeHtml(error.message) + '</div>';
-    list.innerHTML = t;
-    nextEtaList.innerHTML = t;
+    const t = '<div class="msg err">' + escapeHtml(error.message) + '</div>';
+    if (list) list.innerHTML = t;
+    if (nextEtaList) nextEtaList.innerHTML = t;
     return;
   }
+
   if (!data || !data.length) {
-    const t = '<div class="list-empty">No ETA dates yet.</div>';
-    list.innerHTML = t;
-    nextEtaList.innerHTML = t;
+    const t = '<div class="small">No ETA dates yet.</div>';
+    if (list) list.innerHTML = t;
+    if (nextEtaList) nextEtaList.innerHTML = t;
     return;
   }
 
   const markup = data.map(j => `
-    <div class="calendar-row">
-      <div>
-        <strong>${escapeHtml(j.customer || '')}</strong><br>
-        <span class="small-muted">${escapeHtml(j.type || '')} | ${escapeHtml(j.ref || '')}</span>
-      </div>
-      <div class="mono">${escapeHtml(j.eta || '')}</div>
+    <div class="job">
+      <strong>${escapeHtml(j.customer || '')}</strong>
+      <small>${escapeHtml(j.eta || '')} — ${escapeHtml(j.type || '')}</small>
+      <small>${escapeHtml(j.ref || '')}</small>
     </div>
   `).join('');
 
-  list.innerHTML = markup;
-  nextEtaList.innerHTML = markup;
+  if (list) list.innerHTML = markup;
+  if (nextEtaList) nextEtaList.innerHTML = markup;
 }
 
 async function uploadBD() {
@@ -503,19 +597,32 @@ async function uploadBD() {
 
 async function loadBDList() {
   const box = document.getElementById('bdList');
+  if (!box) return;
   const { data, error } = await supabaseClient.storage
     .from('documents')
     .list('bd_handovers', { limit: 20, sortBy: { column: 'name', order: 'desc' } });
 
   if (error) {
-    box.innerHTML = '<div class="list-empty">' + escapeHtml(error.message) + '</div>';
+    box.innerHTML = '<div class="msg err">' + escapeHtml(error.message) + '</div>';
     return;
   }
   if (!data || !data.length) {
-    box.innerHTML = '<div class="list-empty">No BD handover files yet.</div>';
+    box.innerHTML = '<div class="small">No BD handover files yet.</div>';
     return;
   }
-  box.innerHTML = data.map(f => `<div class="job"><strong>${escapeHtml(f.name)}</strong><small>documents/bd_handovers</small></div>`).join('');
+
+  box.innerHTML = data.map(f => `
+    <div class="file-row">
+      <div>
+        <strong>${escapeHtml(f.name)}</strong>
+        <div class="small">documents/bd_handovers</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function folderForType(type) {
+  return String(type || '').toLowerCase().replace(/\s+/g, '_');
 }
 
 async function uploadJobDocument() {
@@ -529,8 +636,7 @@ async function uploadJobDocument() {
     return;
   }
 
-  const folder = jobFolderForType(type);
-  const path = `${folder}/${Date.now()}_${file.name}`;
+  const path = `${folderForType(type)}/${Date.now()}_${file.name}`;
   const { error } = await supabaseClient.storage
     .from('documents')
     .upload(path, file, { upsert: true });
@@ -542,15 +648,6 @@ async function uploadJobDocument() {
   }
   msg.textContent = 'Uploaded to documents/' + path;
   msg.className = 'msg ok';
-}
-
-function escapeHtml(s) {
-  return String(s || '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
 }
 </script>
 </body>
