@@ -123,96 +123,117 @@ const supabase = window.supabase.createClient(
 );
 
 function debug(msg) {
-  document.getElementById("debug").innerText = "Debug: " + msg;
+  const box = document.getElementById("debug");
+  if (box) box.innerText = "Debug: " + msg;
   console.log(msg);
 }
 
-function openModal(){
+function openModal() {
   document.getElementById("modal").style.display = "block";
+  debug("Modal opened");
 }
 
-async function add(){
-  const client = document.getElementById("client").value.trim();
-  const origin = document.getElementById("origin").value.trim();
-  const destination = document.getElementById("destination").value.trim();
-  const status = document.getElementById("status").value;
-
-  if (!client || !origin || !destination) {
-    debug("Missing required fields");
-    return;
-  }
-
-  const id = "SHP" + Date.now();
-
-  debug("Saving shipment " + id + "...");
-
-  const { data, error } = await supabase
-    .from("shipments")
-    .insert([{
-      shipment_ref: id,
-      client: client,
-      origin: origin,
-      destination: destination,
-      shipment_type: "Road",
-      status: status,
-      priority: "Medium"
-    }])
-    .select();
-
-  if (error) {
-    debug("SAVE FAILED: " + error.message);
-    return;
-  }
-
-  debug("Saved OK: " + id);
-
+function closeModal() {
   document.getElementById("modal").style.display = "none";
-  document.getElementById("client").value = "";
-  document.getElementById("origin").value = "";
-  document.getElementById("destination").value = "";
-  document.getElementById("status").value = "Pending";
-
-  await load();
 }
 
-async function load(){
-  debug("Loading shipments...");
+async function add() {
+  try {
+    const client = document.getElementById("client").value.trim();
+    const origin = document.getElementById("origin").value.trim();
+    const destination = document.getElementById("destination").value.trim();
+    const status = document.getElementById("status").value;
 
-  const { data, error } = await supabase
-    .from("shipments")
-    .select("*")
-    .order("created_at", { ascending: false });
+    if (!client || !origin || !destination) {
+      alert("Please fill in Client, Origin and Destination.");
+      debug("Missing fields");
+      return;
+    }
 
-  if (error) {
-    debug("LOAD FAILED: " + error.message);
-    return;
+    const id = "SHP" + Date.now();
+
+    const { error } = await supabase
+      .from("shipments")
+      .insert([{
+        shipment_ref: id,
+        client: client,
+        origin: origin,
+        destination: destination,
+        shipment_type: "Road",
+        status: status,
+        priority: "Medium"
+      }]);
+
+    if (error) {
+      alert("Save failed: " + error.message);
+      debug("Save failed: " + error.message);
+      return;
+    }
+
+    closeModal();
+    document.getElementById("client").value = "";
+    document.getElementById("origin").value = "";
+    document.getElementById("destination").value = "";
+    document.getElementById("status").value = "Pending";
+
+    debug("Saved OK");
+    await load();
+  } catch (err) {
+    alert("Script error: " + err.message);
+    debug("Script error: " + err.message);
   }
+}
 
-  debug("Loaded " + data.length + " shipment(s)");
+async function load() {
+  try {
+    const { data, error } = await supabase
+      .from("shipments")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  const table = document.getElementById("table");
-  table.innerHTML = `
-    <tr>
-      <th>ID</th>
-      <th>Client</th>
-      <th>Route</th>
-      <th>Status</th>
-    </tr>
-  `;
+    if (error) {
+      debug("Load failed: " + error.message);
+      return;
+    }
 
-  data.forEach(s => {
-    table.innerHTML += `
+    const table = document.getElementById("table");
+    table.innerHTML = `
       <tr>
-        <td>${s.shipment_ref}</td>
-        <td>${s.client}</td>
-        <td>${s.origin} → ${s.destination}</td>
-        <td>${s.status}</td>
+        <th>ID</th>
+        <th>Client</th>
+        <th>Route</th>
+        <th>Status</th>
       </tr>
     `;
-  });
+
+    data.forEach(s => {
+      table.innerHTML += `
+        <tr>
+          <td>${s.shipment_ref}</td>
+          <td>${s.client}</td>
+          <td>${s.origin} → ${s.destination}</td>
+          <td>${s.status}</td>
+        </tr>
+      `;
+    });
+
+    debug("Loaded " + data.length + " shipment(s)");
+  } catch (err) {
+    debug("Load script error: " + err.message);
+  }
 }
 
-load();
+window.onload = function () {
+  const openBtn = document.getElementById("openShipmentBtn");
+  if (openBtn) {
+    openBtn.addEventListener("click", openModal);
+    debug("Add Shipment button connected");
+  } else {
+    debug("Button not found");
+  }
+
+  load();
+};
 </script>
 
 </body>
