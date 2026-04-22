@@ -4,7 +4,44 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GateFlow</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+// ===== AI PARSING PATCH (SAFE) =====
+function simpleParse(text){
+  const out = {};
+  const t = text.toLowerCase();
+
+  function find(regex){ const m = text.match(regex); return m ? m[1].trim() : ''; }
+
+  out.customer = find(/customer[:\s]+(.+)/i);
+  out.ref = find(/(awb|ref)[:\s]+([a-z0-9\-]+)/i);
+  out.pieces = find(/pieces[:\s]+(\d+)/i);
+  out.weight = find(/weight[:\s]+([\d\.]+)/i);
+
+  // very basic address capture
+  out.shipper = find(/shipper[:\s]+(.+)/i);
+  out.consignee = find(/consignee[:\s]+(.+)/i);
+
+  return out;
+}
+
+function parseAndFill(){
+  const input = prompt("Paste document text here");
+  if(!input) return;
+
+  const data = simpleParse(input);
+
+  if(data.customer) document.getElementById('customer').value = data.customer;
+  if(data.ref) document.getElementById('ref').value = data.ref;
+  if(data.pieces) document.getElementById('pieces').value = data.pieces;
+  if(data.weight) document.getElementById('weight').value = data.weight;
+  if(data.shipper) document.getElementById('shipper').value = data.shipper;
+  if(data.consignee) document.getElementById('consignee').value = data.consignee;
+
+  alert("Parsed basic fields into job form");
+}
+// ===== END PATCH =====
+
+</script>
   <style>
     body { margin:0; font-family:Arial,sans-serif; background:#f5f5f5; color:#111827; }
     .hidden { display:none !important; }
@@ -208,7 +245,7 @@
               <option>Ocean Export</option>
             </select>
             <input id="docFile" type="file" />
-            <button type="button" onclick="uploadJobDocument()">Upload Job Document</button>
+            <button type="button" onclick="uploadJobDocument()">Upload Job Document</button><br><br><button onclick='parseAndFill()'>Parse Text Into Job</button>
             <div id="docMsg" class="msg"></div>
           </div>
           <div class="card">
@@ -649,6 +686,43 @@ async function uploadJobDocument() {
   msg.textContent = 'Uploaded to documents/' + path;
   msg.className = 'msg ok';
 }
+
+// ===== AI PARSING PATCH (SAFE) =====
+function simpleParse(text){
+  const out = {};
+  const t = text.toLowerCase();
+
+  function find(regex){ const m = text.match(regex); return m ? m[1].trim() : ''; }
+
+  out.customer = find(/customer[:\s]+(.+)/i);
+  out.ref = find(/(awb|ref)[:\s]+([a-z0-9\-]+)/i);
+  out.pieces = find(/pieces[:\s]+(\d+)/i);
+  out.weight = find(/weight[:\s]+([\d\.]+)/i);
+
+  // very basic address capture
+  out.shipper = find(/shipper[:\s]+(.+)/i);
+  out.consignee = find(/consignee[:\s]+(.+)/i);
+
+  return out;
+}
+
+function parseAndFill(){
+  const input = prompt("Paste document text here");
+  if(!input) return;
+
+  const data = simpleParse(input);
+
+  if(data.customer) document.getElementById('customer').value = data.customer;
+  if(data.ref) document.getElementById('ref').value = data.ref;
+  if(data.pieces) document.getElementById('pieces').value = data.pieces;
+  if(data.weight) document.getElementById('weight').value = data.weight;
+  if(data.shipper) document.getElementById('shipper').value = data.shipper;
+  if(data.consignee) document.getElementById('consignee').value = data.consignee;
+
+  alert("Parsed basic fields into job form");
+}
+// ===== END PATCH =====
+
 </script>
 </body>
 </html>
