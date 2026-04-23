@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GateKeeper Test</title>
+  <title>GateKeeper</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -20,11 +21,28 @@
       cursor: pointer;
     }
 
+    button.secondary {
+      background: #888;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
     .modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.45);
       align-items: center;
       justify-content: center;
     }
@@ -33,119 +51,166 @@
       display: flex;
     }
 
-    .box {
+    .modal-box {
       background: white;
+      width: 360px;
       padding: 20px;
       border-radius: 12px;
-      width: 320px;
     }
 
-    input {
+    .modal-box input,
+    .modal-box select {
       width: 100%;
       padding: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       box-sizing: border-box;
     }
-  </style>
-</head>
-<body>
-  <h2>GateKeeper Test</h2>
 
-  <button onclick="openModal()">+ Add Shipment</button>
-
-  <div id="modal" class="modal">
-    <div class="box">
-      <h3>Add Shipment</h3>
-      <input placeholder="Client">
-      <input placeholder="Origin">
-      <input placeholder="Destination">
-      <button onclick="closeModal()">Close</button>
-    </div>
-  </div>
-
-  <script>
-    function openModal() {
-      document.getElementById("modal").classList.add("show");
-    }
-
-    function closeModal() {
-      document.getElementById("modal").classList.remove("show");
-    }
-  </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GateKeeper Test</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f5f7fb;
-    }
-
-    button {
-      padding: 10px 14px;
-      border: none;
-      border-radius: 8px;
-      background: #00a99d;
-      color: white;
-      cursor: pointer;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal.show {
+    .actions {
       display: flex;
+      gap: 10px;
+      justify-content: flex-end;
     }
 
-    .box {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      width: 320px;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      box-sizing: border-box;
+    #statusMsg {
+      margin-top: 12px;
+      color: #555;
     }
   </style>
 </head>
 <body>
-  <h2>GateKeeper Test</h2>
+  <h2>GateKeeper Shipments</h2>
 
-  <button onclick="openModal()">+ Add Shipment</button>
+  <button type="button" id="openBtn">+ Add Shipment</button>
+  <div id="statusMsg">Loading...</div>
 
-  <div id="modal" class="modal">
-    <div class="box">
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Client</th>
+        <th>Route</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <div class="modal" id="modal">
+    <div class="modal-box">
       <h3>Add Shipment</h3>
-      <input placeholder="Client">
-      <input placeholder="Origin">
-      <input placeholder="Destination">
-      <button onclick="closeModal()">Close</button>
+
+      <input id="client" type="text" placeholder="Client" />
+      <input id="origin" type="text" placeholder="Origin" />
+      <input id="destination" type="text" placeholder="Destination" />
+
+      <select id="status">
+        <option value="Pending">Pending</option>
+        <option value="In Transit">In Transit</option>
+        <option value="Delivered">Delivered</option>
+        <option value="Delayed">Delayed</option>
+      </select>
+
+      <div class="actions">
+        <button type="button" class="secondary" id="cancelBtn">Cancel</button>
+        <button type="button" id="saveBtn">Save</button>
+      </div>
     </div>
   </div>
 
   <script>
-    function openModal() {
-      document.getElementById("modal").classList.add("show");
+    const supabase = window.supabase.createClient(
+      "https://edxgkwkdgvsajfmkejbk.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
+    );
+
+    const modal = document.getElementById("modal");
+    const openBtn = document.getElementById("openBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const rows = document.getElementById("rows");
+    const statusMsg = document.getElementById("statusMsg");
+
+    openBtn.addEventListener("click", function () {
+      modal.classList.add("show");
+    });
+
+    cancelBtn.addEventListener("click", function () {
+      modal.classList.remove("show");
+    });
+
+    modal.addEventListener("click", function (e) {
+      if (e.target === modal) {
+        modal.classList.remove("show");
+      }
+    });
+
+    async function loadShipments() {
+      statusMsg.textContent = "Loading shipments...";
+
+      const { data, error } = await supabase
+        .from("shipments")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        statusMsg.textContent = "LOAD ERROR: " + error.message;
+        return;
+      }
+
+      rows.innerHTML = (data || []).map(x => `
+        <tr>
+          <td>${x.shipment_ref || ""}</td>
+          <td>${x.client || ""}</td>
+          <td>${x.origin || ""} → ${x.destination || ""}</td>
+          <td>${x.status || ""}</td>
+        </tr>
+      `).join("");
+
+      statusMsg.textContent = "Loaded " + (data || []).length + " shipment(s)";
     }
 
-    function closeModal() {
-      document.getElementById("modal").classList.remove("show");
-    }
+    saveBtn.addEventListener("click", async function () {
+      const client = document.getElementById("client").value.trim();
+      const origin = document.getElementById("origin").value.trim();
+      const destination = document.getElementById("destination").value.trim();
+      const status = document.getElementById("status").value;
+
+      if (!client || !origin || !destination) {
+        alert("Please fill in Client, Origin and Destination.");
+        return;
+      }
+
+      const payload = {
+        shipment_ref: "SHP" + Date.now(),
+        client: client,
+        origin: origin,
+        destination: destination,
+        shipment_type: "Road",
+        status: status,
+        priority: "Medium"
+      };
+
+      const { error } = await supabase
+        .from("shipments")
+        .insert([payload]);
+
+      if (error) {
+        alert("SAVE ERROR: " + error.message);
+        statusMsg.textContent = "SAVE ERROR: " + error.message;
+        return;
+      }
+
+      document.getElementById("client").value = "";
+      document.getElementById("origin").value = "";
+      document.getElementById("destination").value = "";
+      document.getElementById("status").value = "Pending";
+
+      modal.classList.remove("show");
+      await loadShipments();
+    });
+
+    loadShipments();
   </script>
 </body>
 </html>
