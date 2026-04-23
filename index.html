@@ -3,41 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GateKeeper</title>
+  <title>GateKeeper Test</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f5f7fb;
-    }
-
-    button {
-      padding: 10px 14px;
-      border: none;
-      border-radius: 8px;
-      background: #00a99d;
-      color: white;
-      cursor: pointer;
-    }
-
-    button.secondary {
-      background: #888;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background: white;
-    }
-
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: left;
-    }
-
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f7fb; }
+    h1 { margin-top: 0; }
+    .version { padding: 8px 12px; background: #fff3cd; border-radius: 8px; margin-bottom: 12px; }
+    button { padding: 10px 14px; border: none; border-radius: 8px; background: #00a99d; color: white; cursor: pointer; }
+    .secondary { background: #888; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
     .modal {
       display: none;
       position: fixed;
@@ -46,43 +21,24 @@
       align-items: center;
       justify-content: center;
     }
-
-    .modal.show {
-      display: flex;
-    }
-
-    .modal-box {
-      background: white;
-      width: 360px;
-      padding: 20px;
-      border-radius: 12px;
-    }
-
-    .modal-box input,
-    .modal-box select {
+    .modal.show { display: flex; }
+    .modal-box { background: white; width: 360px; padding: 20px; border-radius: 12px; }
+    .modal-box input, .modal-box select {
       width: 100%;
       padding: 10px;
       margin-bottom: 12px;
       box-sizing: border-box;
     }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-    }
-
-    #statusMsg {
-      margin-top: 12px;
-      color: #555;
-    }
+    .actions { display: flex; gap: 10px; justify-content: flex-end; }
+    #statusMsg { margin-top: 12px; color: #333; white-space: pre-wrap; }
   </style>
 </head>
 <body>
-  <h2>GateKeeper Shipments</h2>
+  <h1>GateKeeper</h1>
+  <div class="version">VERSION: BUTTON-FIX-01</div>
 
   <button type="button" id="openBtn">+ Add Shipment</button>
-  <div id="statusMsg">Loading...</div>
+  <div id="statusMsg">Page loaded.</div>
 
   <table>
     <thead>
@@ -99,18 +55,15 @@
   <div class="modal" id="modal">
     <div class="modal-box">
       <h3>Add Shipment</h3>
-
       <input id="client" type="text" placeholder="Client" />
       <input id="origin" type="text" placeholder="Origin" />
       <input id="destination" type="text" placeholder="Destination" />
-
       <select id="status">
         <option value="Pending">Pending</option>
         <option value="In Transit">In Transit</option>
         <option value="Delivered">Delivered</option>
         <option value="Delayed">Delayed</option>
       </select>
-
       <div class="actions">
         <button type="button" class="secondary" id="cancelBtn">Cancel</button>
         <button type="button" id="saveBtn">Save</button>
@@ -119,42 +72,51 @@
   </div>
 
   <script>
-    const supabase = window.supabase.createClient(
-      "https://edxgkwkdgvsajfmkejbk.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
-    );
-
+    const statusMsg = document.getElementById("statusMsg");
+    const rows = document.getElementById("rows");
     const modal = document.getElementById("modal");
     const openBtn = document.getElementById("openBtn");
     const cancelBtn = document.getElementById("cancelBtn");
     const saveBtn = document.getElementById("saveBtn");
-    const rows = document.getElementById("rows");
-    const statusMsg = document.getElementById("statusMsg");
+
+    function setStatus(msg) {
+      statusMsg.textContent = msg;
+      console.log(msg);
+    }
+
+    setStatus("Script loaded. Wiring button...");
+
+    const supabase = window.supabase.createClient(
+      "https://edxgkwkdgvsajfmkejbk.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJ9.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
+    );
 
     openBtn.addEventListener("click", function () {
       modal.classList.add("show");
+      setStatus("Add Shipment clicked. Modal opened.");
     });
 
     cancelBtn.addEventListener("click", function () {
       modal.classList.remove("show");
+      setStatus("Modal closed.");
     });
 
     modal.addEventListener("click", function (e) {
       if (e.target === modal) {
         modal.classList.remove("show");
+        setStatus("Modal closed.");
       }
     });
 
     async function loadShipments() {
-      statusMsg.textContent = "Loading shipments...";
-
+      setStatus("Loading shipments...");
       const { data, error } = await supabase
         .from("shipments")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) {
-        statusMsg.textContent = "LOAD ERROR: " + error.message;
+        setStatus("LOAD ERROR: " + error.message);
         return;
       }
 
@@ -167,7 +129,7 @@
         </tr>
       `).join("");
 
-      statusMsg.textContent = "Loaded " + (data || []).length + " shipment(s)";
+      setStatus("Loaded " + (data || []).length + " shipment(s).");
     }
 
     saveBtn.addEventListener("click", async function () {
@@ -177,27 +139,26 @@
       const status = document.getElementById("status").value;
 
       if (!client || !origin || !destination) {
-        alert("Please fill in Client, Origin and Destination.");
+        setStatus("Please fill in Client, Origin and Destination.");
         return;
       }
 
       const payload = {
         shipment_ref: "SHP" + Date.now(),
-        client: client,
-        origin: origin,
-        destination: destination,
+        client,
+        origin,
+        destination,
         shipment_type: "Road",
-        status: status,
+        status,
         priority: "Medium"
       };
 
-      const { error } = await supabase
-        .from("shipments")
-        .insert([payload]);
+      setStatus("Saving shipment...");
+
+      const { error } = await supabase.from("shipments").insert([payload]);
 
       if (error) {
-        alert("SAVE ERROR: " + error.message);
-        statusMsg.textContent = "SAVE ERROR: " + error.message;
+        setStatus("SAVE ERROR: " + error.message);
         return;
       }
 
@@ -207,6 +168,7 @@
       document.getElementById("status").value = "Pending";
 
       modal.classList.remove("show");
+      setStatus("Save OK. Reloading...");
       await loadShipments();
     });
 
