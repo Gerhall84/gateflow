@@ -1314,23 +1314,66 @@
     document.getElementById("cancelBtn").onclick = closeModal;
     document.getElementById("cancelBtn2").onclick = closeModal;
 
-    document.getElementById("saveBtn").onclick = async () => {
-      const assigned = getVal("assigned");
+document.getElementById("saveBtn").onclick = async () => {
+  const assigned = getVal("assigned");
 
-      const payload = {
-        client: getVal("client"),
-        origin: getVal("origin"),
-        destination: getVal("destination"),
-        status: getVal("status"),
-        priority: getVal("priority"),
-        assigned_to: assigned || null,
-        assigned_to_email: assigned || null,
-        pickup_date: getVal("pickup") || null,
-        etd: getVal("etd") || null,
-        eta: getVal("eta") || null,
-        bd_source: getVal("bdSource") || null,
-        bd_notes: getVal("bdNotes") || null,
-        updated_at: new Date().toISOString()
+  const payload = {
+    client: getVal("client"),
+    origin: getVal("origin"),
+    destination: getVal("destination"),
+    status: getVal("status"),
+    priority: getVal("priority"),
+    assigned_to: assigned || null,
+    assigned_to_email: assigned || null,
+    pickup_date: getVal("pickup") || null,
+    etd: getVal("etd") || null,
+    eta: getVal("eta") || null,
+    bd_source: getVal("bdSource") || null,
+    bd_notes: getVal("bdNotes") || null,
+    updated_at: new Date().toISOString()
+  };
+
+  if (!payload.client || !payload.origin || !payload.destination) {
+    alert("Please fill Client, Origin and Destination.");
+    return;
+  }
+
+  let result;
+
+  if (editingId) {
+    const existing = shipments.find(x => x.id === editingId);
+    const history = Array.isArray(existing?.status_history) ? existing.status_history : [];
+    const nextHistory = existing && existing.status !== payload.status
+      ? [...history, { from: existing.status, to: payload.status, at: new Date().toISOString() }]
+      : history;
+
+    result = await sb
+      .from("shipments")
+      .update({ ...payload, status_history: nextHistory })
+      .eq("id", editingId);
+  } else {
+    result = await sb.from("shipments").insert([{
+      shipment_ref: "SHP" + Date.now(),
+      shipment_type: "Road",
+      source: "manual",
+      created_by_email: user?.email || null,
+      status_history: [{ from: null, to: payload.status, at: new Date().toISOString() }],
+      ...payload
+    }]);
+  }
+
+  if (result.error) {
+    alert("SAVE ERROR: " + result.error.message);
+    statusMsg.textContent = "SAVE ERROR: " + result.error.message;
+    console.error(result.error);
+    return;
+  }
+
+  closeModal();
+  clearForm();
+  selectedShipment = null;
+  await loadShipments();
+  statusMsg.textContent = "Saved successfully.";
       };
 
       if (!payload.client || !payload.origin || !payload.destination) {
