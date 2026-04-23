@@ -35,8 +35,53 @@
       color:var(--text);
     }
 
+    .login-screen {
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(135deg,#04142e,#063b63);
+      padding:20px;
+    }
+
+    .login-card {
+      width:100%;
+      max-width:420px;
+      background:white;
+      border-radius:22px;
+      padding:28px;
+      box-shadow:0 30px 80px rgba(0,0,0,.25);
+    }
+
+    .login-card h1 {
+      margin:0 0 8px;
+      color:var(--nav);
+    }
+
+    .login-card p {
+      margin:0 0 20px;
+      color:var(--muted);
+    }
+
+    .login-card input {
+      width:100%;
+      height:46px;
+      margin-bottom:12px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:0 12px;
+      font-size:14px;
+    }
+
+    .login-error {
+      color:var(--danger);
+      font-size:13px;
+      margin-top:12px;
+      white-space:pre-wrap;
+    }
+
     .app {
-      display:grid;
+      display:none;
       grid-template-columns:240px 1fr;
       min-height:100vh;
     }
@@ -103,6 +148,7 @@
       justify-content:center;
       color:white;
       font-weight:800;
+      flex-shrink:0;
     }
 
     .main { padding:20px; }
@@ -128,7 +174,7 @@
       border-radius:14px;
       padding:0 14px;
       height:46px;
-      width:320px;
+      width:300px;
       box-shadow:var(--shadow);
     }
 
@@ -260,8 +306,7 @@
       font-size:18px;
       color:var(--brand-dark);
     }
-
-    .small {
+        .small {
       display:block;
       color:var(--muted);
       font-size:13px;
@@ -324,11 +369,11 @@
       box-shadow:0 12px 30px rgba(0,0,0,.2);
     }
 
-    .calendar-list, .bd-list, .detail-body, .parser-body {
+    .calendar-list, .bd-list, .detail-body, .parser-body, .workload-list {
       padding:0 18px 18px;
     }
 
-    .calendar-row, .bd-row, .detail-row {
+    .calendar-row, .bd-row, .detail-row, .workload-row {
       display:grid;
       grid-template-columns:46px 1fr auto;
       gap:12px;
@@ -337,7 +382,7 @@
       align-items:center;
     }
 
-    .bd-row, .detail-row {
+    .bd-row, .detail-row, .workload-row {
       grid-template-columns:1fr auto;
     }
 
@@ -382,13 +427,9 @@
       font-size:13px;
     }
 
-    tbody tr {
-      cursor:pointer;
-    }
+    tbody tr { cursor:pointer; }
 
-    tbody tr:hover {
-      background:#f8fcfb;
-    }
+    tbody tr:hover { background:#f8fcfb; }
 
     #statusMsg {
       padding:0 18px 16px;
@@ -483,9 +524,7 @@
     }
 
     .field input,
-    .field select {
-      height:44px;
-    }
+    .field select { height:44px; }
 
     .field textarea {
       min-height:90px;
@@ -517,10 +556,24 @@
     }
   </style>
 </head>
-<body>
-  <div class="app">
 
-    <!-- SIDEBAR -->
+<body>
+  <!-- LOGIN -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <h1>GateKeeper Pro</h1>
+      <p>Sign in to manage shipments, BD handovers and team workload.</p>
+
+      <input id="loginEmail" type="email" placeholder="Email">
+      <input id="loginPassword" type="password" placeholder="Password">
+
+      <button class="primary-btn" id="loginBtn" style="width:100%;">Login</button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div class="app" id="app">
     <aside class="sidebar">
       <div class="brand">
         <img src="logo.png">
@@ -539,18 +592,15 @@
       </nav>
 
       <div class="sidebar-user">
-        <div class="avatar">GK</div>
+        <div class="avatar" id="userInitials">GK</div>
         <div>
-          <strong>GateKeeper</strong><br>
-          <small>Admin</small>
+          <strong id="userName">GateKeeper</strong><br>
+          <small id="userRole">Admin</small>
         </div>
       </div>
     </aside>
 
-    <!-- MAIN -->
     <main class="main">
-
-      <!-- TOP BAR -->
       <div class="topbar">
         <div class="top-actions">
           <div class="search">
@@ -581,22 +631,23 @@
           </select>
         </div>
 
-        <button class="primary-btn" id="openBtn">+ Add Shipment</button>
+        <div class="top-actions">
+          <button class="primary-btn" id="openBtn">+ Add Shipment</button>
+          <button class="secondary-btn" id="logoutBtn">Logout</button>
+        </div>
       </div>
-
-      <!-- WELCOME -->
-      <section class="welcome">
-        <h1>GateKeeper Pro</h1>
-        <p>Live operations, tracking & BD intelligence</p>
+            <section class="welcome">
+        <h1>Dashboard</h1>
+        <p>Live operations, workload and performance</p>
       </section>
 
       <!-- KPIs -->
       <section class="stats">
         <div class="card stat-card"><div class="stat-icon">📦</div><div><div class="stat-label">Total</div><div class="stat-value" id="totalStat">0</div></div></div>
         <div class="card stat-card"><div class="stat-icon">🚢</div><div><div class="stat-label">Transit</div><div class="stat-value" id="transitStat">0</div></div></div>
-        <div class="card stat-card"><div class="stat-icon">✈️</div><div><div class="stat-label">Pending</div><div class="stat-value" id="pendingStat">0</div></div></div>
-        <div class="card stat-card"><div class="stat-icon">✓</div><div><div class="stat-label">Delivered</div><div class="stat-value" id="deliveredStat">0</div></div></div>
+        <div class="card stat-card"><div class="stat-icon">✓</div><div><div class="stat-label">On-Time %</div><div class="stat-value" id="ontimeStat">0%</div></div></div>
         <div class="card stat-card"><div class="stat-icon">🕒</div><div><div class="stat-label">Delayed</div><div class="stat-value" id="delayedStat">0</div></div></div>
+        <div class="card stat-card"><div class="stat-icon">👥</div><div><div class="stat-label">Unassigned</div><div class="stat-value" id="unassignedStat">0</div></div></div>
       </section>
 
       <!-- MAP + CALENDAR -->
@@ -617,7 +668,7 @@
         </div>
       </section>
 
-      <!-- SHIPMENTS TABLE -->
+      <!-- SHIPMENTS -->
       <section class="card">
         <div class="section-head"><h2>Shipments</h2></div>
 
@@ -641,39 +692,31 @@
       <!-- LOWER GRID -->
       <section class="lower-grid">
 
+        <!-- WORKLOAD -->
+        <div class="card">
+          <div class="section-head"><h2>Workload</h2></div>
+          <div class="workload-list" id="workloadList"></div>
+        </div>
+
+        <!-- DETAIL -->
+        <div class="card">
+          <div class="section-head"><h2>Shipment Detail</h2></div>
+          <div class="detail-body" id="detailView"></div>
+        </div>
+
         <!-- BD -->
         <div class="card">
           <div class="section-head"><h2>BD Handover</h2></div>
           <div class="bd-list" id="bdList"></div>
         </div>
 
-        <!-- VIP -->
-        <div class="card">
-          <div class="section-head"><h2>VIP Shipments</h2></div>
-          <div class="bd-list" id="vipList"></div>
-        </div>
-
-        <!-- DETAIL VIEW -->
-        <div class="card">
-          <div class="section-head"><h2>Shipment Detail</h2></div>
-          <div class="detail-body" id="detailView">
-            <div class="detail-row">
-              <div>
-                <strong>Select a shipment</strong>
-                <span class="small">Click any row to view full details</span>
-              </div>
-              <span class="pill pending">Info</span>
-            </div>
-          </div>
-        </div>
-
         <!-- EMAIL PARSER -->
         <div class="card">
-          <div class="section-head"><h2>Email / BD Parser</h2></div>
+          <div class="section-head"><h2>Email Parser</h2></div>
           <div class="parser-body">
-            <textarea id="emailInput" placeholder="Paste customer email or BD handover here..."></textarea>
+            <textarea id="emailInput" placeholder="Paste email..."></textarea>
             <br><br>
-            <button class="primary-btn" id="parseBtn">Parse & Create Shipment</button>
+            <button class="primary-btn" id="parseBtn">Parse</button>
           </div>
         </div>
 
@@ -686,7 +729,7 @@
   <div class="modal" id="modal">
     <div class="modal-box">
       <div class="modal-head">
-        <h3 id="modalTitle">Add Shipment</h3>
+        <h3 id="modalTitle">Shipment</h3>
         <button class="close-btn" id="cancelBtn">×</button>
       </div>
 
@@ -694,7 +737,7 @@
         <input id="client" placeholder="Client">
         <input id="origin" placeholder="Origin">
         <input id="destination" placeholder="Destination">
-        <input id="assigned" placeholder="Assigned To">
+        <input id="assigned" placeholder="Assign to (email)">
 
         <select id="status">
           <option>Pending</option>
@@ -714,7 +757,6 @@
         <input type="date" id="eta">
 
         <input id="bdSource" placeholder="BD Source">
-
         <textarea id="bdNotes" placeholder="BD Notes"></textarea>
       </div>
 
@@ -728,13 +770,17 @@
     <script>
     const sb = window.supabase.createClient(
       "https://edxgkwkdgvsajfmkejbk.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
     );
 
+    let user = null;
+    let profile = null;
     let shipments = [];
     let editingId = null;
     let selectedShipment = null;
 
+    const loginScreen = document.getElementById("loginScreen");
+    const app = document.getElementById("app");
     const modal = document.getElementById("modal");
     const rows = document.getElementById("rows");
     const statusMsg = document.getElementById("statusMsg");
@@ -747,11 +793,15 @@
       document.getElementById(id).value = value || "";
     }
 
+    function initials(email) {
+      return String(email || "GK").slice(0, 2).toUpperCase();
+    }
+
     function closeModal() {
       modal.classList.remove("show");
       editingId = null;
       document.getElementById("deleteBtn").style.display = "none";
-      document.getElementById("modalTitle").textContent = "Add Shipment";
+      document.getElementById("modalTitle").textContent = "Shipment";
     }
 
     function clearForm() {
@@ -759,21 +809,6 @@
       setVal("status", "Pending");
       setVal("priority", "Medium");
     }
-
-    document.getElementById("openBtn").onclick = () => {
-      editingId = null;
-      clearForm();
-      document.getElementById("modalTitle").textContent = "Add Shipment";
-      document.getElementById("deleteBtn").style.display = "none";
-      modal.classList.add("show");
-    };
-
-    document.getElementById("cancelBtn").onclick = closeModal;
-    document.getElementById("cancelBtn2").onclick = closeModal;
-
-    modal.onclick = e => {
-      if (e.target === modal) closeModal();
-    };
 
     function statusClass(status) {
       if (status === "In Transit") return "transit";
@@ -815,12 +850,86 @@
       };
     }
 
+    async function login() {
+      const email = getVal("loginEmail");
+      const password = getVal("loginPassword");
+      const errorBox = document.getElementById("loginError");
+
+      errorBox.textContent = "";
+
+      const { data, error } = await sb.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        errorBox.textContent = error.message;
+        return;
+      }
+
+      user = data.user;
+      await bootstrap();
+    }
+
+    async function logout() {
+      await sb.auth.signOut();
+      user = null;
+      profile = null;
+      shipments = [];
+      app.style.display = "none";
+      loginScreen.style.display = "flex";
+    }
+
+    async function loadProfile() {
+      const { data, error } = await sb
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (error || !data) {
+        const fallback = {
+          id: user.id,
+          email: user.email,
+          full_name: user.email,
+          role: "ops"
+        };
+
+        await sb.from("profiles").insert([fallback]);
+        profile = fallback;
+      } else {
+        profile = data;
+      }
+
+      document.getElementById("userInitials").textContent = initials(profile.email);
+      document.getElementById("userName").textContent = profile.full_name || profile.email;
+      document.getElementById("userRole").textContent = profile.role || "ops";
+    }
+
+    function userCanSeeShipment(x) {
+      const role = profile?.role || "ops";
+
+      if (role === "admin") return true;
+
+      if (role === "bd") {
+        return x.created_by_email === user.email || x.source === "email" || x.bd_source;
+      }
+
+      return !x.assigned_to_email || x.assigned_to_email === user.email || x.assigned_to === user.email;
+    }
+
     function updateStats(data) {
+      const delayed = data.filter(x => effectiveStatus(x) === "Delayed").length;
+      const delivered = data.filter(x => effectiveStatus(x) === "Delivered").length;
+      const onTime = delivered;
+      const onTimePercent = data.length ? Math.round((onTime / data.length) * 100) : 0;
+      const unassigned = data.filter(x => !x.assigned_to_email && !x.assigned_to).length;
+
       document.getElementById("totalStat").textContent = data.length;
       document.getElementById("transitStat").textContent = data.filter(x => effectiveStatus(x) === "In Transit").length;
-      document.getElementById("pendingStat").textContent = data.filter(x => effectiveStatus(x) === "Pending").length;
-      document.getElementById("deliveredStat").textContent = data.filter(x => effectiveStatus(x) === "Delivered").length;
-      document.getElementById("delayedStat").textContent = data.filter(x => effectiveStatus(x) === "Delayed").length;
+      document.getElementById("ontimeStat").textContent = onTimePercent + "%";
+      document.getElementById("delayedStat").textContent = delayed;
+      document.getElementById("unassignedStat").textContent = unassigned;
     }
 
     function renderRows(data) {
@@ -834,7 +943,7 @@
             <td>${x.origin || ""} → ${x.destination || ""}</td>
             <td><span class="pill ${statusClass(effectiveStatus(x))}">${effectiveStatus(x)}</span></td>
             <td><span class="pill ${priorityClass(x.priority)}">${x.priority || "Medium"}</span></td>
-            <td>${x.assigned_to || "-"}</td>
+            <td>${x.assigned_to_email || x.assigned_to || "-"}</td>
           </tr>
         `).join("");
       }
@@ -843,6 +952,7 @@
       renderCalendar(data);
       renderBD(data);
       renderMap(data);
+      renderWorkload(data);
     }
 
     function renderCalendar(data) {
@@ -936,18 +1046,29 @@
           <span class="pill pending">Info</span>
         </div>
       `;
+    }
 
-      document.getElementById("vipList").innerHTML = vip.length ? vip.slice(0,5).map(x => `
-        <div class="bd-row">
+    function renderWorkload(data) {
+      const counts = {};
+
+      data.forEach(x => {
+        const assignee = x.assigned_to_email || x.assigned_to || "Unassigned";
+        counts[assignee] = (counts[assignee] || 0) + 1;
+      });
+
+      const entries = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+
+      document.getElementById("workloadList").innerHTML = entries.length ? entries.map(([name, count]) => `
+        <div class="workload-row">
           <div>
-            <strong>${x.shipment_ref} — ${x.client || ""}</strong>
-            <span class="small">${x.origin || ""} → ${x.destination || ""}</span>
+            <strong>${name}</strong>
+            <span class="small">${count} active shipment(s)</span>
           </div>
-          <span class="pill vip">VIP</span>
+          <span class="pill pickup">${count}</span>
         </div>
       `).join("") : `
-        <div class="bd-row">
-          <div><strong>No VIP shipments</strong><span class="small">Set priority to VIP.</span></div>
+        <div class="workload-row">
+          <div><strong>No workload yet</strong><span class="small">Assign shipments to users.</span></div>
           <span class="pill pending">Info</span>
         </div>
       `;
@@ -989,17 +1110,17 @@
         <div class="detail-row">
           <div>
             <strong>Assigned</strong>
-            <span class="small">${x.assigned_to || "Unassigned"}</span>
+            <span class="small">${x.assigned_to_email || x.assigned_to || "Unassigned"}</span>
           </div>
           <span class="pill pickup">Team</span>
         </div>
 
         <div class="detail-row">
           <div>
-            <strong>Dates</strong>
-            <span class="small">Pickup: ${x.pickup_date || "-"} | ETD: ${x.etd || "-"} | ETA: ${x.eta || "-"}</span>
+            <strong>Source</strong>
+            <span class="small">${x.source || "manual"} / ${x.created_by_email || "unknown"}</span>
           </div>
-          <span class="pill transit">Timeline</span>
+          <span class="pill pending">Source</span>
         </div>
 
         <div class="detail-row">
@@ -1030,7 +1151,7 @@
       setVal("destination", x.destination);
       setVal("status", x.status || "Pending");
       setVal("priority", x.priority || "Medium");
-      setVal("assigned", x.assigned_to);
+      setVal("assigned", x.assigned_to_email || x.assigned_to);
       setVal("pickup", x.pickup_date);
       setVal("etd", x.etd);
       setVal("eta", x.eta);
@@ -1046,7 +1167,9 @@
       const type = document.getElementById("typeFilter").value;
       const priority = document.getElementById("priorityFilter").value;
 
-      const filtered = shipments.filter(x => {
+      const visible = shipments.filter(userCanSeeShipment);
+
+      const filtered = visible.filter(x => {
         const matchSearch =
           String(x.shipment_ref || "").toLowerCase().includes(q) ||
           String(x.client || "").toLowerCase().includes(q) ||
@@ -1061,7 +1184,7 @@
       });
 
       renderRows(filtered);
-      statusMsg.textContent = "Showing " + filtered.length + " of " + shipments.length + " shipment(s)";
+      statusMsg.textContent = "Showing " + filtered.length + " of " + visible.length + " shipment(s)";
     }
 
     async function loadShipments() {
@@ -1080,19 +1203,35 @@
       shipments = data || [];
       applyFilters();
 
-      if (shipments.length && !selectedShipment) {
-        selectShipment(shipments[0].id);
-      }
+      const visible = shipments.filter(userCanSeeShipment);
+      if (visible.length && !selectedShipment) selectShipment(visible[0].id);
     }
 
+    document.getElementById("loginBtn").onclick = login;
+    document.getElementById("logoutBtn").onclick = logout;
+
+    document.getElementById("openBtn").onclick = () => {
+      editingId = null;
+      clearForm();
+      document.getElementById("modalTitle").textContent = "Add Shipment";
+      document.getElementById("deleteBtn").style.display = "none";
+      modal.classList.add("show");
+    };
+
+    document.getElementById("cancelBtn").onclick = closeModal;
+    document.getElementById("cancelBtn2").onclick = closeModal;
+
     document.getElementById("saveBtn").onclick = async () => {
+      const assigned = getVal("assigned");
+
       const payload = {
         client: getVal("client"),
         origin: getVal("origin"),
         destination: getVal("destination"),
         status: getVal("status"),
         priority: getVal("priority"),
-        assigned_to: getVal("assigned") || null,
+        assigned_to: assigned || null,
+        assigned_to_email: assigned || null,
         pickup_date: getVal("pickup") || null,
         etd: getVal("etd") || null,
         eta: getVal("eta") || null,
@@ -1126,6 +1265,8 @@
         const { error } = await sb.from("shipments").insert([{
           shipment_ref: "SHP" + Date.now(),
           shipment_type: "Road",
+          source: "manual",
+          created_by_email: user.email,
           status_history: [{ from: null, to: payload.status, at: new Date().toISOString() }],
           ...payload
         }]);
@@ -1168,7 +1309,7 @@
       const text = document.getElementById("emailInput").value.trim();
 
       if (!text) {
-        statusMsg.textContent = "Paste an email or BD handover first.";
+        statusMsg.textContent = "Paste an email first.";
         return;
       }
 
@@ -1202,6 +1343,8 @@
         shipment_type: /air/i.test(text) ? "Air" : /sea|ocean/i.test(text) ? "Sea" : "Road",
         status: "Pending",
         priority,
+        source: "email",
+        created_by_email: user.email,
         bd_source: "Email Parser",
         bd_notes: text.slice(0, 500),
         status_history: [{ from: null, to: "Pending", at: new Date().toISOString() }]
@@ -1213,6 +1356,7 @@
       }
 
       document.getElementById("emailInput").value = "";
+      selectedShipment = null;
       await loadShipments();
       statusMsg.textContent = "Email parsed and shipment created.";
     };
@@ -1222,7 +1366,27 @@
       document.getElementById(id).addEventListener("change", applyFilters);
     });
 
-    loadShipments();
+    async function bootstrap() {
+      loginScreen.style.display = "none";
+      app.style.display = "grid";
+
+      await loadProfile();
+      await loadShipments();
+    }
+
+    async function init() {
+      const { data } = await sb.auth.getSession();
+
+      if (data.session?.user) {
+        user = data.session.user;
+        await bootstrap();
+      } else {
+        loginScreen.style.display = "flex";
+        app.style.display = "none";
+      }
+    }
+
+    init();
   </script>
 </body>
 </html>
