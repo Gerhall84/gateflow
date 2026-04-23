@@ -3,9 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GateKeeper</title>
-
-  <!-- ✅ ONLY ONE Supabase script -->
+  <title>GateKeeper Shipments</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -13,9 +11,12 @@
       font-family: Arial, sans-serif;
       padding: 20px;
       background: #f5f7fb;
+      margin: 0;
     }
 
-    h2 { margin-top: 0; }
+    h2 {
+      margin: 0 0 16px 0;
+    }
 
     button {
       padding: 10px 14px;
@@ -26,7 +27,9 @@
       cursor: pointer;
     }
 
-    .secondary { background: #888; }
+    button.secondary {
+      background: #888;
+    }
 
     table {
       width: 100%;
@@ -50,13 +53,16 @@
       justify-content: center;
     }
 
-    .modal.show { display: flex; }
+    .modal.show {
+      display: flex;
+    }
 
     .modal-box {
       background: white;
       width: 360px;
       padding: 20px;
       border-radius: 12px;
+      box-sizing: border-box;
     }
 
     .modal-box input,
@@ -76,15 +82,14 @@
     #statusMsg {
       margin-top: 12px;
       color: #333;
+      white-space: pre-wrap;
     }
   </style>
 </head>
-
 <body>
-
   <h2>GateKeeper Shipments</h2>
 
-  <button id="openBtn">+ Add Shipment</button>
+  <button type="button" id="openBtn">+ Add Shipment</button>
   <div id="statusMsg">Loading...</div>
 
   <table>
@@ -99,31 +104,29 @@
     <tbody id="rows"></tbody>
   </table>
 
-  <!-- Modal -->
   <div class="modal" id="modal">
     <div class="modal-box">
       <h3>Add Shipment</h3>
 
-      <input id="client" placeholder="Client">
-      <input id="origin" placeholder="Origin">
-      <input id="destination" placeholder="Destination">
+      <input id="client" type="text" placeholder="Client" />
+      <input id="origin" type="text" placeholder="Origin" />
+      <input id="destination" type="text" placeholder="Destination" />
 
       <select id="status">
-        <option>Pending</option>
-        <option>In Transit</option>
-        <option>Delivered</option>
-        <option>Delayed</option>
+        <option value="Pending">Pending</option>
+        <option value="In Transit">In Transit</option>
+        <option value="Delivered">Delivered</option>
+        <option value="Delayed">Delayed</option>
       </select>
 
       <div class="actions">
-        <button class="secondary" id="cancelBtn">Cancel</button>
-        <button id="saveBtn">Save</button>
+        <button type="button" class="secondary" id="cancelBtn">Cancel</button>
+        <button type="button" id="saveBtn">Save</button>
       </div>
     </div>
   </div>
 
   <script>
-    // ✅ ONLY ONE Supabase client
     const supabase = window.supabase.createClient(
       "https://edxgkwkdgvsajfmkejbk.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
@@ -136,79 +139,103 @@
     const rows = document.getElementById("rows");
     const statusMsg = document.getElementById("statusMsg");
 
-    // Open modal
-    openBtn.onclick = () => {
+    openBtn.onclick = function () {
       modal.classList.add("show");
       statusMsg.textContent = "Modal opened";
     };
 
-    // Close modal
-    cancelBtn.onclick = () => {
+    cancelBtn.onclick = function () {
       modal.classList.remove("show");
+      statusMsg.textContent = "Modal closed";
     };
 
-    // Load shipments
+    modal.onclick = function (e) {
+      if (e.target === modal) {
+        modal.classList.remove("show");
+        statusMsg.textContent = "Modal closed";
+      }
+    };
+
     async function loadShipments() {
       statusMsg.textContent = "Loading shipments...";
 
-      const { data, error } = await supabase
-        .from("shipments")
-        .select("*")
-        .order("created_at", { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from("shipments")
+          .select("*")
+          .order("created_at", { ascending: false });
 
-      if (error) {
-        statusMsg.textContent = "LOAD ERROR: " + error.message;
-        return;
+        if (error) {
+          statusMsg.textContent = "LOAD ERROR: " + error.message;
+          console.error(error);
+          return;
+        }
+
+        rows.innerHTML = (data || []).map(function (x) {
+          return `
+            <tr>
+              <td>${x.shipment_ref || ""}</td>
+              <td>${x.client || ""}</td>
+              <td>${x.origin || ""} → ${x.destination || ""}</td>
+              <td>${x.status || ""}</td>
+            </tr>
+          `;
+        }).join("");
+
+        statusMsg.textContent = "Loaded " + ((data || []).length) + " shipment(s)";
+      } catch (err) {
+        statusMsg.textContent = "LOAD JS ERROR: " + err.message;
+        console.error(err);
       }
-
-      rows.innerHTML = (data || []).map(x => `
-        <tr>
-          <td>${x.shipment_ref}</td>
-          <td>${x.client}</td>
-          <td>${x.origin} → ${x.destination}</td>
-          <td>${x.status}</td>
-        </tr>
-      `).join("");
-
-      statusMsg.textContent = "Loaded " + (data?.length || 0) + " shipments";
     }
 
-    // Save shipment
-    saveBtn.onclick = async () => {
-      const client = document.getElementById("client").value;
-      const origin = document.getElementById("origin").value;
-      const destination = document.getElementById("destination").value;
+    saveBtn.onclick = async function () {
+      const client = document.getElementById("client").value.trim();
+      const origin = document.getElementById("origin").value.trim();
+      const destination = document.getElementById("destination").value.trim();
       const status = document.getElementById("status").value;
 
       if (!client || !origin || !destination) {
-        statusMsg.textContent = "Fill all fields";
+        statusMsg.textContent = "Please fill in Client, Origin and Destination.";
         return;
       }
 
-      const { error } = await supabase.from("shipments").insert([{
+      const payload = {
         shipment_ref: "SHP" + Date.now(),
-        client,
-        origin,
-        destination,
+        client: client,
+        origin: origin,
+        destination: destination,
         shipment_type: "Road",
-        status,
+        status: status,
         priority: "Medium"
-      }]);
+      };
 
-      if (error) {
-        statusMsg.textContent = "SAVE ERROR: " + error.message;
-        return;
+      try {
+        const { error } = await supabase
+          .from("shipments")
+          .insert([payload]);
+
+        if (error) {
+          statusMsg.textContent = "SAVE ERROR: " + error.message;
+          console.error(error);
+          return;
+        }
+
+        document.getElementById("client").value = "";
+        document.getElementById("origin").value = "";
+        document.getElementById("destination").value = "";
+        document.getElementById("status").value = "Pending";
+
+        modal.classList.remove("show");
+        statusMsg.textContent = "Saved successfully";
+        await loadShipments();
+      } catch (err) {
+        statusMsg.textContent = "SAVE JS ERROR: " + err.message;
+        console.error(err);
       }
-
-      modal.classList.remove("show");
-      statusMsg.textContent = "Saved successfully";
-
-      loadShipments();
     };
 
-    // Initial load
     loadShipments();
   </script>
-
 </body>
 </html>
