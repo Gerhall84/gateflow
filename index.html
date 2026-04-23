@@ -22,6 +22,7 @@
       --warning:#f0a227;
       --success:#18a66e;
       --blue:#2d79ff;
+      --purple:#7a3fd1;
       --shadow:0 10px 30px rgba(6,20,46,.08);
     }
 
@@ -104,9 +105,7 @@
       font-weight:800;
     }
 
-    .main {
-      padding:20px;
-    }
+    .main { padding:20px; }
 
     .topbar {
       display:flex;
@@ -141,6 +140,16 @@
       font-size:14px;
     }
 
+    select {
+      height:44px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:0 12px;
+      background:white;
+      font-weight:700;
+      color:var(--text);
+    }
+
     .primary-btn {
       height:46px;
       border:0;
@@ -164,9 +173,18 @@
       cursor:pointer;
     }
 
-    .welcome {
-      margin-bottom:18px;
+    .danger-btn {
+      height:44px;
+      border:0;
+      border-radius:12px;
+      background:var(--danger);
+      color:white;
+      padding:0 16px;
+      font-weight:800;
+      cursor:pointer;
     }
+
+    .welcome { margin-bottom:18px; }
 
     .welcome h1 {
       margin:0 0 8px;
@@ -223,24 +241,6 @@
       font-weight:900;
     }
 
-    .filters {
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr auto;
-      gap:12px;
-      padding:18px;
-      margin-bottom:14px;
-    }
-
-    .filters select {
-      height:44px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:0 12px;
-      background:white;
-      font-weight:700;
-      color:var(--text);
-    }
-
     .grid {
       display:grid;
       grid-template-columns:1.35fr 1fr;
@@ -267,6 +267,22 @@
       font-size:13px;
       margin-top:4px;
     }
+
+    .pill {
+      display:inline-flex;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+
+    .transit { background:var(--brand-soft); color:var(--brand-dark); }
+    .pending { background:#fff1da; color:#d88d10; }
+    .delivered { background:#dff5eb; color:var(--success); }
+    .delayed { background:#ffe4e4; color:var(--danger); }
+    .vip { background:#efe4ff; color:var(--purple); }
+    .pickup { background:#e4f0ff; color:var(--blue); }
 
     .map-box {
       height:350px;
@@ -319,17 +335,21 @@
       flex-wrap:wrap;
     }
 
-    .calendar-list {
+    .calendar-list, .bd-list, .detail-body {
       padding:0 18px 18px;
     }
 
-    .calendar-row {
+    .calendar-row, .bd-row, .detail-row {
       display:grid;
       grid-template-columns:46px 1fr auto;
       gap:12px;
       padding:14px 0;
       border-top:1px solid var(--line);
       align-items:center;
+    }
+
+    .bd-row, .detail-row {
+      grid-template-columns:1fr auto;
     }
 
     .date-box {
@@ -355,22 +375,6 @@
       font-size:14px;
     }
 
-    .pill {
-      display:inline-flex;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:800;
-      white-space:nowrap;
-    }
-
-    .transit { background:var(--brand-soft); color:var(--brand-dark); }
-    .pending { background:#fff1da; color:#d88d10; }
-    .delivered { background:#dff5eb; color:var(--success); }
-    .delayed { background:#ffe4e4; color:var(--danger); }
-    .vip { background:#efe4ff; color:#7a3fd1; }
-    .pickup { background:#e4f0ff; color:var(--blue); }
-
     table {
       width:100%;
       border-collapse:collapse;
@@ -389,6 +393,14 @@
       font-size:13px;
     }
 
+    tbody tr {
+      cursor:pointer;
+    }
+
+    tbody tr:hover {
+      background:#f8fcfb;
+    }
+
     #statusMsg {
       padding:0 18px 16px;
       color:var(--muted);
@@ -402,19 +414,6 @@
       margin-top:14px;
     }
 
-    .bd-list {
-      padding:0 18px 18px;
-    }
-
-    .bd-row {
-      display:grid;
-      grid-template-columns:1fr auto;
-      gap:12px;
-      padding:14px 0;
-      border-top:1px solid var(--line);
-      align-items:center;
-    }
-
     .modal {
       display:none;
       position:fixed;
@@ -426,12 +425,10 @@
       padding:20px;
     }
 
-    .modal.show {
-      display:flex;
-    }
+    .modal.show { display:flex; }
 
     .modal-box {
-      width:min(780px,100%);
+      width:min(820px,100%);
       background:white;
       border-radius:22px;
       box-shadow:0 30px 80px rgba(2,17,39,.28);
@@ -448,9 +445,7 @@
       align-items:center;
     }
 
-    .modal-head h3 {
-      margin:0;
-    }
+    .modal-head h3 { margin:0; }
 
     .close-btn {
       border:0;
@@ -472,9 +467,7 @@
       gap:8px;
     }
 
-    .field.full {
-      grid-column:1 / -1;
-    }
+    .field.full { grid-column:1 / -1; }
 
     .field label {
       font-size:13px;
@@ -506,12 +499,12 @@
       justify-content:flex-end;
       gap:12px;
       padding:0 24px 24px;
+      flex-wrap:wrap;
     }
 
     @media(max-width:1100px) {
       .stats { grid-template-columns:repeat(2,1fr); }
       .grid, .bd-grid { grid-template-columns:1fr; }
-      .filters { grid-template-columns:1fr 1fr; }
     }
 
     @media(max-width:800px) {
@@ -521,50 +514,47 @@
       .top-actions { width:100%; }
       .search { width:100%; }
       .stats { grid-template-columns:1fr; }
-      .filters { grid-template-columns:1fr; }
       .form-grid { grid-template-columns:1fr; }
     }
   </style>
 </head>
 <body>
   <div class="app">
+
     <aside class="sidebar">
       <div class="brand">
-        <img src="logo.png" alt="Maurice Ward Group">
+        <img src="logo.png">
         <strong>Maurice Ward Group</strong>
       </div>
 
       <nav class="nav">
-        <a class="active" href="#">🏠 Dashboard</a>
-        <a href="#">📦 Shipments</a>
-        <a href="#">📅 Calendar</a>
-        <a href="#">🌍 Map</a>
-        <a href="#">📄 Quotation</a>
-        <a href="#">⤴ BD Handover</a>
-        <a href="#">👥 Team</a>
-        <a href="#">📊 Reports</a>
-        <a href="#">⚙ Settings</a>
+        <a class="active">🏠 Dashboard</a>
+        <a>📦 Shipments</a>
+        <a>📅 Calendar</a>
+        <a>🌍 Map</a>
+        <a>📄 Quotation</a>
+        <a>⤴ BD Handover</a>
+        <a>👥 Team</a>
+        <a>⚙ Settings</a>
       </nav>
 
       <div class="sidebar-user">
         <div class="avatar">GK</div>
         <div>
           <strong>GateKeeper</strong><br>
-          <small>Administrator</small>
+          <small>Admin</small>
         </div>
       </div>
     </aside>
 
     <main class="main">
 
-      <!-- TOP BAR -->
       <div class="topbar">
         <div class="top-actions">
           <div class="search">
-            <input id="searchInput" placeholder="Search shipments, clients, refs...">
+            <input id="searchInput" placeholder="Search...">
           </div>
 
-          <!-- FILTERS -->
           <select id="statusFilter">
             <option value="">All Status</option>
             <option>Pending</option>
@@ -578,7 +568,6 @@
             <option>Road</option>
             <option>Air</option>
             <option>Sea</option>
-            <option>Express</option>
           </select>
 
           <select id="priorityFilter">
@@ -590,132 +579,59 @@
           </select>
         </div>
 
-        <button class="primary-btn" id="openBtn">＋ Add Shipment</button>
+        <button class="primary-btn" id="openBtn">+ Add</button>
       </div>
 
-      <!-- WELCOME -->
       <section class="welcome">
-        <h1>Welcome back, GateKeeper 👋</h1>
-        <p>Here’s what’s happening with your shipments today.</p>
+        <h1>Dashboard</h1>
+        <p>Live shipment operations</p>
       </section>
 
-      <!-- KPI CARDS -->
       <section class="stats">
-        <div class="card stat-card">
-          <div class="stat-icon">📦</div>
-          <div>
-            <div class="stat-label">Total</div>
-            <div class="stat-value" id="totalStat">0</div>
-          </div>
-        </div>
-
-        <div class="card stat-card">
-          <div class="stat-icon">🚢</div>
-          <div>
-            <div class="stat-label">In Transit</div>
-            <div class="stat-value" id="transitStat">0</div>
-          </div>
-        </div>
-
-        <div class="card stat-card">
-          <div class="stat-icon">✈️</div>
-          <div>
-            <div class="stat-label">Pending</div>
-            <div class="stat-value" id="pendingStat">0</div>
-          </div>
-        </div>
-
-        <div class="card stat-card">
-          <div class="stat-icon">✓</div>
-          <div>
-            <div class="stat-label">Delivered</div>
-            <div class="stat-value" id="deliveredStat">0</div>
-          </div>
-        </div>
-
-        <div class="card stat-card">
-          <div class="stat-icon">🕒</div>
-          <div>
-            <div class="stat-label">Delayed</div>
-            <div class="stat-value" id="delayedStat">0</div>
-          </div>
-        </div>
+        <div class="card stat-card"><div class="stat-icon">📦</div><div><div class="stat-label">Total</div><div class="stat-value" id="totalStat">0</div></div></div>
+        <div class="card stat-card"><div class="stat-icon">🚢</div><div><div class="stat-label">Transit</div><div class="stat-value" id="transitStat">0</div></div></div>
+        <div class="card stat-card"><div class="stat-icon">✈️</div><div><div class="stat-label">Pending</div><div class="stat-value" id="pendingStat">0</div></div></div>
+        <div class="card stat-card"><div class="stat-icon">✓</div><div><div class="stat-label">Delivered</div><div class="stat-value" id="deliveredStat">0</div></div></div>
+        <div class="card stat-card"><div class="stat-icon">🕒</div><div><div class="stat-label">Delayed</div><div class="stat-value" id="delayedStat">0</div></div></div>
       </section>
 
-      <!-- MAP + CALENDAR -->
       <section class="grid">
         <div class="card">
-          <div class="section-head">
-            <h2>Live Shipment Map</h2>
-            <span class="small">Top active route</span>
-          </div>
-
+          <div class="section-head"><h2>Map</h2></div>
           <div class="map-box">
             <div class="route" id="routeLine"></div>
             <div class="dot" id="dotStart"></div>
             <div class="dot" id="dotEnd"></div>
-
-            <div class="route-card" id="routeCard">
-              No shipments yet
-            </div>
-
-            <div class="map-label">
-              <span>🟢 Transit</span>
-              <span>🟠 Pending</span>
-              <span>🔴 Delayed</span>
-            </div>
+            <div class="route-card" id="routeCard"></div>
           </div>
         </div>
 
         <div class="card">
-          <div class="section-head">
-            <h2>Calendar</h2>
-            <span class="small">Pickup / ETD / ETA</span>
-          </div>
-
+          <div class="section-head"><h2>Calendar</h2></div>
           <div class="calendar-list" id="calendarList"></div>
         </div>
       </section>
 
-      <!-- SHIPMENTS TABLE -->
       <section class="card">
-        <div class="section-head">
-          <h2>Shipments</h2>
-          <span class="small">Live data</span>
-        </div>
-
-        <div style="overflow-x:auto;">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Client</th>
-                <th>Route</th>
-                <th>Type</th>
-                <th>Status</th>
-                <th>Priority</th>
-              </tr>
-            </thead>
-            <tbody id="rows"></tbody>
-          </table>
-        </div>
-
-        <div id="statusMsg">Loading...</div>
+        <div class="section-head"><h2>Shipments</h2></div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Client</th><th>Route</th><th>Status</th><th>Priority</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+        <div id="statusMsg"></div>
       </section>
 
-      <!-- BD HANDOVER -->
       <section class="bd-grid">
         <div class="card">
-          <div class="section-head">
-            <h2>BD Handover</h2>
-          </div>
+          <div class="section-head"><h2>BD</h2></div>
           <div class="bd-list" id="bdList"></div>
         </div>
-
         <div class="card">
-          <div class="section-head">
-            <h2>VIP Shipments</h2>
-          </div>
+          <div class="section-head"><h2>VIP</h2></div>
           <div class="bd-list" id="vipList"></div>
         </div>
       </section>
@@ -727,84 +643,28 @@
   <div class="modal" id="modal">
     <div class="modal-box">
       <div class="modal-head">
-        <h3>Add Shipment</h3>
+        <h3 id="modalTitle">Add Shipment</h3>
         <button class="close-btn" id="cancelBtn">×</button>
       </div>
 
       <div class="form-grid">
-        <div class="field">
-          <label>Client</label>
-          <input id="client">
-        </div>
-
-        <div class="field">
-          <label>Type</label>
-          <select id="shipmentType">
-            <option>Road</option>
-            <option>Air</option>
-            <option>Sea</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Origin</label>
-          <input id="origin">
-        </div>
-
-        <div class="field">
-          <label>Destination</label>
-          <input id="destination">
-        </div>
-
-        <div class="field">
-          <label>Status</label>
-          <select id="status">
-            <option>Pending</option>
-            <option>In Transit</option>
-            <option>Delivered</option>
-            <option>Delayed</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Priority</label>
-          <select id="priority">
-            <option>Low</option>
-            <option>Medium</option>
-            <option>High</option>
-            <option>VIP</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Pickup Date</label>
-          <input type="date" id="pickup">
-        </div>
-
-        <div class="field">
-          <label>ETD</label>
-          <input type="date" id="etd">
-        </div>
-
-        <div class="field">
-          <label>ETA</label>
-          <input type="date" id="eta">
-        </div>
-
-        <div class="field">
-          <label>BD Source</label>
-          <input id="bdSource">
-        </div>
-
-        <div class="field full">
-          <label>BD Notes</label>
-          <textarea id="bdNotes"></textarea>
-        </div>
+        <input id="client" placeholder="Client">
+        <input id="origin" placeholder="Origin">
+        <input id="destination" placeholder="Destination">
+        <select id="status"><option>Pending</option><option>In Transit</option><option>Delivered</option><option>Delayed</option></select>
+        <select id="priority"><option>Medium</option><option>High</option><option>VIP</option></select>
+        <input id="assigned" placeholder="Assigned To">
+        <input type="date" id="pickup">
+        <input type="date" id="etd">
+        <input type="date" id="eta">
+        <input id="bdSource" placeholder="BD Source">
+        <textarea id="bdNotes" placeholder="Notes"></textarea>
       </div>
 
       <div class="actions">
         <button class="secondary-btn" id="cancelBtn2">Cancel</button>
         <button class="primary-btn" id="saveBtn">Save</button>
+        <button class="danger-btn" id="deleteBtn" style="display:none;">Delete</button>
       </div>
     </div>
   </div>
@@ -814,18 +674,47 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
     );
 
+    let shipments = [];
+    let editingId = null;
+
     const modal = document.getElementById("modal");
     const rows = document.getElementById("rows");
     const statusMsg = document.getElementById("statusMsg");
 
-    let currentShipments = [];
+    function closeModal() {
+      modal.classList.remove("show");
+      editingId = null;
+      document.getElementById("deleteBtn").style.display = "none";
+      document.getElementById("modalTitle").textContent = "Add Shipment";
+    }
 
-    document.getElementById("openBtn").onclick = () => modal.classList.add("show");
+    document.getElementById("openBtn").onclick = () => {
+      editingId = null;
+      document.getElementById("modalTitle").textContent = "Add Shipment";
+      document.getElementById("deleteBtn").style.display = "none";
+      clearForm();
+      modal.classList.add("show");
+    };
+
     document.getElementById("cancelBtn").onclick = closeModal;
     document.getElementById("cancelBtn2").onclick = closeModal;
 
-    function closeModal() {
-      modal.classList.remove("show");
+    modal.onclick = e => {
+      if (e.target === modal) closeModal();
+    };
+
+    function getVal(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function setVal(id, value) {
+      document.getElementById(id).value = value || "";
+    }
+
+    function clearForm() {
+      ["client","origin","destination","assigned","pickup","etd","eta","bdSource","bdNotes"].forEach(id => setVal(id, ""));
+      setVal("status", "Pending");
+      setVal("priority", "Medium");
     }
 
     function statusClass(status) {
@@ -839,6 +728,28 @@
       return priority === "VIP" ? "vip" : "pickup";
     }
 
+    function isAutoDelayed(x) {
+      if (x.status === "Delivered") return false;
+      if (!x.eta) return false;
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const eta = new Date(x.eta);
+      eta.setHours(0,0,0,0);
+      return eta < today;
+    }
+
+    function effectiveStatus(x) {
+      return isAutoDelayed(x) ? "Delayed" : (x.status || "Pending");
+    }
+
+    function updateStats(data) {
+      document.getElementById("totalStat").textContent = data.length;
+      document.getElementById("transitStat").textContent = data.filter(x => effectiveStatus(x) === "In Transit").length;
+      document.getElementById("pendingStat").textContent = data.filter(x => effectiveStatus(x) === "Pending").length;
+      document.getElementById("deliveredStat").textContent = data.filter(x => effectiveStatus(x) === "Delivered").length;
+      document.getElementById("delayedStat").textContent = data.filter(x => effectiveStatus(x) === "Delayed").length;
+    }
+
     function fmtDate(date) {
       if (!date) return null;
       const d = new Date(date);
@@ -849,49 +760,17 @@
       };
     }
 
-    function updateStats(data) {
-      document.getElementById("totalStat").textContent = data.length;
-      document.getElementById("transitStat").textContent = data.filter(x => x.status === "In Transit").length;
-      document.getElementById("pendingStat").textContent = data.filter(x => x.status === "Pending").length;
-      document.getElementById("deliveredStat").textContent = data.filter(x => x.status === "Delivered").length;
-      document.getElementById("delayedStat").textContent = data.filter(x => x.status === "Delayed").length;
-    }
-
-    function renderShipments(data) {
-      if (!data.length) {
-        rows.innerHTML = `<tr><td colspan="6">No shipments found.</td></tr>`;
-      } else {
-        rows.innerHTML = data.map(x => `
-          <tr>
-            <td>${x.shipment_ref || ""}</td>
-            <td>${x.client || ""}</td>
-            <td>${x.origin || ""} → ${x.destination || ""}</td>
-            <td>${x.shipment_type || ""}</td>
-            <td><span class="pill ${statusClass(x.status)}">${x.status || ""}</span></td>
-            <td><span class="pill ${priorityClass(x.priority)}">${x.priority || "Medium"}</span></td>
-          </tr>
-        `).join("");
-      }
-
-      updateStats(data);
-      renderCalendar(data);
-      renderBD(data);
-      renderMap(data);
-    }
-
     function renderCalendar(data) {
       const list = document.getElementById("calendarList");
-
       const events = [];
 
       data.forEach(x => {
-        if (x.pickup_date) events.push({ type: "Pickup", date: x.pickup_date, item: x });
-        if (x.etd) events.push({ type: "ETD", date: x.etd, item: x });
-        if (x.eta) events.push({ type: "ETA", date: x.eta, item: x });
+        if (x.pickup_date) events.push({ label: "Pickup", date: x.pickup_date, item: x });
+        if (x.etd) events.push({ label: "ETD", date: x.etd, item: x });
+        if (x.eta) events.push({ label: "ETA", date: x.eta, item: x });
       });
 
-      events.sort((a, b) => new Date(a.date) - new Date(b.date));
-
+      events.sort((a,b) => new Date(a.date) - new Date(b.date));
       const upcoming = events.slice(0, 6);
 
       if (!upcoming.length) {
@@ -900,7 +779,7 @@
             <div class="date-box"><span>--</span><strong>--</strong></div>
             <div>
               <strong>No calendar dates</strong>
-              <span class="small">Add pickup, ETD or ETA dates</span>
+              <span class="small">Add pickup, ETD or ETA dates.</span>
             </div>
             <span class="pill pending">Info</span>
           </div>
@@ -915,95 +794,99 @@
             <div class="date-box"><span>${d.month}</span><strong>${d.day}</strong></div>
             <div>
               <strong>${e.item.shipment_ref}</strong>
-              <span class="small">${e.item.origin} → ${e.item.destination}</span>
+              <span class="small">${e.item.origin || ""} → ${e.item.destination || ""}</span>
             </div>
-            <span class="pill ${e.type === "Pickup" ? "pickup" : "transit"}">${e.type}</span>
+            <span class="pill ${e.label === "Pickup" ? "pickup" : "transit"}">${e.label}</span>
           </div>
         `;
       }).join("");
     }
 
+    function renderMap(data) {
+      const active = data.find(x => effectiveStatus(x) === "In Transit") || data[0];
+      const card = document.getElementById("routeCard");
+      const line = document.getElementById("routeLine");
+      const start = document.getElementById("dotStart");
+      const end = document.getElementById("dotEnd");
+
+      if (!active) {
+        card.innerHTML = `<strong>No active route</strong><span class="small">Add a shipment.</span>`;
+        line.style.display = start.style.display = end.style.display = "none";
+        return;
+      }
+
+      line.style.display = start.style.display = end.style.display = "block";
+      line.style.width = "310px";
+      line.style.left = "90px";
+      line.style.top = "170px";
+      line.style.transform = "rotate(-10deg)";
+      start.style.left = "78px";
+      start.style.top = "162px";
+      end.style.left = "392px";
+      end.style.top = "106px";
+
+      card.innerHTML = `
+        <strong>${active.shipment_ref}</strong>
+        <span class="small">${active.client || ""}</span>
+        <span class="small">${active.origin || ""} → ${active.destination || ""}</span><br>
+        <span class="pill ${statusClass(effectiveStatus(active))}">${effectiveStatus(active)}</span>
+      `;
+    }
+
     function renderBD(data) {
-      const bdList = document.getElementById("bdList");
-      const vipList = document.getElementById("vipList");
+      const bd = data.filter(x => x.bd_source || x.bd_notes);
+      const vip = data.filter(x => x.priority === "VIP");
 
-      const bdItems = data.filter(x => x.bd_source || x.bd_notes);
-      const vipItems = data.filter(x => x.priority === "VIP");
-
-      bdList.innerHTML = bdItems.length ? bdItems.slice(0, 5).map(x => `
+      document.getElementById("bdList").innerHTML = bd.length ? bd.slice(0,5).map(x => `
         <div class="bd-row">
           <div>
-            <strong>${x.shipment_ref} — ${x.client}</strong>
+            <strong>${x.shipment_ref} — ${x.client || ""}</strong>
             <span class="small">${x.bd_source || "BD"}: ${x.bd_notes || "No notes"}</span>
           </div>
           <span class="pill pickup">BD</span>
         </div>
       `).join("") : `
         <div class="bd-row">
-          <div>
-            <strong>No BD handovers yet</strong>
-            <span class="small">Add BD Source or BD Notes when creating a shipment.</span>
-          </div>
+          <div><strong>No BD handovers</strong><span class="small">Add BD source or notes.</span></div>
           <span class="pill pending">Info</span>
         </div>
       `;
 
-      vipList.innerHTML = vipItems.length ? vipItems.slice(0, 5).map(x => `
+      document.getElementById("vipList").innerHTML = vip.length ? vip.slice(0,5).map(x => `
         <div class="bd-row">
           <div>
-            <strong>${x.shipment_ref} — ${x.client}</strong>
-            <span class="small">${x.origin} → ${x.destination}</span>
+            <strong>${x.shipment_ref} — ${x.client || ""}</strong>
+            <span class="small">${x.origin || ""} → ${x.destination || ""}</span>
           </div>
           <span class="pill vip">VIP</span>
         </div>
       `).join("") : `
         <div class="bd-row">
-          <div>
-            <strong>No VIP shipments</strong>
-            <span class="small">Set priority to VIP to show shipments here.</span>
-          </div>
+          <div><strong>No VIP shipments</strong><span class="small">Set priority to VIP.</span></div>
           <span class="pill pending">Info</span>
         </div>
       `;
     }
 
-    function renderMap(data) {
-      const routeCard = document.getElementById("routeCard");
-      const routeLine = document.getElementById("routeLine");
-      const dotStart = document.getElementById("dotStart");
-      const dotEnd = document.getElementById("dotEnd");
-
-      const active = data.find(x => x.status === "In Transit") || data[0];
-
-      if (!active) {
-        routeCard.innerHTML = `<strong>No active route</strong><span class="small">Add a shipment to display map activity.</span>`;
-        routeLine.style.display = "none";
-        dotStart.style.display = "none";
-        dotEnd.style.display = "none";
-        return;
+    function renderRows(data) {
+      if (!data.length) {
+        rows.innerHTML = `<tr><td colspan="5">No shipments found.</td></tr>`;
+      } else {
+        rows.innerHTML = data.map(x => `
+          <tr onclick="openEdit('${x.id}')">
+            <td>${x.shipment_ref || ""}</td>
+            <td>${x.client || ""}</td>
+            <td>${x.origin || ""} → ${x.destination || ""}</td>
+            <td><span class="pill ${statusClass(effectiveStatus(x))}">${effectiveStatus(x)}</span></td>
+            <td><span class="pill ${priorityClass(x.priority)}">${x.priority || "Medium"}</span></td>
+          </tr>
+        `).join("");
       }
 
-      routeLine.style.display = "block";
-      dotStart.style.display = "block";
-      dotEnd.style.display = "block";
-
-      routeLine.style.width = "310px";
-      routeLine.style.left = "90px";
-      routeLine.style.top = "170px";
-      routeLine.style.transform = "rotate(-10deg)";
-
-      dotStart.style.left = "78px";
-      dotStart.style.top = "162px";
-      dotEnd.style.left = "392px";
-      dotEnd.style.top = "106px";
-
-      routeCard.innerHTML = `
-        <strong>${active.shipment_ref}</strong>
-        <span class="small">${active.client}</span>
-        <span class="small">${active.origin} → ${active.destination}</span>
-        <br>
-        <span class="pill ${statusClass(active.status)}">${active.status}</span>
-      `;
+      updateStats(data);
+      renderCalendar(data);
+      renderBD(data);
+      renderMap(data);
     }
 
     function applyFilters() {
@@ -1012,22 +895,22 @@
       const type = document.getElementById("typeFilter").value;
       const priority = document.getElementById("priorityFilter").value;
 
-      const filtered = currentShipments.filter(x => {
-        const matchesSearch =
+      const filtered = shipments.filter(x => {
+        const matchSearch =
           String(x.shipment_ref || "").toLowerCase().includes(q) ||
           String(x.client || "").toLowerCase().includes(q) ||
           String(x.origin || "").toLowerCase().includes(q) ||
           String(x.destination || "").toLowerCase().includes(q);
 
-        const matchesStatus = !status || x.status === status;
-        const matchesType = !type || x.shipment_type === type;
-        const matchesPriority = !priority || x.priority === priority;
+        const matchStatus = !status || effectiveStatus(x) === status;
+        const matchType = !type || x.shipment_type === type;
+        const matchPriority = !priority || x.priority === priority;
 
-        return matchesSearch && matchesStatus && matchesType && matchesPriority;
+        return matchSearch && matchStatus && matchType && matchPriority;
       });
 
-      renderShipments(filtered);
-      statusMsg.textContent = "Showing " + filtered.length + " of " + currentShipments.length + " shipment(s)";
+      renderRows(filtered);
+      statusMsg.textContent = "Showing " + filtered.length + " of " + shipments.length + " shipment(s)";
     }
 
     async function loadShipments() {
@@ -1043,24 +926,47 @@
         return;
       }
 
-      currentShipments = data || [];
+      shipments = data || [];
       applyFilters();
     }
 
+    window.openEdit = function(id) {
+      const x = shipments.find(s => s.id === id);
+      if (!x) return;
+
+      editingId = id;
+      document.getElementById("modalTitle").textContent = "Edit Shipment";
+      document.getElementById("deleteBtn").style.display = "inline-block";
+
+      setVal("client", x.client);
+      setVal("origin", x.origin);
+      setVal("destination", x.destination);
+      setVal("status", x.status || "Pending");
+      setVal("priority", x.priority || "Medium");
+      setVal("assigned", x.assigned_to);
+      setVal("pickup", x.pickup_date);
+      setVal("etd", x.etd);
+      setVal("eta", x.eta);
+      setVal("bdSource", x.bd_source);
+      setVal("bdNotes", x.bd_notes);
+
+      modal.classList.add("show");
+    };
+
     document.getElementById("saveBtn").onclick = async () => {
       const payload = {
-        shipment_ref: "SHP" + Date.now(),
-        client: document.getElementById("client").value.trim(),
-        origin: document.getElementById("origin").value.trim(),
-        destination: document.getElementById("destination").value.trim(),
-        shipment_type: document.getElementById("shipmentType").value,
-        status: document.getElementById("status").value,
-        priority: document.getElementById("priority").value,
-        pickup_date: document.getElementById("pickup").value || null,
-        etd: document.getElementById("etd").value || null,
-        eta: document.getElementById("eta").value || null,
-        bd_source: document.getElementById("bdSource").value.trim() || null,
-        bd_notes: document.getElementById("bdNotes").value.trim() || null
+        client: getVal("client"),
+        origin: getVal("origin"),
+        destination: getVal("destination"),
+        status: getVal("status"),
+        priority: getVal("priority"),
+        assigned_to: getVal("assigned") || null,
+        pickup_date: getVal("pickup") || null,
+        etd: getVal("etd") || null,
+        eta: getVal("eta") || null,
+        bd_source: getVal("bdSource") || null,
+        bd_notes: getVal("bdNotes") || null,
+        updated_at: new Date().toISOString()
       };
 
       if (!payload.client || !payload.origin || !payload.destination) {
@@ -1068,31 +974,66 @@
         return;
       }
 
-      const { error } = await sb.from("shipments").insert([payload]);
+      if (editingId) {
+        const existing = shipments.find(x => x.id === editingId);
+        const history = existing?.status_history || [];
+        const nextHistory = existing && existing.status !== payload.status
+          ? [...history, { from: existing.status, to: payload.status, at: new Date().toISOString() }]
+          : history;
+
+        const { error } = await sb
+          .from("shipments")
+          .update({ ...payload, status_history: nextHistory })
+          .eq("id", editingId);
+
+        if (error) {
+          statusMsg.textContent = "UPDATE ERROR: " + error.message;
+          return;
+        }
+      } else {
+        const { error } = await sb.from("shipments").insert([{
+          shipment_ref: "SHP" + Date.now(),
+          shipment_type: "Road",
+          status_history: [{ from: null, to: payload.status, at: new Date().toISOString() }],
+          ...payload
+        }]);
+
+        if (error) {
+          statusMsg.textContent = "SAVE ERROR: " + error.message;
+          return;
+        }
+      }
+
+      closeModal();
+      clearForm();
+      await loadShipments();
+      statusMsg.textContent = "Saved successfully.";
+    };
+
+    document.getElementById("deleteBtn").onclick = async () => {
+      if (!editingId) return;
+      if (!confirm("Delete this shipment?")) return;
+
+      const { error } = await sb
+        .from("shipments")
+        .delete()
+        .eq("id", editingId);
 
       if (error) {
-        statusMsg.textContent = "SAVE ERROR: " + error.message;
+        statusMsg.textContent = "DELETE ERROR: " + error.message;
         return;
       }
 
-      document.querySelectorAll("#modal input, #modal textarea").forEach(el => el.value = "");
-      document.getElementById("shipmentType").value = "Road";
-      document.getElementById("status").value = "Pending";
-      document.getElementById("priority").value = "Medium";
-
       closeModal();
+      clearForm();
       await loadShipments();
-      statusMsg.textContent = "Saved successfully.";
+      statusMsg.textContent = "Deleted successfully.";
     };
 
     ["searchInput", "statusFilter", "typeFilter", "priorityFilter"].forEach(id => {
       document.getElementById(id).addEventListener("input", applyFilters);
       document.getElementById(id).addEventListener("change", applyFilters);
     });
-
-    modal.onclick = e => {
-      if (e.target === modal) closeModal();
-    };
 
     loadShipments();
   </script>
