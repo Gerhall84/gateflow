@@ -21,6 +21,7 @@
       --danger:#ef5c5c;
       --warning:#f0a227;
       --success:#18a66e;
+      --blue:#2d79ff;
       --shadow:0 10px 30px rgba(6,20,46,.08);
     }
 
@@ -115,6 +116,13 @@
       margin-bottom:18px;
     }
 
+    .top-actions {
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
     .search {
       background:white;
       border:1px solid var(--line);
@@ -143,6 +151,17 @@
       font-weight:800;
       cursor:pointer;
       box-shadow:0 12px 24px rgba(6,183,165,.24);
+    }
+
+    .secondary-btn {
+      height:44px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:white;
+      color:var(--text);
+      padding:0 16px;
+      font-weight:800;
+      cursor:pointer;
     }
 
     .welcome {
@@ -204,6 +223,24 @@
       font-weight:900;
     }
 
+    .filters {
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr auto;
+      gap:12px;
+      padding:18px;
+      margin-bottom:14px;
+    }
+
+    .filters select {
+      height:44px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:0 12px;
+      background:white;
+      font-weight:700;
+      color:var(--text);
+    }
+
     .grid {
       display:grid;
       grid-template-columns:1.35fr 1fr;
@@ -224,8 +261,15 @@
       color:var(--brand-dark);
     }
 
+    .small {
+      display:block;
+      color:var(--muted);
+      font-size:13px;
+      margin-top:4px;
+    }
+
     .map-box {
-      height:330px;
+      height:350px;
       margin:0 18px 18px;
       border-radius:16px;
       background:
@@ -243,10 +287,6 @@
       transform-origin:left center;
     }
 
-    .r1 { width:210px; left:80px; top:120px; transform:rotate(-8deg); }
-    .r2 { width:180px; left:280px; top:150px; transform:rotate(14deg); }
-    .r3 { width:130px; left:470px; top:190px; transform:rotate(-22deg); }
-
     .dot {
       position:absolute;
       width:16px;
@@ -256,10 +296,17 @@
       box-shadow:0 0 0 5px rgba(6,183,165,.25);
     }
 
-    .d1 { left:72px; top:112px; }
-    .d2 { left:285px; top:92px; }
-    .d3 { left:455px; top:180px; }
-    .d4 { right:75px; top:140px; }
+    .route-card {
+      position:absolute;
+      top:18px;
+      right:18px;
+      background:rgba(255,255,255,.94);
+      color:var(--text);
+      padding:14px;
+      border-radius:14px;
+      width:230px;
+      box-shadow:0 12px 30px rgba(0,0,0,.2);
+    }
 
     .map-label {
       position:absolute;
@@ -269,6 +316,7 @@
       display:flex;
       gap:20px;
       font-size:13px;
+      flex-wrap:wrap;
     }
 
     .calendar-list {
@@ -307,25 +355,21 @@
       font-size:14px;
     }
 
-    .small {
-      display:block;
-      color:var(--muted);
-      font-size:13px;
-      margin-top:4px;
-    }
-
     .pill {
       display:inline-flex;
       padding:6px 10px;
       border-radius:999px;
       font-size:12px;
       font-weight:800;
+      white-space:nowrap;
     }
 
     .transit { background:var(--brand-soft); color:var(--brand-dark); }
     .pending { background:#fff1da; color:#d88d10; }
     .delivered { background:#dff5eb; color:var(--success); }
     .delayed { background:#ffe4e4; color:var(--danger); }
+    .vip { background:#efe4ff; color:#7a3fd1; }
+    .pickup { background:#e4f0ff; color:var(--blue); }
 
     table {
       width:100%;
@@ -351,6 +395,26 @@
       font-size:13px;
     }
 
+    .bd-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-top:14px;
+    }
+
+    .bd-list {
+      padding:0 18px 18px;
+    }
+
+    .bd-row {
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:12px;
+      padding:14px 0;
+      border-top:1px solid var(--line);
+      align-items:center;
+    }
+
     .modal {
       display:none;
       position:fixed;
@@ -367,11 +431,13 @@
     }
 
     .modal-box {
-      width:min(720px,100%);
+      width:min(780px,100%);
       background:white;
       border-radius:22px;
       box-shadow:0 30px 80px rgba(2,17,39,.28);
       overflow:hidden;
+      max-height:92vh;
+      overflow-y:auto;
     }
 
     .modal-head {
@@ -406,17 +472,33 @@
       gap:8px;
     }
 
+    .field.full {
+      grid-column:1 / -1;
+    }
+
     .field label {
       font-size:13px;
       font-weight:800;
     }
 
     .field input,
-    .field select {
-      height:44px;
+    .field select,
+    .field textarea {
       border:1px solid var(--line);
       border-radius:12px;
       padding:0 12px;
+      font-family:Arial, sans-serif;
+    }
+
+    .field input,
+    .field select {
+      height:44px;
+    }
+
+    .field textarea {
+      min-height:90px;
+      padding:12px;
+      resize:vertical;
     }
 
     .actions {
@@ -426,33 +508,24 @@
       padding:0 24px 24px;
     }
 
-    .secondary-btn {
-      height:44px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      background:white;
-      color:var(--text);
-      padding:0 16px;
-      font-weight:800;
-      cursor:pointer;
-    }
-
     @media(max-width:1100px) {
       .stats { grid-template-columns:repeat(2,1fr); }
-      .grid { grid-template-columns:1fr; }
+      .grid, .bd-grid { grid-template-columns:1fr; }
+      .filters { grid-template-columns:1fr 1fr; }
     }
 
     @media(max-width:800px) {
       .app { grid-template-columns:1fr; }
       .sidebar { display:none; }
       .topbar { flex-direction:column; align-items:stretch; }
+      .top-actions { width:100%; }
       .search { width:100%; }
       .stats { grid-template-columns:1fr; }
+      .filters { grid-template-columns:1fr; }
       .form-grid { grid-template-columns:1fr; }
     }
   </style>
 </head>
-
 <body>
   <div class="app">
     <aside class="sidebar">
@@ -483,24 +556,55 @@
     </aside>
 
     <main class="main">
+
+      <!-- TOP BAR -->
       <div class="topbar">
-        <div class="search">
-          <input id="searchInput" placeholder="Search shipments, clients, refs...">
+        <div class="top-actions">
+          <div class="search">
+            <input id="searchInput" placeholder="Search shipments, clients, refs...">
+          </div>
+
+          <!-- FILTERS -->
+          <select id="statusFilter">
+            <option value="">All Status</option>
+            <option>Pending</option>
+            <option>In Transit</option>
+            <option>Delivered</option>
+            <option>Delayed</option>
+          </select>
+
+          <select id="typeFilter">
+            <option value="">All Types</option>
+            <option>Road</option>
+            <option>Air</option>
+            <option>Sea</option>
+            <option>Express</option>
+          </select>
+
+          <select id="priorityFilter">
+            <option value="">All Priority</option>
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+            <option>VIP</option>
+          </select>
         </div>
 
         <button class="primary-btn" id="openBtn">＋ Add Shipment</button>
       </div>
 
+      <!-- WELCOME -->
       <section class="welcome">
         <h1>Welcome back, GateKeeper 👋</h1>
         <p>Here’s what’s happening with your shipments today.</p>
       </section>
 
+      <!-- KPI CARDS -->
       <section class="stats">
         <div class="card stat-card">
           <div class="stat-icon">📦</div>
           <div>
-            <div class="stat-label">Total Shipments</div>
+            <div class="stat-label">Total</div>
             <div class="stat-value" id="totalStat">0</div>
           </div>
         </div>
@@ -538,23 +642,25 @@
         </div>
       </section>
 
+      <!-- MAP + CALENDAR -->
       <section class="grid">
         <div class="card">
           <div class="section-head">
             <h2>Live Shipment Map</h2>
-            <span class="small">Visual route overview</span>
+            <span class="small">Top active route</span>
           </div>
 
           <div class="map-box">
-            <div class="route r1"></div>
-            <div class="route r2"></div>
-            <div class="route r3"></div>
-            <div class="dot d1"></div>
-            <div class="dot d2"></div>
-            <div class="dot d3"></div>
-            <div class="dot d4"></div>
+            <div class="route" id="routeLine"></div>
+            <div class="dot" id="dotStart"></div>
+            <div class="dot" id="dotEnd"></div>
+
+            <div class="route-card" id="routeCard">
+              No shipments yet
+            </div>
+
             <div class="map-label">
-              <span>🟢 In Transit</span>
+              <span>🟢 Transit</span>
               <span>🟠 Pending</span>
               <span>🔴 Delayed</span>
             </div>
@@ -564,28 +670,30 @@
         <div class="card">
           <div class="section-head">
             <h2>Calendar</h2>
-            <span class="small">ETD / Pickup</span>
+            <span class="small">Pickup / ETD / ETA</span>
           </div>
 
           <div class="calendar-list" id="calendarList"></div>
         </div>
       </section>
 
+      <!-- SHIPMENTS TABLE -->
       <section class="card">
         <div class="section-head">
-          <h2>Recent Shipments</h2>
-          <span class="small">Live Supabase data</span>
+          <h2>Shipments</h2>
+          <span class="small">Live data</span>
         </div>
 
         <div style="overflow-x:auto;">
           <table>
             <thead>
               <tr>
-                <th>Shipment ID</th>
+                <th>ID</th>
                 <th>Client</th>
                 <th>Route</th>
                 <th>Type</th>
                 <th>Status</th>
+                <th>Priority</th>
               </tr>
             </thead>
             <tbody id="rows"></tbody>
@@ -594,9 +702,28 @@
 
         <div id="statusMsg">Loading...</div>
       </section>
+
+      <!-- BD HANDOVER -->
+      <section class="bd-grid">
+        <div class="card">
+          <div class="section-head">
+            <h2>BD Handover</h2>
+          </div>
+          <div class="bd-list" id="bdList"></div>
+        </div>
+
+        <div class="card">
+          <div class="section-head">
+            <h2>VIP Shipments</h2>
+          </div>
+          <div class="bd-list" id="vipList"></div>
+        </div>
+      </section>
+
     </main>
   </div>
 
+  <!-- MODAL -->
   <div class="modal" id="modal">
     <div class="modal-box">
       <div class="modal-head">
@@ -607,27 +734,26 @@
       <div class="form-grid">
         <div class="field">
           <label>Client</label>
-          <input id="client" placeholder="Client">
+          <input id="client">
         </div>
 
         <div class="field">
-          <label>Shipment Type</label>
+          <label>Type</label>
           <select id="shipmentType">
             <option>Road</option>
             <option>Air</option>
             <option>Sea</option>
-            <option>Express</option>
           </select>
         </div>
 
         <div class="field">
           <label>Origin</label>
-          <input id="origin" placeholder="Origin">
+          <input id="origin">
         </div>
 
         <div class="field">
           <label>Destination</label>
-          <input id="destination" placeholder="Destination">
+          <input id="destination">
         </div>
 
         <div class="field">
@@ -643,61 +769,84 @@
         <div class="field">
           <label>Priority</label>
           <select id="priority">
-            <option>Medium</option>
             <option>Low</option>
+            <option>Medium</option>
             <option>High</option>
             <option>VIP</option>
           </select>
+        </div>
+
+        <div class="field">
+          <label>Pickup Date</label>
+          <input type="date" id="pickup">
+        </div>
+
+        <div class="field">
+          <label>ETD</label>
+          <input type="date" id="etd">
+        </div>
+
+        <div class="field">
+          <label>ETA</label>
+          <input type="date" id="eta">
+        </div>
+
+        <div class="field">
+          <label>BD Source</label>
+          <input id="bdSource">
+        </div>
+
+        <div class="field full">
+          <label>BD Notes</label>
+          <textarea id="bdNotes"></textarea>
         </div>
       </div>
 
       <div class="actions">
         <button class="secondary-btn" id="cancelBtn2">Cancel</button>
-        <button class="primary-btn" id="saveBtn">Save Shipment</button>
+        <button class="primary-btn" id="saveBtn">Save</button>
       </div>
     </div>
   </div>
-
-  <script>
-    console.log("APP START");
-
+    <script>
     const sb = window.supabase.createClient(
       "https://edxgkwkdgvsajfmkejbk.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
     );
 
     const modal = document.getElementById("modal");
-    const openBtn = document.getElementById("openBtn");
-    const cancelBtn = document.getElementById("cancelBtn");
-    const cancelBtn2 = document.getElementById("cancelBtn2");
-    const saveBtn = document.getElementById("saveBtn");
     const rows = document.getElementById("rows");
     const statusMsg = document.getElementById("statusMsg");
-    const searchInput = document.getElementById("searchInput");
 
     let currentShipments = [];
 
-    openBtn.onclick = () => {
-      modal.classList.add("show");
-      statusMsg.textContent = "Modal opened";
-    };
-
-    cancelBtn.onclick = closeModal;
-    cancelBtn2.onclick = closeModal;
+    document.getElementById("openBtn").onclick = () => modal.classList.add("show");
+    document.getElementById("cancelBtn").onclick = closeModal;
+    document.getElementById("cancelBtn2").onclick = closeModal;
 
     function closeModal() {
       modal.classList.remove("show");
     }
-
-    modal.onclick = (e) => {
-      if (e.target === modal) closeModal();
-    };
 
     function statusClass(status) {
       if (status === "In Transit") return "transit";
       if (status === "Delivered") return "delivered";
       if (status === "Delayed") return "delayed";
       return "pending";
+    }
+
+    function priorityClass(priority) {
+      return priority === "VIP" ? "vip" : "pickup";
+    }
+
+    function fmtDate(date) {
+      if (!date) return null;
+      const d = new Date(date);
+      if (isNaN(d)) return null;
+      return {
+        month: d.toLocaleString("en-GB", { month: "short" }).toUpperCase(),
+        day: String(d.getDate()).padStart(2, "0")
+      };
     }
 
     function updateStats(data) {
@@ -708,17 +857,50 @@
       document.getElementById("delayedStat").textContent = data.filter(x => x.status === "Delayed").length;
     }
 
+    function renderShipments(data) {
+      if (!data.length) {
+        rows.innerHTML = `<tr><td colspan="6">No shipments found.</td></tr>`;
+      } else {
+        rows.innerHTML = data.map(x => `
+          <tr>
+            <td>${x.shipment_ref || ""}</td>
+            <td>${x.client || ""}</td>
+            <td>${x.origin || ""} → ${x.destination || ""}</td>
+            <td>${x.shipment_type || ""}</td>
+            <td><span class="pill ${statusClass(x.status)}">${x.status || ""}</span></td>
+            <td><span class="pill ${priorityClass(x.priority)}">${x.priority || "Medium"}</span></td>
+          </tr>
+        `).join("");
+      }
+
+      updateStats(data);
+      renderCalendar(data);
+      renderBD(data);
+      renderMap(data);
+    }
+
     function renderCalendar(data) {
       const list = document.getElementById("calendarList");
-      const upcoming = data.slice(0, 5);
+
+      const events = [];
+
+      data.forEach(x => {
+        if (x.pickup_date) events.push({ type: "Pickup", date: x.pickup_date, item: x });
+        if (x.etd) events.push({ type: "ETD", date: x.etd, item: x });
+        if (x.eta) events.push({ type: "ETA", date: x.eta, item: x });
+      });
+
+      events.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      const upcoming = events.slice(0, 6);
 
       if (!upcoming.length) {
         list.innerHTML = `
           <div class="calendar-row">
             <div class="date-box"><span>--</span><strong>--</strong></div>
             <div>
-              <strong>No shipments yet</strong>
-              <span class="small">Add your first shipment</span>
+              <strong>No calendar dates</strong>
+              <span class="small">Add pickup, ETD or ETA dates</span>
             </div>
             <span class="pill pending">Info</span>
           </div>
@@ -726,35 +908,126 @@
         return;
       }
 
-      list.innerHTML = upcoming.map((x, i) => `
-        <div class="calendar-row">
-          <div class="date-box"><span>APR</span><strong>${23 + i}</strong></div>
-          <div>
-            <strong>${x.shipment_ref || ""}</strong>
-            <span class="small">${x.origin || ""} → ${x.destination || ""}</span>
+      list.innerHTML = upcoming.map(e => {
+        const d = fmtDate(e.date);
+        return `
+          <div class="calendar-row">
+            <div class="date-box"><span>${d.month}</span><strong>${d.day}</strong></div>
+            <div>
+              <strong>${e.item.shipment_ref}</strong>
+              <span class="small">${e.item.origin} → ${e.item.destination}</span>
+            </div>
+            <span class="pill ${e.type === "Pickup" ? "pickup" : "transit"}">${e.type}</span>
           </div>
-          <span class="pill ${statusClass(x.status)}">${x.status || "Pending"}</span>
-        </div>
-      `).join("");
+        `;
+      }).join("");
     }
 
-    function renderShipments(data) {
-      rows.innerHTML = data.map(x => `
-        <tr>
-          <td>${x.shipment_ref || ""}</td>
-          <td>${x.client || ""}</td>
-          <td>${x.origin || ""} → ${x.destination || ""}</td>
-          <td>${x.shipment_type || ""}</td>
-          <td><span class="pill ${statusClass(x.status)}">${x.status || ""}</span></td>
-        </tr>
-      `).join("");
+    function renderBD(data) {
+      const bdList = document.getElementById("bdList");
+      const vipList = document.getElementById("vipList");
 
-      if (!data.length) {
-        rows.innerHTML = `<tr><td colspan="5">No shipments yet. Add your first shipment.</td></tr>`;
+      const bdItems = data.filter(x => x.bd_source || x.bd_notes);
+      const vipItems = data.filter(x => x.priority === "VIP");
+
+      bdList.innerHTML = bdItems.length ? bdItems.slice(0, 5).map(x => `
+        <div class="bd-row">
+          <div>
+            <strong>${x.shipment_ref} — ${x.client}</strong>
+            <span class="small">${x.bd_source || "BD"}: ${x.bd_notes || "No notes"}</span>
+          </div>
+          <span class="pill pickup">BD</span>
+        </div>
+      `).join("") : `
+        <div class="bd-row">
+          <div>
+            <strong>No BD handovers yet</strong>
+            <span class="small">Add BD Source or BD Notes when creating a shipment.</span>
+          </div>
+          <span class="pill pending">Info</span>
+        </div>
+      `;
+
+      vipList.innerHTML = vipItems.length ? vipItems.slice(0, 5).map(x => `
+        <div class="bd-row">
+          <div>
+            <strong>${x.shipment_ref} — ${x.client}</strong>
+            <span class="small">${x.origin} → ${x.destination}</span>
+          </div>
+          <span class="pill vip">VIP</span>
+        </div>
+      `).join("") : `
+        <div class="bd-row">
+          <div>
+            <strong>No VIP shipments</strong>
+            <span class="small">Set priority to VIP to show shipments here.</span>
+          </div>
+          <span class="pill pending">Info</span>
+        </div>
+      `;
+    }
+
+    function renderMap(data) {
+      const routeCard = document.getElementById("routeCard");
+      const routeLine = document.getElementById("routeLine");
+      const dotStart = document.getElementById("dotStart");
+      const dotEnd = document.getElementById("dotEnd");
+
+      const active = data.find(x => x.status === "In Transit") || data[0];
+
+      if (!active) {
+        routeCard.innerHTML = `<strong>No active route</strong><span class="small">Add a shipment to display map activity.</span>`;
+        routeLine.style.display = "none";
+        dotStart.style.display = "none";
+        dotEnd.style.display = "none";
+        return;
       }
 
-      updateStats(data);
-      renderCalendar(data);
+      routeLine.style.display = "block";
+      dotStart.style.display = "block";
+      dotEnd.style.display = "block";
+
+      routeLine.style.width = "310px";
+      routeLine.style.left = "90px";
+      routeLine.style.top = "170px";
+      routeLine.style.transform = "rotate(-10deg)";
+
+      dotStart.style.left = "78px";
+      dotStart.style.top = "162px";
+      dotEnd.style.left = "392px";
+      dotEnd.style.top = "106px";
+
+      routeCard.innerHTML = `
+        <strong>${active.shipment_ref}</strong>
+        <span class="small">${active.client}</span>
+        <span class="small">${active.origin} → ${active.destination}</span>
+        <br>
+        <span class="pill ${statusClass(active.status)}">${active.status}</span>
+      `;
+    }
+
+    function applyFilters() {
+      const q = document.getElementById("searchInput").value.toLowerCase();
+      const status = document.getElementById("statusFilter").value;
+      const type = document.getElementById("typeFilter").value;
+      const priority = document.getElementById("priorityFilter").value;
+
+      const filtered = currentShipments.filter(x => {
+        const matchesSearch =
+          String(x.shipment_ref || "").toLowerCase().includes(q) ||
+          String(x.client || "").toLowerCase().includes(q) ||
+          String(x.origin || "").toLowerCase().includes(q) ||
+          String(x.destination || "").toLowerCase().includes(q);
+
+        const matchesStatus = !status || x.status === status;
+        const matchesType = !type || x.shipment_type === type;
+        const matchesPriority = !priority || x.priority === priority;
+
+        return matchesSearch && matchesStatus && matchesType && matchesPriority;
+      });
+
+      renderShipments(filtered);
+      statusMsg.textContent = "Showing " + filtered.length + " of " + currentShipments.length + " shipment(s)";
     }
 
     async function loadShipments() {
@@ -771,59 +1044,54 @@
       }
 
       currentShipments = data || [];
-      renderShipments(currentShipments);
-      statusMsg.textContent = "Loaded " + currentShipments.length + " shipment(s)";
+      applyFilters();
     }
 
-    saveBtn.onclick = async () => {
-      const client = document.getElementById("client").value.trim();
-      const origin = document.getElementById("origin").value.trim();
-      const destination = document.getElementById("destination").value.trim();
-      const shipmentType = document.getElementById("shipmentType").value;
-      const status = document.getElementById("status").value;
-      const priority = document.getElementById("priority").value;
+    document.getElementById("saveBtn").onclick = async () => {
+      const payload = {
+        shipment_ref: "SHP" + Date.now(),
+        client: document.getElementById("client").value.trim(),
+        origin: document.getElementById("origin").value.trim(),
+        destination: document.getElementById("destination").value.trim(),
+        shipment_type: document.getElementById("shipmentType").value,
+        status: document.getElementById("status").value,
+        priority: document.getElementById("priority").value,
+        pickup_date: document.getElementById("pickup").value || null,
+        etd: document.getElementById("etd").value || null,
+        eta: document.getElementById("eta").value || null,
+        bd_source: document.getElementById("bdSource").value.trim() || null,
+        bd_notes: document.getElementById("bdNotes").value.trim() || null
+      };
 
-      if (!client || !origin || !destination) {
-        statusMsg.textContent = "Fill all required fields";
+      if (!payload.client || !payload.origin || !payload.destination) {
+        statusMsg.textContent = "Fill client, origin and destination.";
         return;
       }
 
-      const { error } = await sb.from("shipments").insert([{
-        shipment_ref: "SHP" + Date.now(),
-        client,
-        origin,
-        destination,
-        shipment_type: shipmentType,
-        status,
-        priority
-      }]);
+      const { error } = await sb.from("shipments").insert([payload]);
 
       if (error) {
         statusMsg.textContent = "SAVE ERROR: " + error.message;
         return;
       }
 
-      document.getElementById("client").value = "";
-      document.getElementById("origin").value = "";
-      document.getElementById("destination").value = "";
+      document.querySelectorAll("#modal input, #modal textarea").forEach(el => el.value = "");
       document.getElementById("shipmentType").value = "Road";
       document.getElementById("status").value = "Pending";
       document.getElementById("priority").value = "Medium";
 
       closeModal();
-      statusMsg.textContent = "Saved successfully";
-      loadShipments();
+      await loadShipments();
+      statusMsg.textContent = "Saved successfully.";
     };
 
-    searchInput.oninput = () => {
-      const q = searchInput.value.toLowerCase();
-      const filtered = currentShipments.filter(x =>
-        String(x.shipment_ref || "").toLowerCase().includes(q) ||
-        String(x.client || "").toLowerCase().includes(q) ||
-        String(x.origin || "").toLowerCase().includes(q) ||
-        String(x.destination || "").toLowerCase().includes(q)
-      );
-      renderShipments(filtered);
+    ["searchInput", "statusFilter", "typeFilter", "priorityFilter"].forEach(id => {
+      document.getElementById(id).addEventListener("input", applyFilters);
+      document.getElementById(id).addEventListener("change", applyFilters);
+    });
+
+    modal.onclick = e => {
+      if (e.target === modal) closeModal();
     };
 
     loadShipments();
