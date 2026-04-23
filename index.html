@@ -45,35 +45,62 @@ const supabase = window.supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
 );
 
-function openModal(){
+function openModal() {
   document.getElementById("modal").style.display = "block";
 }
 
-async function load(){
-  const { data } = await supabase.from("shipments").select("*");
+async function load() {
+  const { data, error } = await supabase
+    .from("shipments")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-  document.getElementById("rows").innerHTML = data.map(x => `
+  if (error) {
+    alert("Load failed: " + error.message);
+    console.error(error);
+    return;
+  }
+
+  document.getElementById("rows").innerHTML = (data || []).map(x => `
     <tr>
-      <td>${x.shipment_ref}</td>
-      <td>${x.client}</td>
-      <td>${x.origin} → ${x.destination}</td>
-      <td>${x.status}</td>
+      <td>${x.shipment_ref || ""}</td>
+      <td>${x.client || ""}</td>
+      <td>${x.origin || ""} → ${x.destination || ""}</td>
+      <td>${x.status || ""}</td>
     </tr>
   `).join("");
 }
 
-async function save(){
-  await supabase.from("shipments").insert({
+async function save() {
+  const payload = {
     shipment_ref: "SHP" + Date.now(),
-    client: document.getElementById("client").value,
-    origin: document.getElementById("origin").value,
-    destination: document.getElementById("destination").value,
-    status: document.getElementById("status").value
-  });
+    client: document.getElementById("client").value.trim(),
+    origin: document.getElementById("origin").value.trim(),
+    destination: document.getElementById("destination").value.trim(),
+    shipment_type: "Road",
+    status: document.getElementById("status").value,
+    priority: "Medium"
+  };
 
-  location.reload();
+  const { data, error } = await supabase
+    .from("shipments")
+    .insert([payload])
+    .select();
+
+  if (error) {
+    alert("Save failed: " + error.message);
+    console.error(error);
+    return;
+  }
+
+  document.getElementById("modal").style.display = "none";
+  document.getElementById("client").value = "";
+  document.getElementById("origin").value = "";
+  document.getElementById("destination").value = "";
+  document.getElementById("status").value = "Pending";
+
+  await load();
 }
-
 load();
 </script>
 
