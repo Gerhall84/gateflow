@@ -1,18 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GateKeeper</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
-    body { font-family: Arial; padding:20px; }
-    button { padding:10px 15px; cursor:pointer; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f5f7fb;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    button {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 8px;
+      background: #00a99d;
+      color: white;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #888;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
 
     .modal {
+      display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.5);
-      display: none;
+      background: rgba(0,0,0,0.45);
       align-items: center;
       justify-content: center;
     }
@@ -23,130 +57,165 @@
 
     .modal-box {
       background: white;
+      width: 360px;
       padding: 20px;
-      border-radius: 10px;
-      width: 300px;
+      border-radius: 12px;
     }
 
-    input, select {
+    .modal-box input,
+    .modal-box select {
       width: 100%;
-      margin-bottom: 10px;
-      padding: 8px;
+      padding: 10px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    #statusMsg {
+      margin-top: 12px;
+      color: #555;
     }
   </style>
 </head>
-
 <body>
+  <h2>GateKeeper Shipments</h2>
 
-<h2>GateKeeper Shipments</h2>
+  <button type="button" id="openBtn">+ Add Shipment</button>
 
-<button id="openBtn">+ Add Shipment</button>
+  <div id="statusMsg">Loading...</div>
 
-<table border="1" cellpadding="10" style="margin-top:20px;">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Client</th>
-      <th>Route</th>
-      <th>Status</th>
-    </tr>
-  </thead>
-  <tbody id="rows"></tbody>
-</table>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Client</th>
+        <th>Route</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
 
-<!-- MODAL -->
-<div class="modal" id="modal">
-  <div class="modal-box">
-    <h3>Add Shipment</h3>
+  <div class="modal" id="modal">
+    <div class="modal-box">
+      <h3>Add Shipment</h3>
 
-    <input id="client" placeholder="Client">
-    <input id="origin" placeholder="Origin">
-    <input id="destination" placeholder="Destination">
+      <input id="client" type="text" placeholder="Client" />
+      <input id="origin" type="text" placeholder="Origin" />
+      <input id="destination" type="text" placeholder="Destination" />
 
-    <select id="status">
-      <option>Pending</option>
-      <option>In Transit</option>
-      <option>Delivered</option>
-      <option>Delayed</option>
-    </select>
+      <select id="status">
+        <option value="Pending">Pending</option>
+        <option value="In Transit">In Transit</option>
+        <option value="Delivered">Delivered</option>
+        <option value="Delayed">Delayed</option>
+      </select>
 
-    <button onclick="save()">Save</button>
-    <button onclick="closeModal()">Cancel</button>
+      <div class="actions">
+        <button type="button" class="secondary" id="cancelBtn">Cancel</button>
+        <button type="button" id="saveBtn">Save</button>
+      </div>
+    </div>
   </div>
-</div>
 
-<script>
-const supabase = window.supabase.createClient(
-  "https://edxgkwkdgvsajfmkejbk.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
-);
+  <script>
+    const supabase = window.supabase.createClient(
+      "https://edxgkwkdgvsajfmkejbk.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
+    );
 
-// UI
-const modal = document.getElementById("modal");
-const openBtn = document.getElementById("openBtn");
+    const modal = document.getElementById("modal");
+    const openBtn = document.getElementById("openBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const rows = document.getElementById("rows");
+    const statusMsg = document.getElementById("statusMsg");
 
-openBtn.onclick = () => modal.classList.add("show");
+    openBtn.addEventListener("click", function () {
+      modal.classList.add("show");
+    });
 
-function closeModal() {
-  modal.classList.remove("show");
-}
+    cancelBtn.addEventListener("click", function () {
+      modal.classList.remove("show");
+    });
 
-// LOAD DATA
-async function load() {
-  const { data, error } = await supabase
-    .from("shipments")
-    .select("*")
-    .order("created_at", { ascending: false });
+    modal.addEventListener("click", function (e) {
+      if (e.target === modal) {
+        modal.classList.remove("show");
+      }
+    });
 
-  if (error) {
-    alert("LOAD ERROR: " + error.message);
-    return;
-  }
+    async function loadShipments() {
+      statusMsg.textContent = "Loading shipments...";
 
-  document.getElementById("rows").innerHTML = (data || []).map(x => `
-    <tr>
-      <td>${x.shipment_ref}</td>
-      <td>${x.client}</td>
-      <td>${x.origin} → ${x.destination}</td>
-      <td>${x.status}</td>
-    </tr>
-  `).join("");
-}
+      const { data, error } = await supabase
+        .from("shipments")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-// SAVE DATA
-async function save() {
-  const payload = {
-    shipment_ref: "SHP" + Date.now(),
-    client: document.getElementById("client").value,
-    origin: document.getElementById("origin").value,
-    destination: document.getElementById("destination").value,
-    shipment_type: "Road",
-    status: document.getElementById("status").value,
-    priority: "Medium"
-  };
+      if (error) {
+        statusMsg.textContent = "LOAD ERROR: " + error.message;
+        return;
+      }
 
-  const { error } = await supabase
-    .from("shipments")
-    .insert([payload]);
+      rows.innerHTML = (data || []).map(x => `
+        <tr>
+          <td>${x.shipment_ref || ""}</td>
+          <td>${x.client || ""}</td>
+          <td>${x.origin || ""} → ${x.destination || ""}</td>
+          <td>${x.status || ""}</td>
+        </tr>
+      `).join("");
 
-  if (error) {
-    alert("SAVE ERROR: " + error.message);
-    return;
-  }
+      statusMsg.textContent = "Loaded " + (data || []).length + " shipment(s)";
+    }
 
-  closeModal();
+    saveBtn.addEventListener("click", async function () {
+      const client = document.getElementById("client").value.trim();
+      const origin = document.getElementById("origin").value.trim();
+      const destination = document.getElementById("destination").value.trim();
+      const status = document.getElementById("status").value;
 
-  // clear inputs
-  document.getElementById("client").value = "";
-  document.getElementById("origin").value = "";
-  document.getElementById("destination").value = "";
+      if (!client || !origin || !destination) {
+        alert("Please fill in Client, Origin and Destination.");
+        return;
+      }
 
-  load();
-}
+      const payload = {
+        shipment_ref: "SHP" + Date.now(),
+        client: client,
+        origin: origin,
+        destination: destination,
+        shipment_type: "Road",
+        status: status,
+        priority: "Medium"
+      };
 
-// INIT
-load();
-</script>
+      const { error } = await supabase
+        .from("shipments")
+        .insert([payload]);
 
+      if (error) {
+        alert("SAVE ERROR: " + error.message);
+        statusMsg.textContent = "SAVE ERROR: " + error.message;
+        return;
+      }
+
+      document.getElementById("client").value = "";
+      document.getElementById("origin").value = "";
+      document.getElementById("destination").value = "";
+      document.getElementById("status").value = "Pending";
+
+      modal.classList.remove("show");
+      await loadShipments();
+    });
+
+    loadShipments();
+  </script>
 </body>
 </html>
