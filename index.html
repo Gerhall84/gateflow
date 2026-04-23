@@ -7,6 +7,15 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+  <!-- Free Leaflet Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Free marker clustering -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
   <style>
     :root {
       --bg:#f4f7f8;
@@ -286,8 +295,7 @@
       font-size:24px;
       font-weight:900;
     }
-
-    .grid {
+        .grid {
       display:grid;
       grid-template-columns:1.35fr 1fr;
       gap:14px;
@@ -306,7 +314,8 @@
       font-size:18px;
       color:var(--brand-dark);
     }
-        .small {
+
+    .small {
       display:block;
       color:var(--muted);
       font-size:13px;
@@ -330,43 +339,22 @@
     .pickup { background:#e4f0ff; color:var(--blue); }
 
     .map-box {
-      height:350px;
+      height:430px;
       margin:0 18px 18px;
       border-radius:16px;
-      background:
-        radial-gradient(circle at 20% 30%, rgba(6,183,165,.26), transparent 20%),
-        radial-gradient(circle at 55% 40%, rgba(6,183,165,.20), transparent 18%),
-        radial-gradient(circle at 80% 55%, rgba(6,183,165,.20), transparent 18%),
-        linear-gradient(180deg,#06264d,#021837);
-      position:relative;
       overflow:hidden;
+      border:1px solid var(--line);
+      background:#06264d;
     }
 
-    .route {
-      position:absolute;
-      border-top:3px dashed rgba(255,255,255,.85);
-      transform-origin:left center;
+    .leaflet-container {
+      font-family:Arial, sans-serif;
     }
 
-    .dot {
-      position:absolute;
-      width:16px;
-      height:16px;
-      border-radius:50%;
-      background:white;
-      box-shadow:0 0 0 5px rgba(6,183,165,.25);
-    }
-
-    .route-card {
-      position:absolute;
-      top:18px;
-      right:18px;
-      background:rgba(255,255,255,.94);
+    .map-popup strong {
+      display:block;
+      margin-bottom:4px;
       color:var(--text);
-      padding:14px;
-      border-radius:14px;
-      width:240px;
-      box-shadow:0 12px 30px rgba(0,0,0,.2);
     }
 
     .calendar-list, .bd-list, .detail-body, .parser-body, .workload-list {
@@ -427,9 +415,13 @@
       font-size:13px;
     }
 
-    tbody tr { cursor:pointer; }
+    tbody tr {
+      cursor:pointer;
+    }
 
-    tbody tr:hover { background:#f8fcfb; }
+    tbody tr:hover {
+      background:#f8fcfb;
+    }
 
     #statusMsg {
       padding:0 18px 16px;
@@ -524,7 +516,9 @@
     }
 
     .field input,
-    .field select { height:44px; }
+    .field select {
+      height:44px;
+    }
 
     .field textarea {
       min-height:90px;
@@ -562,7 +556,7 @@
   <div class="login-screen" id="loginScreen">
     <div class="login-card">
       <h1>GateKeeper Pro</h1>
-      <p>Sign in to manage shipments, BD handovers and team workload.</p>
+      <p>Sign in to manage shipments, routes and workload.</p>
 
       <input id="loginEmail" type="email" placeholder="Email">
       <input id="loginPassword" type="password" placeholder="Password">
@@ -636,7 +630,7 @@
           <button class="secondary-btn" id="logoutBtn">Logout</button>
         </div>
       </div>
-            <section class="welcome">
+         <section class="welcome">
         <h1>Dashboard</h1>
         <p>Live operations, workload and performance</p>
       </section>
@@ -654,12 +648,9 @@
       <section class="grid">
         <div class="card">
           <div class="section-head"><h2>Live Map</h2></div>
-          <div class="map-box">
-            <div class="route" id="routeLine"></div>
-            <div class="dot" id="dotStart"></div>
-            <div class="dot" id="dotEnd"></div>
-            <div class="route-card" id="routeCard"></div>
-          </div>
+
+          <!-- REAL MAP -->
+          <div id="map" class="map-box"></div>
         </div>
 
         <div class="card">
@@ -767,17 +758,22 @@
       </div>
     </div>
   </div>
-   <script>
-  const sb = window.supabase.createClient(
-  "https://edxgkwkdgvsajfmkejbk.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
-);
+     <script>
+    const sb = window.supabase.createClient(
+      "https://edxgkwkdgvsajfmkejbk.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
+    );
 
     let user = null;
     let profile = null;
     let shipments = [];
     let editingId = null;
     let selectedShipment = null;
+
+    let map;
+    let markerCluster;
+    let routeLayer;
+    const geoCache = {};
 
     const loginScreen = document.getElementById("loginScreen");
     const app = document.getElementById("app");
@@ -819,6 +815,13 @@
 
     function priorityClass(priority) {
       return priority === "VIP" ? "vip" : "pickup";
+    }
+
+    function statusColor(status) {
+      if (status === "Delayed") return "#ef5c5c";
+      if (status === "Delivered") return "#18a66e";
+      if (status === "In Transit") return "#06b7a5";
+      return "#f0a227";
     }
 
     function isAutoDelayed(x) {
@@ -921,8 +924,7 @@
     function updateStats(data) {
       const delayed = data.filter(x => effectiveStatus(x) === "Delayed").length;
       const delivered = data.filter(x => effectiveStatus(x) === "Delivered").length;
-      const onTime = delivered;
-      const onTimePercent = data.length ? Math.round((onTime / data.length) * 100) : 0;
+      const onTimePercent = data.length ? Math.round((delivered / data.length) * 100) : 0;
       const unassigned = data.filter(x => !x.assigned_to_email && !x.assigned_to).length;
 
       document.getElementById("totalStat").textContent = data.length;
@@ -997,40 +999,8 @@
       }).join("");
     }
 
-    function renderMap(data) {
-      const active = data.find(x => effectiveStatus(x) === "In Transit") || data[0];
-      const card = document.getElementById("routeCard");
-      const line = document.getElementById("routeLine");
-      const start = document.getElementById("dotStart");
-      const end = document.getElementById("dotEnd");
-
-      if (!active) {
-        card.innerHTML = `<strong>No active route</strong><span class="small">Add a shipment.</span>`;
-        line.style.display = start.style.display = end.style.display = "none";
-        return;
-      }
-
-      line.style.display = start.style.display = end.style.display = "block";
-      line.style.width = "310px";
-      line.style.left = "90px";
-      line.style.top = "170px";
-      line.style.transform = "rotate(-10deg)";
-      start.style.left = "78px";
-      start.style.top = "162px";
-      end.style.left = "392px";
-      end.style.top = "106px";
-
-      card.innerHTML = `
-        <strong>${active.shipment_ref}</strong>
-        <span class="small">${active.client || ""}</span>
-        <span class="small">${active.origin || ""} → ${active.destination || ""}</span><br>
-        <span class="pill ${statusClass(effectiveStatus(active))}">${effectiveStatus(active)}</span>
-      `;
-    }
-
     function renderBD(data) {
       const bd = data.filter(x => x.bd_source || x.bd_notes);
-      const vip = data.filter(x => x.priority === "VIP");
 
       document.getElementById("bdList").innerHTML = bd.length ? bd.slice(0,5).map(x => `
         <div class="bd-row">
@@ -1072,6 +1042,129 @@
           <span class="pill pending">Info</span>
         </div>
       `;
+    }
+
+    function initMap() {
+      if (map) return;
+
+      map = L.map("map", {
+        zoomControl: true,
+        scrollWheelZoom: true
+      }).setView([53.3498, -6.2603], 4);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap"
+      }).addTo(map);
+
+      markerCluster = L.markerClusterGroup();
+      routeLayer = L.layerGroup();
+
+      map.addLayer(routeLayer);
+      map.addLayer(markerCluster);
+    }
+
+    async function geocode(place) {
+      if (!place) return null;
+
+      const key = place.toLowerCase().trim();
+      if (geoCache[key]) return geoCache[key];
+
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(place)}`
+        );
+
+        const data = await res.json();
+        if (!data[0]) return null;
+
+        const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+        geoCache[key] = coords;
+        return coords;
+      } catch {
+        return null;
+      }
+    }
+
+    function makePulseIcon(color) {
+      return L.divIcon({
+        className: "",
+        html: `
+          <div style="
+            width:18px;
+            height:18px;
+            border-radius:50%;
+            background:${color};
+            box-shadow:0 0 0 6px ${color}33, 0 0 18px ${color};
+            border:2px solid white;
+          "></div>
+        `,
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+      });
+    }
+
+    async function renderMap(data) {
+      if (!map) return;
+
+      markerCluster.clearLayers();
+      routeLayer.clearLayers();
+
+      const bounds = [];
+      const visibleData = data.slice(0, 15);
+
+      for (const x of visibleData) {
+        const origin = await geocode(x.origin);
+        const destination = await geocode(x.destination);
+
+        const color = statusColor(effectiveStatus(x));
+
+        if (origin) {
+          const marker = L.marker(origin, { icon: makePulseIcon(color) })
+            .bindPopup(`
+              <div class="map-popup">
+                <strong>${x.shipment_ref || ""}</strong>
+                Origin: ${x.origin || ""}<br>
+                Client: ${x.client || ""}<br>
+                Status: ${effectiveStatus(x)}
+              </div>
+            `);
+
+          markerCluster.addLayer(marker);
+          bounds.push(origin);
+        }
+
+        if (destination) {
+          const marker = L.marker(destination, { icon: makePulseIcon(color) })
+            .bindPopup(`
+              <div class="map-popup">
+                <strong>${x.shipment_ref || ""}</strong>
+                Destination: ${x.destination || ""}<br>
+                Client: ${x.client || ""}<br>
+                Status: ${effectiveStatus(x)}
+              </div>
+            `);
+
+          markerCluster.addLayer(marker);
+          bounds.push(destination);
+        }
+
+        if (origin && destination) {
+          const route = L.polyline([origin, destination], {
+            color,
+            weight: effectiveStatus(x) === "In Transit" ? 4 : 3,
+            opacity: 0.85,
+            dashArray: effectiveStatus(x) === "In Transit" ? "8, 10" : null
+          });
+
+          route.addTo(routeLayer);
+        }
+      }
+
+      if (bounds.length) {
+        map.fitBounds(bounds, { padding: [30, 30], maxZoom: 6 });
+      }
+
+      setTimeout(() => map.invalidateSize(), 200);
     }
 
     window.selectShipment = function(id) {
@@ -1371,6 +1464,8 @@
       app.style.display = "grid";
 
       await loadProfile();
+      initMap();
+      setTimeout(() => map.invalidateSize(), 300);
       await loadShipments();
     }
 
