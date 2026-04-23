@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GateKeeper Dashboard</title>
+  <title>GateKeeper Pro</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -128,7 +128,7 @@
       border-radius:14px;
       padding:0 14px;
       height:46px;
-      width:340px;
+      width:320px;
       box-shadow:var(--shadow);
     }
 
@@ -320,22 +320,11 @@
       color:var(--text);
       padding:14px;
       border-radius:14px;
-      width:230px;
+      width:240px;
       box-shadow:0 12px 30px rgba(0,0,0,.2);
     }
 
-    .map-label {
-      position:absolute;
-      bottom:18px;
-      left:18px;
-      color:white;
-      display:flex;
-      gap:20px;
-      font-size:13px;
-      flex-wrap:wrap;
-    }
-
-    .calendar-list, .bd-list, .detail-body {
+    .calendar-list, .bd-list, .detail-body, .parser-body {
       padding:0 18px 18px;
     }
 
@@ -407,11 +396,21 @@
       font-size:13px;
     }
 
-    .bd-grid {
+    .lower-grid {
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:14px;
       margin-top:14px;
+    }
+
+    textarea {
+      width:100%;
+      min-height:110px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px;
+      resize:vertical;
+      font-family:Arial, sans-serif;
     }
 
     .modal {
@@ -428,7 +427,7 @@
     .modal.show { display:flex; }
 
     .modal-box {
-      width:min(820px,100%);
+      width:min(860px,100%);
       background:white;
       border-radius:22px;
       box-shadow:0 30px 80px rgba(2,17,39,.28);
@@ -504,7 +503,7 @@
 
     @media(max-width:1100px) {
       .stats { grid-template-columns:repeat(2,1fr); }
-      .grid, .bd-grid { grid-template-columns:1fr; }
+      .grid, .lower-grid { grid-template-columns:1fr; }
     }
 
     @media(max-width:800px) {
@@ -521,6 +520,7 @@
 <body>
   <div class="app">
 
+    <!-- SIDEBAR -->
     <aside class="sidebar">
       <div class="brand">
         <img src="logo.png">
@@ -547,12 +547,14 @@
       </div>
     </aside>
 
+    <!-- MAIN -->
     <main class="main">
 
+      <!-- TOP BAR -->
       <div class="topbar">
         <div class="top-actions">
           <div class="search">
-            <input id="searchInput" placeholder="Search...">
+            <input id="searchInput" placeholder="Search shipments, clients, refs...">
           </div>
 
           <select id="statusFilter">
@@ -579,14 +581,16 @@
           </select>
         </div>
 
-        <button class="primary-btn" id="openBtn">+ Add</button>
+        <button class="primary-btn" id="openBtn">+ Add Shipment</button>
       </div>
 
+      <!-- WELCOME -->
       <section class="welcome">
-        <h1>Dashboard</h1>
-        <p>Live shipment operations</p>
+        <h1>GateKeeper Pro</h1>
+        <p>Live operations, tracking & BD intelligence</p>
       </section>
 
+      <!-- KPIs -->
       <section class="stats">
         <div class="card stat-card"><div class="stat-icon">📦</div><div><div class="stat-label">Total</div><div class="stat-value" id="totalStat">0</div></div></div>
         <div class="card stat-card"><div class="stat-icon">🚢</div><div><div class="stat-label">Transit</div><div class="stat-value" id="transitStat">0</div></div></div>
@@ -595,9 +599,10 @@
         <div class="card stat-card"><div class="stat-icon">🕒</div><div><div class="stat-label">Delayed</div><div class="stat-value" id="delayedStat">0</div></div></div>
       </section>
 
+      <!-- MAP + CALENDAR -->
       <section class="grid">
         <div class="card">
-          <div class="section-head"><h2>Map</h2></div>
+          <div class="section-head"><h2>Live Map</h2></div>
           <div class="map-box">
             <div class="route" id="routeLine"></div>
             <div class="dot" id="dotStart"></div>
@@ -612,28 +617,66 @@
         </div>
       </section>
 
+      <!-- SHIPMENTS TABLE -->
       <section class="card">
         <div class="section-head"><h2>Shipments</h2></div>
+
         <table>
           <thead>
             <tr>
-              <th>ID</th><th>Client</th><th>Route</th><th>Status</th><th>Priority</th>
+              <th>ID</th>
+              <th>Client</th>
+              <th>Route</th>
+              <th>Status</th>
+              <th>Priority</th>
+              <th>Assigned</th>
             </tr>
           </thead>
           <tbody id="rows"></tbody>
         </table>
+
         <div id="statusMsg"></div>
       </section>
 
-      <section class="bd-grid">
+      <!-- LOWER GRID -->
+      <section class="lower-grid">
+
+        <!-- BD -->
         <div class="card">
-          <div class="section-head"><h2>BD</h2></div>
+          <div class="section-head"><h2>BD Handover</h2></div>
           <div class="bd-list" id="bdList"></div>
         </div>
+
+        <!-- VIP -->
         <div class="card">
-          <div class="section-head"><h2>VIP</h2></div>
+          <div class="section-head"><h2>VIP Shipments</h2></div>
           <div class="bd-list" id="vipList"></div>
         </div>
+
+        <!-- DETAIL VIEW -->
+        <div class="card">
+          <div class="section-head"><h2>Shipment Detail</h2></div>
+          <div class="detail-body" id="detailView">
+            <div class="detail-row">
+              <div>
+                <strong>Select a shipment</strong>
+                <span class="small">Click any row to view full details</span>
+              </div>
+              <span class="pill pending">Info</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- EMAIL PARSER -->
+        <div class="card">
+          <div class="section-head"><h2>Email / BD Parser</h2></div>
+          <div class="parser-body">
+            <textarea id="emailInput" placeholder="Paste customer email or BD handover here..."></textarea>
+            <br><br>
+            <button class="primary-btn" id="parseBtn">Parse & Create Shipment</button>
+          </div>
+        </div>
+
       </section>
 
     </main>
@@ -651,14 +694,28 @@
         <input id="client" placeholder="Client">
         <input id="origin" placeholder="Origin">
         <input id="destination" placeholder="Destination">
-        <select id="status"><option>Pending</option><option>In Transit</option><option>Delivered</option><option>Delayed</option></select>
-        <select id="priority"><option>Medium</option><option>High</option><option>VIP</option></select>
         <input id="assigned" placeholder="Assigned To">
+
+        <select id="status">
+          <option>Pending</option>
+          <option>In Transit</option>
+          <option>Delivered</option>
+          <option>Delayed</option>
+        </select>
+
+        <select id="priority">
+          <option>Medium</option>
+          <option>High</option>
+          <option>VIP</option>
+        </select>
+
         <input type="date" id="pickup">
         <input type="date" id="etd">
         <input type="date" id="eta">
+
         <input id="bdSource" placeholder="BD Source">
-        <textarea id="bdNotes" placeholder="Notes"></textarea>
+
+        <textarea id="bdNotes" placeholder="BD Notes"></textarea>
       </div>
 
       <div class="actions">
@@ -676,32 +733,11 @@
 
     let shipments = [];
     let editingId = null;
+    let selectedShipment = null;
 
     const modal = document.getElementById("modal");
     const rows = document.getElementById("rows");
     const statusMsg = document.getElementById("statusMsg");
-
-    function closeModal() {
-      modal.classList.remove("show");
-      editingId = null;
-      document.getElementById("deleteBtn").style.display = "none";
-      document.getElementById("modalTitle").textContent = "Add Shipment";
-    }
-
-    document.getElementById("openBtn").onclick = () => {
-      editingId = null;
-      document.getElementById("modalTitle").textContent = "Add Shipment";
-      document.getElementById("deleteBtn").style.display = "none";
-      clearForm();
-      modal.classList.add("show");
-    };
-
-    document.getElementById("cancelBtn").onclick = closeModal;
-    document.getElementById("cancelBtn2").onclick = closeModal;
-
-    modal.onclick = e => {
-      if (e.target === modal) closeModal();
-    };
 
     function getVal(id) {
       return document.getElementById(id).value.trim();
@@ -711,11 +747,33 @@
       document.getElementById(id).value = value || "";
     }
 
+    function closeModal() {
+      modal.classList.remove("show");
+      editingId = null;
+      document.getElementById("deleteBtn").style.display = "none";
+      document.getElementById("modalTitle").textContent = "Add Shipment";
+    }
+
     function clearForm() {
       ["client","origin","destination","assigned","pickup","etd","eta","bdSource","bdNotes"].forEach(id => setVal(id, ""));
       setVal("status", "Pending");
       setVal("priority", "Medium");
     }
+
+    document.getElementById("openBtn").onclick = () => {
+      editingId = null;
+      clearForm();
+      document.getElementById("modalTitle").textContent = "Add Shipment";
+      document.getElementById("deleteBtn").style.display = "none";
+      modal.classList.add("show");
+    };
+
+    document.getElementById("cancelBtn").onclick = closeModal;
+    document.getElementById("cancelBtn2").onclick = closeModal;
+
+    modal.onclick = e => {
+      if (e.target === modal) closeModal();
+    };
 
     function statusClass(status) {
       if (status === "In Transit") return "transit";
@@ -731,15 +789,30 @@
     function isAutoDelayed(x) {
       if (x.status === "Delivered") return false;
       if (!x.eta) return false;
+
       const today = new Date();
       today.setHours(0,0,0,0);
+
       const eta = new Date(x.eta);
       eta.setHours(0,0,0,0);
+
       return eta < today;
     }
 
     function effectiveStatus(x) {
       return isAutoDelayed(x) ? "Delayed" : (x.status || "Pending");
+    }
+
+    function fmtDate(date) {
+      if (!date) return null;
+      const d = new Date(date);
+      if (isNaN(d)) return null;
+
+      return {
+        month: d.toLocaleString("en-GB", { month: "short" }).toUpperCase(),
+        day: String(d.getDate()).padStart(2, "0"),
+        full: d.toLocaleDateString("en-GB")
+      };
     }
 
     function updateStats(data) {
@@ -750,14 +823,26 @@
       document.getElementById("delayedStat").textContent = data.filter(x => effectiveStatus(x) === "Delayed").length;
     }
 
-    function fmtDate(date) {
-      if (!date) return null;
-      const d = new Date(date);
-      if (isNaN(d)) return null;
-      return {
-        month: d.toLocaleString("en-GB", { month: "short" }).toUpperCase(),
-        day: String(d.getDate()).padStart(2, "0")
-      };
+    function renderRows(data) {
+      if (!data.length) {
+        rows.innerHTML = `<tr><td colspan="6">No shipments found.</td></tr>`;
+      } else {
+        rows.innerHTML = data.map(x => `
+          <tr onclick="selectShipment('${x.id}')">
+            <td>${x.shipment_ref || ""}</td>
+            <td>${x.client || ""}</td>
+            <td>${x.origin || ""} → ${x.destination || ""}</td>
+            <td><span class="pill ${statusClass(effectiveStatus(x))}">${effectiveStatus(x)}</span></td>
+            <td><span class="pill ${priorityClass(x.priority)}">${x.priority || "Medium"}</span></td>
+            <td>${x.assigned_to || "-"}</td>
+          </tr>
+        `).join("");
+      }
+
+      updateStats(data);
+      renderCalendar(data);
+      renderBD(data);
+      renderMap(data);
     }
 
     function renderCalendar(data) {
@@ -868,26 +953,92 @@
       `;
     }
 
-    function renderRows(data) {
-      if (!data.length) {
-        rows.innerHTML = `<tr><td colspan="5">No shipments found.</td></tr>`;
-      } else {
-        rows.innerHTML = data.map(x => `
-          <tr onclick="openEdit('${x.id}')">
-            <td>${x.shipment_ref || ""}</td>
-            <td>${x.client || ""}</td>
-            <td>${x.origin || ""} → ${x.destination || ""}</td>
-            <td><span class="pill ${statusClass(effectiveStatus(x))}">${effectiveStatus(x)}</span></td>
-            <td><span class="pill ${priorityClass(x.priority)}">${x.priority || "Medium"}</span></td>
-          </tr>
-        `).join("");
-      }
+    window.selectShipment = function(id) {
+      const x = shipments.find(s => s.id === id);
+      if (!x) return;
 
-      updateStats(data);
-      renderCalendar(data);
-      renderBD(data);
-      renderMap(data);
-    }
+      selectedShipment = x;
+
+      const history = Array.isArray(x.status_history) ? x.status_history : [];
+      const historyHtml = history.length
+        ? history.slice().reverse().map(h => `
+          <div class="detail-row">
+            <div>
+              <strong>${h.from || "New"} → ${h.to}</strong>
+              <span class="small">${h.at ? new Date(h.at).toLocaleString("en-GB") : ""}</span>
+            </div>
+            <span class="pill transit">History</span>
+          </div>
+        `).join("")
+        : `
+          <div class="detail-row">
+            <div><strong>No status history yet</strong><span class="small">Changes will appear here.</span></div>
+            <span class="pill pending">Info</span>
+          </div>
+        `;
+
+      document.getElementById("detailView").innerHTML = `
+        <div class="detail-row">
+          <div>
+            <strong>${x.shipment_ref} — ${x.client || ""}</strong>
+            <span class="small">${x.origin || ""} → ${x.destination || ""}</span>
+          </div>
+          <span class="pill ${statusClass(effectiveStatus(x))}">${effectiveStatus(x)}</span>
+        </div>
+
+        <div class="detail-row">
+          <div>
+            <strong>Assigned</strong>
+            <span class="small">${x.assigned_to || "Unassigned"}</span>
+          </div>
+          <span class="pill pickup">Team</span>
+        </div>
+
+        <div class="detail-row">
+          <div>
+            <strong>Dates</strong>
+            <span class="small">Pickup: ${x.pickup_date || "-"} | ETD: ${x.etd || "-"} | ETA: ${x.eta || "-"}</span>
+          </div>
+          <span class="pill transit">Timeline</span>
+        </div>
+
+        <div class="detail-row">
+          <div>
+            <strong>BD Notes</strong>
+            <span class="small">${x.bd_notes || "No BD notes"}</span>
+          </div>
+          <span class="pill pickup">BD</span>
+        </div>
+
+        ${historyHtml}
+
+        <br>
+        <button class="primary-btn" onclick="openEdit('${x.id}')">Edit Shipment</button>
+      `;
+    };
+
+    window.openEdit = function(id) {
+      const x = shipments.find(s => s.id === id);
+      if (!x) return;
+
+      editingId = id;
+      document.getElementById("modalTitle").textContent = "Edit Shipment";
+      document.getElementById("deleteBtn").style.display = "inline-block";
+
+      setVal("client", x.client);
+      setVal("origin", x.origin);
+      setVal("destination", x.destination);
+      setVal("status", x.status || "Pending");
+      setVal("priority", x.priority || "Medium");
+      setVal("assigned", x.assigned_to);
+      setVal("pickup", x.pickup_date);
+      setVal("etd", x.etd);
+      setVal("eta", x.eta);
+      setVal("bdSource", x.bd_source);
+      setVal("bdNotes", x.bd_notes);
+
+      modal.classList.add("show");
+    };
 
     function applyFilters() {
       const q = document.getElementById("searchInput").value.toLowerCase();
@@ -928,30 +1079,11 @@
 
       shipments = data || [];
       applyFilters();
+
+      if (shipments.length && !selectedShipment) {
+        selectShipment(shipments[0].id);
+      }
     }
-
-    window.openEdit = function(id) {
-      const x = shipments.find(s => s.id === id);
-      if (!x) return;
-
-      editingId = id;
-      document.getElementById("modalTitle").textContent = "Edit Shipment";
-      document.getElementById("deleteBtn").style.display = "inline-block";
-
-      setVal("client", x.client);
-      setVal("origin", x.origin);
-      setVal("destination", x.destination);
-      setVal("status", x.status || "Pending");
-      setVal("priority", x.priority || "Medium");
-      setVal("assigned", x.assigned_to);
-      setVal("pickup", x.pickup_date);
-      setVal("etd", x.etd);
-      setVal("eta", x.eta);
-      setVal("bdSource", x.bd_source);
-      setVal("bdNotes", x.bd_notes);
-
-      modal.classList.add("show");
-    };
 
     document.getElementById("saveBtn").onclick = async () => {
       const payload = {
@@ -976,7 +1108,7 @@
 
       if (editingId) {
         const existing = shipments.find(x => x.id === editingId);
-        const history = existing?.status_history || [];
+        const history = Array.isArray(existing?.status_history) ? existing.status_history : [];
         const nextHistory = existing && existing.status !== payload.status
           ? [...history, { from: existing.status, to: payload.status, at: new Date().toISOString() }]
           : history;
@@ -1006,6 +1138,7 @@
 
       closeModal();
       clearForm();
+      selectedShipment = null;
       await loadShipments();
       statusMsg.textContent = "Saved successfully.";
     };
@@ -1026,8 +1159,62 @@
 
       closeModal();
       clearForm();
+      selectedShipment = null;
       await loadShipments();
       statusMsg.textContent = "Deleted successfully.";
+    };
+
+    document.getElementById("parseBtn").onclick = async () => {
+      const text = document.getElementById("emailInput").value.trim();
+
+      if (!text) {
+        statusMsg.textContent = "Paste an email or BD handover first.";
+        return;
+      }
+
+      function extract(pattern) {
+        const match = text.match(pattern);
+        return match ? match[1].trim() : "";
+      }
+
+      const client =
+        extract(/client[:\-]\s*(.+)/i) ||
+        extract(/customer[:\-]\s*(.+)/i) ||
+        "Parsed Client";
+
+      const origin =
+        extract(/origin[:\-]\s*(.+)/i) ||
+        extract(/from[:\-]\s*(.+)/i) ||
+        "TBC";
+
+      const destination =
+        extract(/destination[:\-]\s*(.+)/i) ||
+        extract(/to[:\-]\s*(.+)/i) ||
+        "TBC";
+
+      const priority = /vip|urgent|critical/i.test(text) ? "VIP" : "Medium";
+
+      const { error } = await sb.from("shipments").insert([{
+        shipment_ref: "SHP" + Date.now(),
+        client,
+        origin,
+        destination,
+        shipment_type: /air/i.test(text) ? "Air" : /sea|ocean/i.test(text) ? "Sea" : "Road",
+        status: "Pending",
+        priority,
+        bd_source: "Email Parser",
+        bd_notes: text.slice(0, 500),
+        status_history: [{ from: null, to: "Pending", at: new Date().toISOString() }]
+      }]);
+
+      if (error) {
+        statusMsg.textContent = "PARSER ERROR: " + error.message;
+        return;
+      }
+
+      document.getElementById("emailInput").value = "";
+      await loadShipments();
+      statusMsg.textContent = "Email parsed and shipment created.";
     };
 
     ["searchInput", "statusFilter", "typeFilter", "priorityFilter"].forEach(id => {
