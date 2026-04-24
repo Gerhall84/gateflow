@@ -379,6 +379,27 @@
       font-size:13px;
     }
 
+    .unassigned-list {
+      padding:16px;
+    }
+
+    .unassigned-card {
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      margin-bottom:10px;
+      background:#fbfdfd;
+    }
+
+    .unassigned-card strong {
+      display:block;
+      margin-bottom:4px;
+    }
+
+    .unassigned-card small {
+      color:var(--muted);
+    }
+
     .alert-panel {
       margin-bottom:16px;
       padding:18px;
@@ -591,7 +612,8 @@
       </div>
 
       <div class="card">
-        <div class="section-head"><h2>Status</h2></div>
+        <div class="section-head"><h2>Unassigned Shipments</h2></div>
+        <div class="unassigned-list" id="unassignedBox"></div>
         <div id="statusMsg">Loading...</div>
       </div>
     </section>
@@ -625,8 +647,8 @@
     <input id="client" placeholder="Customer name">
     <input id="origin" placeholder="Origin">
     <input id="destination" placeholder="Destination">
-    <input id="assigned" placeholder="Assign to email">
 
+    <select id="assigned"></select>
     <select id="shipmentType"></select>
 
     <input id="pickupDate" type="date">
@@ -647,515 +669,253 @@
   </div>
 </div>
 <script>
-  const sb = window.supabase.createClient(
-    "https://edxgkwkdgvsajfmkejbk.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
-  );
+const sb = window.supabase.createClient(
+  "https://edxgkwkdgvsajfmkejbk.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
+);
 
-  const shipmentTypes = [
-    "All",
-    "Air Import",
-    "Air Export",
-    "Ocean Import",
-    "Ocean Export",
-    "Road Import",
-    "Road Export",
-    "Road Domestic",
-    "Customs Clearance"
-  ];
+// USERS (Admin + team)
+const users = [
+  { name: "Gerard Hall", email: "gerard.hall@mauriceward.com" },
+  { name: "Balazs Bekes", email: "balazs.bekes@mauriceward.com" }
+];
 
-  let user = null;
-  let shipments = [];
-  let map;
-  let mapLayer;
-  let showMine = false;
-  let alertFilter = "all";
-  let typeFilter = "All";
-  let editingId = null;
-  const geoCache = {};
+// TYPES
+const shipmentTypes = [
+  "All",
+  "Air Import","Air Export",
+  "Ocean Import","Ocean Export",
+  "Road Import","Road Export","Road Domestic",
+  "Customs Clearance"
+];
 
-  const loginScreen = document.getElementById("loginScreen");
-  const app = document.getElementById("app");
-  const modal = document.getElementById("modal");
-  const rows = document.getElementById("rows");
-  const statusMsg = document.getElementById("statusMsg");
-  const myBtn = document.getElementById("myBtn");
+let user=null, shipments=[], map, mapLayer;
+let showMine=false, alertFilter="all", typeFilter="All", editingId=null;
 
-  function getVal(id) {
-    return document.getElementById(id).value.trim();
+const rows = document.getElementById("rows");
+const statusMsg = document.getElementById("statusMsg");
+const myBtn = document.getElementById("myBtn");
+
+// ---------- BASIC ----------
+const getVal = id => document.getElementById(id).value.trim();
+const initials = e => String(e||"GK").slice(0,2).toUpperCase();
+
+// ---------- DROPDOWNS ----------
+function renderUserDropdown(){
+  const el=document.getElementById("assigned");
+  el.innerHTML=`
+    <option value="">Unassigned</option>
+    ${users.map(u=>`<option value="${u.email}">${u.name}</option>`).join("")}
+  `;
+}
+
+function renderTypeFilters(){
+  const top=document.getElementById("topTypeFilters");
+  const side=document.getElementById("sideTypeFilters");
+
+  top.innerHTML=shipmentTypes.map(t=>`
+    <button class="type-chip ${typeFilter===t?"active":""}" onclick="setTypeFilter('${t}')">${t}</button>
+  `).join("");
+
+  side.innerHTML=shipmentTypes.map(t=>`
+    <button class="${typeFilter===t?"active":""}" onclick="setTypeFilter('${t}')">${t}</button>
+  `).join("");
+
+  document.getElementById("shipmentType").innerHTML =
+    shipmentTypes.filter(t=>t!=="All").map(t=>`<option>${t}</option>`).join("");
+}
+
+function setTypeFilter(t){ typeFilter=t; renderTypeFilters(); renderRows(); }
+
+// ---------- LOGIN ----------
+async function login(){
+  const {data,error}=await sb.auth.signInWithPassword({
+    email:getVal("loginEmail"),
+    password:getVal("loginPassword")
+  });
+
+  if(error){
+    document.getElementById("loginError").textContent=error.message;
+    return;
   }
 
-  function initials(email) {
-    return String(email || "GK").slice(0, 2).toUpperCase();
+  user=data.user;
+  document.getElementById("userEmail").textContent=user.email;
+  document.getElementById("avatar").textContent=initials(user.email);
+
+  document.getElementById("loginScreen").style.display="none";
+  document.getElementById("app").style.display="grid";
+
+  initMap();
+  loadShipments();
+}
+
+// ---------- MAP ----------
+function initMap(){
+  map=L.map("map").setView([53,-6],4);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+  mapLayer=L.layerGroup().addTo(map);
+}
+
+// ---------- FILTERS ----------
+function baseVisible(){
+  let data=showMine
+    ? shipments.filter(x=>x.assigned_to===user.email)
+    : shipments;
+
+  if(typeFilter!=="All"){
+    data=data.filter(x=>x.shipment_type===typeFilter);
   }
 
-  function renderTypeFilters() {
-    const top = document.getElementById("topTypeFilters");
-    const side = document.getElementById("sideTypeFilters");
-    const options = shipmentTypes.filter(t => t !== "All");
+  return data;
+}
 
-    top.innerHTML = shipmentTypes.map(t => `
-      <button class="type-chip ${typeFilter === t ? "active" : ""}" onclick="setTypeFilter('${t}')">${t}</button>
-    `).join("");
+function getVisible(){
+  let data=baseVisible();
 
-    side.innerHTML = `
-      <button class="${typeFilter === "All" ? "active" : ""}" onclick="setTypeFilter('All')">All Shipments</button>
-      ${options.map(t => `
-        <button class="${typeFilter === t ? "active" : ""}" onclick="setTypeFilter('${t}')">${t}</button>
-      `).join("")}
-    `;
-
-    document.getElementById("shipmentType").innerHTML = options.map(t => `
-      <option value="${t}">${t}</option>
-    `).join("");
+  if(alertFilter==="overdue"){
+    data=data.filter(x=>riskLabel(x)==="Overdue");
   }
 
-  function setTypeFilter(type) {
-    typeFilter = type;
-    renderTypeFilters();
-    renderRows();
+  if(alertFilter==="risk"){
+    data=data.filter(x=>riskLabel(x)==="At Risk");
   }
 
-  function clearForm() {
-    editingId = null;
-    document.getElementById("modalTitle").textContent = "Add Shipment";
-    ["client", "origin", "destination", "assigned", "pickupDate", "etdDate", "eta"].forEach(id => {
-      document.getElementById(id).value = "";
-    });
-    document.getElementById("shipmentType").value = "Air Import";
-    document.getElementById("status").value = "Pending";
+  return data;
+}
+
+// ---------- RISK ----------
+function riskLabel(x){
+  if(!x.eta || x.status==="Delivered") return "";
+  const diff=(new Date(x.eta)-new Date())/86400000;
+  if(diff<0) return "Overdue";
+  if(diff<=2) return "At Risk";
+  return "";
+}
+
+// ---------- UNASSIGNED ----------
+function renderUnassigned(){
+  const box=document.getElementById("unassignedBox");
+
+  const list=shipments.filter(x=>!x.assigned_to);
+
+  if(!list.length){
+    box.innerHTML=`<div style="color:#6f7d93;">No unassigned shipments</div>`;
+    return;
   }
 
-  async function login() {
-    const { data, error } = await sb.auth.signInWithPassword({
-      email: getVal("loginEmail"),
-      password: getVal("loginPassword")
-    });
-
-    if (error) {
-      document.getElementById("loginError").textContent = error.message;
-      return;
-    }
-
-    user = data.user;
-    document.getElementById("userEmail").textContent = user.email;
-    document.getElementById("avatar").textContent = initials(user.email);
-
-    loginScreen.style.display = "none";
-    app.style.display = "grid";
-
-    initMap();
-    await loadShipments();
-  }
-
-  async function logout() {
-    await sb.auth.signOut();
-    location.reload();
-  }
-
-  function initMap() {
-    if (map) {
-      map.invalidateSize();
-      return;
-    }
-
-    map = L.map("map").setView([53.3498, -6.2603], 4);
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap"
-    }).addTo(map);
-
-    mapLayer = L.layerGroup().addTo(map);
-    setTimeout(() => map.invalidateSize(), 300);
-  }
-
-  async function geocode(place) {
-    if (!place) return [53.3, -6.2];
-
-    const key = place.toLowerCase();
-    if (geoCache[key]) return geoCache[key];
-
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(place)}`
-      );
-      const data = await res.json();
-
-      if (data[0]) {
-        const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-        geoCache[key] = coords;
-        return coords;
-      }
-    } catch {}
-
-    return [53.3, -6.2];
-  }
-
-  function statusClass(s) {
-    if (s === "In Transit") return "transit";
-    if (s === "Delivered") return "delivered";
-    if (s === "Delayed") return "delayed";
-    return "pending";
-  }
-
-  function riskLabel(x) {
-    if (!x.eta || x.status === "Delivered") return "";
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const eta = new Date(x.eta);
-    eta.setHours(0, 0, 0, 0);
-
-    const diff = Math.ceil((eta - today) / 86400000);
-
-    if (diff < 0) return "Overdue";
-    if (diff <= 2) return "At Risk";
-    return "";
-  }
-
-  function setAlertFilter(type) {
-    alertFilter = type;
-    renderRows();
-  }
-
-  function baseVisible() {
-    let data = showMine
-      ? shipments.filter(x => String(x.assigned_to || "").toLowerCase() === String(user?.email || "").toLowerCase())
-      : shipments;
-
-    if (typeFilter !== "All") {
-      data = data.filter(x => (x.shipment_type || "") === typeFilter);
-    }
-
-    return data;
-  }
-
-  function getVisible() {
-    let data = baseVisible();
-
-    if (alertFilter === "overdue") {
-      data = data.filter(x => riskLabel(x) === "Overdue");
-    }
-
-    if (alertFilter === "risk") {
-      data = data.filter(x => riskLabel(x) === "At Risk");
-    }
-
-    return data;
-  }
-
-  function eventDateValue(x, field) {
-    if (field === "pickup") return x.pickup_date || "";
-    if (field === "etd") return x.etd || "";
-    if (field === "eta") return x.eta || "";
-    return "";
-  }
-
-  function renderTimeline(data) {
-    const grid = document.getElementById("timelineGrid");
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const days = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(today);
-      d.setDate(today.getDate() + i);
-      return d;
-    });
-
-    grid.innerHTML = days.map(day => {
-      const key = day.toISOString().slice(0, 10);
-      const events = [];
-
-      data.forEach(x => {
-        if (eventDateValue(x, "pickup") === key) events.push({ type: "Pickup", item: x });
-        if (eventDateValue(x, "etd") === key) events.push({ type: "ETD", item: x });
-        if (eventDateValue(x, "eta") === key) events.push({ type: "ETA", item: x });
-      });
-
-      const eventHtml = events.length
-        ? events.map(e => {
-            const r = riskLabel(e.item);
-            const cls =
-              r === "Overdue" ? "overdue" :
-              r === "At Risk" ? "risk" :
-              e.item.status === "Delivered" ? "delivered" : "";
-
-            return `
-              <div class="timeline-item ${cls}">
-                <strong>${e.type} · ${e.item.shipment_type || "Shipment"}</strong>
-                <div class="timeline-customer">${e.item.client || "No customer"}</div>
-                <div>${e.item.shipment_ref || ""}</div>
-                <div class="timeline-route">${e.item.origin || ""} → ${e.item.destination || ""}</div>
-              </div>
-            `;
-          }).join("")
-        : `<div style="color:#6f7d93; font-size:12px;">No events</div>`;
-
-      return `
-        <div class="timeline-day">
-          <h3>${day.toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short" })}</h3>
-          ${eventHtml}
-        </div>
-      `;
-    }).join("");
-  }
-
-  async function renderMap(data) {
-    if (!mapLayer) return;
-
-    mapLayer.clearLayers();
-    const bounds = [];
-
-    for (const x of data.slice(0, 10)) {
-      const o = await geocode(x.origin);
-      const d = await geocode(x.destination);
-
-      bounds.push(o, d);
-
-      const color =
-        riskLabel(x) === "Overdue" || x.status === "Delayed" ? "red" :
-        x.status === "Delivered" ? "green" :
-        "#06b7a5";
-
-      L.polyline([o, d], {
-        color,
-        weight: 4,
-        opacity: .85,
-        dashArray: x.status === "In Transit" ? "8,8" : null
-      }).addTo(mapLayer);
-
-      L.marker(o).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>${x.client || ""}<br>${x.origin || ""}`);
-      L.marker(d).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>${x.client || ""}<br>${x.destination || ""}`);
-    }
-
-    if (bounds.length) {
-      map.fitBounds(bounds, { padding: [30, 30], maxZoom: 6 });
-    }
-  }
-
-  function renderRows() {
-    const data = getVisible();
-    const allVisible = baseVisible();
-
-    if (!data.length) {
-      rows.innerHTML = `<tr><td colspan="10">No shipments found.</td></tr>`;
-    } else {
-      rows.innerHTML = data.map(x => {
-        const risk = riskLabel(x);
-
-        return `
-        <tr style="
-          ${risk === "Overdue" ? "background:#fff3f3;" : ""}
-          ${risk === "At Risk" ? "background:#fff9f0;" : ""}
-        ">
-          <td>${x.shipment_ref || ""}</td>
-          <td>${x.client || ""}</td>
-          <td><span class="pill pickup">${x.shipment_type || "Not set"}</span></td>
-          <td>${x.origin || ""} → ${x.destination || ""}</td>
-          <td>
-            <span class="pill ${statusClass(x.status)}">${x.status || "Pending"}</span>
-            ${risk ? `<span class="pill ${risk === "Overdue" ? "delayed" : "pending"}">${risk}</span>` : ""}
-          </td>
-          <td>${eventDateValue(x, "pickup") || "-"}</td>
-          <td>${eventDateValue(x, "etd") || "-"}</td>
-          <td>${eventDateValue(x, "eta") || "-"}</td>
-          <td>${x.assigned_to || "-"}</td>
-          <td>
-            <button class="action-btn" onclick="editShipment('${x.id}')">✏️</button>
-            <button class="action-btn" onclick="setStatus('${x.id}','In Transit')">🚚</button>
-            <button class="action-btn" onclick="setStatus('${x.id}','Delivered')">✅</button>
-            <button class="action-btn" onclick="deleteShipment('${x.id}')">🗑️</button>
-          </td>
-        </tr>`;
-      }).join("");
-    }
-
-    document.getElementById("totalStat").textContent = data.length;
-    document.getElementById("transitStat").textContent = data.filter(x => x.status === "In Transit").length;
-    document.getElementById("delayedStat").textContent = data.filter(x => x.status === "Delayed" || riskLabel(x)).length;
-
-    document.getElementById("alertAll").textContent = allVisible.length;
-    document.getElementById("alertOverdue").textContent = allVisible.filter(x => riskLabel(x) === "Overdue").length;
-    document.getElementById("alertRisk").textContent = allVisible.filter(x => riskLabel(x) === "At Risk").length;
-
-    renderTimeline(data);
-    renderMap(data);
-
-    statusMsg.textContent =
-      (typeFilter !== "All" ? typeFilter + " · " : "") +
-      (showMine ? "Showing my shipments: " + data.length : "Loaded " + data.length + " shipment(s)");
-  }
-
-  function editShipment(id) {
-    const x = shipments.find(s => s.id === id);
-    if (!x) return;
-
-    editingId = id;
-    document.getElementById("modalTitle").textContent = "Edit Shipment";
-
-    document.getElementById("client").value = x.client || "";
-    document.getElementById("origin").value = x.origin || "";
-    document.getElementById("destination").value = x.destination || "";
-    document.getElementById("assigned").value = x.assigned_to || "";
-    document.getElementById("shipmentType").value = x.shipment_type || "Air Import";
-    document.getElementById("pickupDate").value = x.pickup_date || "";
-    document.getElementById("etdDate").value = x.etd || "";
-    document.getElementById("eta").value = x.eta || "";
-    document.getElementById("status").value = x.status || "Pending";
-
-    modal.classList.add("show");
-  }
-
-  async function setStatus(id, status) {
-    const { error } = await sb
-      .from("shipments")
-      .update({ status })
-      .eq("id", id);
-
-    if (error) {
-      alert("Update failed: " + error.message);
-      return;
-    }
-
-    await loadShipments();
-    statusMsg.textContent = "Shipment updated ✔";
-  }
-
-  async function deleteShipment(id) {
-    if (!confirm("Delete this shipment?")) return;
-
-    const { error } = await sb
-      .from("shipments")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      alert("Delete failed: " + error.message);
-      return;
-    }
-
-    await loadShipments();
-    statusMsg.textContent = "Shipment deleted ✔";
-  }
-
-  async function loadShipments() {
-    statusMsg.textContent = "Loading...";
-
-    const { data, error } = await sb
-      .from("shipments")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      statusMsg.textContent = "LOAD ERROR: " + error.message;
-      return;
-    }
-
-    shipments = data || [];
-    renderRows();
-  }
-
-  document.getElementById("loginBtn").onclick = login;
-  document.getElementById("logoutBtn").onclick = logout;
-
-  myBtn.onclick = () => {
-    showMine = !showMine;
-    myBtn.classList.toggle("active", showMine);
-    renderRows();
+  box.innerHTML=list.map(x=>`
+    <div class="unassigned-card">
+      <strong>${x.client}</strong>
+      <small>${x.origin} → ${x.destination}</small><br>
+      <button class="primary-btn" onclick="takeShipment('${x.id}')">Take</button>
+    </div>
+  `).join("");
+}
+
+async function takeShipment(id){
+  await sb.from("shipments")
+    .update({assigned_to:user.email})
+    .eq("id",id);
+
+  loadShipments();
+}
+
+// ---------- TABLE ----------
+function renderRows(){
+  const data=getVisible();
+
+  rows.innerHTML=data.map(x=>`
+    <tr>
+      <td>${x.shipment_ref||""}</td>
+      <td>${x.client||""}</td>
+      <td>${x.shipment_type||""}</td>
+      <td>${x.origin} → ${x.destination}</td>
+      <td>${x.status||""}</td>
+      <td>${x.pickup_date||"-"}</td>
+      <td>${x.etd||"-"}</td>
+      <td>${x.eta||"-"}</td>
+      <td>${x.assigned_to||"-"}</td>
+      <td>
+        <button onclick="editShipment('${x.id}')">✏️</button>
+        <button onclick="takeShipment('${x.id}')">👤</button>
+        <button onclick="deleteShipment('${x.id}')">🗑️</button>
+      </td>
+    </tr>
+  `).join("");
+
+  renderUnassigned();
+}
+
+// ---------- CRUD ----------
+function editShipment(id){
+  const x=shipments.find(s=>s.id===id);
+  editingId=id;
+
+  document.getElementById("client").value=x.client||"";
+  document.getElementById("origin").value=x.origin||"";
+  document.getElementById("destination").value=x.destination||"";
+  document.getElementById("assigned").value=x.assigned_to||"";
+  document.getElementById("shipmentType").value=x.shipment_type||"";
+  document.getElementById("pickupDate").value=x.pickup_date||"";
+  document.getElementById("etdDate").value=x.etd||"";
+  document.getElementById("eta").value=x.eta||"";
+
+  modal.classList.add("show");
+}
+
+async function deleteShipment(id){
+  if(!confirm("Delete?")) return;
+  await sb.from("shipments").delete().eq("id",id);
+  loadShipments();
+}
+
+// ---------- SAVE ----------
+document.getElementById("saveBtn").onclick = async ()=>{
+  const payload={
+    client:getVal("client"),
+    origin:getVal("origin"),
+    destination:getVal("destination"),
+    assigned_to:getVal("assigned")||null,
+    shipment_type:getVal("shipmentType"),
+    pickup_date:getVal("pickupDate")||null,
+    etd:getVal("etdDate")||null,
+    eta:getVal("eta")||null,
+    status:getVal("status")
   };
 
-  document.getElementById("openBtn").onclick = () => {
-    clearForm();
-    modal.classList.add("show");
-  };
-
-  document.getElementById("cancelBtn").onclick = () => {
-    clearForm();
-    modal.classList.remove("show");
-  };
-
-  modal.onclick = e => {
-    if (e.target === modal) {
-      clearForm();
-      modal.classList.remove("show");
-    }
-  };
-
-  document.getElementById("saveBtn").onclick = async () => {
-    const payload = {
-      client: getVal("client"),
-      origin: getVal("origin"),
-      destination: getVal("destination"),
-      assigned_to: getVal("assigned") || null,
-      shipment_type: getVal("shipmentType") || "Air Import",
-      pickup_date: getVal("pickupDate") || null,
-      etd: getVal("etdDate") || null,
-      eta: getVal("eta") || null,
-      status: getVal("status") || "Pending"
-    };
-
-    if (!payload.client || !payload.origin || !payload.destination) {
-      alert("Fill Customer, Origin and Destination.");
-      return;
-    }
-
-    let error;
-
-    if (editingId) {
-      const res = await sb
-        .from("shipments")
-        .update(payload)
-        .eq("id", editingId);
-
-      error = res.error;
-    } else {
-      const res = await sb
-        .from("shipments")
-        .insert([{
-          ...payload,
-          shipment_ref: "SHP" + Date.now(),
-          priority: "Medium",
-          created_by_email: user?.email || null,
-          source: "manual"
-        }]);
-
-      error = res.error;
-    }
-
-    if (error) {
-      alert("SAVE ERROR: " + error.message);
-      return;
-    }
-
-    clearForm();
-    modal.classList.remove("show");
-    await loadShipments();
-    statusMsg.textContent = "Saved ✔";
-  };
-
-  async function init() {
-    renderTypeFilters();
-
-    const { data } = await sb.auth.getSession();
-
-    if (data.session?.user) {
-      user = data.session.user;
-      document.getElementById("userEmail").textContent = user.email;
-      document.getElementById("avatar").textContent = initials(user.email);
-
-      loginScreen.style.display = "none";
-      app.style.display = "grid";
-
-      initMap();
-      await loadShipments();
-    } else {
-      loginScreen.style.display = "flex";
-      app.style.display = "none";
-    }
+  if(editingId){
+    await sb.from("shipments").update(payload).eq("id",editingId);
+  }else{
+    await sb.from("shipments").insert([{
+      ...payload,
+      shipment_ref:"SHP"+Date.now()
+    }]);
   }
 
-  init();
+  editingId=null;
+  modal.classList.remove("show");
+  loadShipments();
+};
+
+// ---------- LOAD ----------
+async function loadShipments(){
+  const {data}=await sb.from("shipments").select("*");
+  shipments=data||[];
+  renderRows();
+}
+
+// ---------- INIT ----------
+function init(){
+  renderUserDropdown();
+  renderTypeFilters();
+}
+
+document.getElementById("loginBtn").onclick=login;
+document.getElementById("openBtn").onclick=()=>modal.classList.add("show");
+document.getElementById("cancelBtn").onclick=()=>modal.classList.remove("show");
+
+init();
 </script>
 </body>
 </html>
