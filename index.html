@@ -646,6 +646,14 @@
 <div class="modal" id="modal">
   <div class="modal-box">
     <h2 id="modalTitle">Add Shipment</h2>
+    <div style="border:2px dashed #e4ebed; border-radius:18px; padding:16px; margin-bottom:14px; background:#fbfdfd; text-align:center;">
+  <strong>Shipment Documents</strong><br>
+  <small>Upload PDFs or files for this shipment</small><br><br>
+  <input id="docUpload" type="file" multiple>
+</div>
+<div id="docList" style="font-size:13px; color:#6f7d93; margin-bottom:12px;">
+  No documents selected.
+</div>
     <input id="client" placeholder="Customer name">
     <input id="origin" placeholder="Origin">
     <input id="destination" placeholder="Destination">
@@ -1237,6 +1245,15 @@ modal.onclick = e => {
 };
 
 async function init() {
+  let selectedDocs = [];
+
+document.getElementById("docUpload").addEventListener("change", e => {
+  selectedDocs = Array.from(e.target.files || []);
+
+  document.getElementById("docList").innerHTML = selectedDocs.length
+    ? selectedDocs.map(f => "📄 " + f.name).join("<br>")
+    : "No documents selected.";
+});
   renderUserDropdown();
   renderTypeFilters();
 
