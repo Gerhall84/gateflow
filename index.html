@@ -153,7 +153,8 @@
       text-transform:uppercase;
       margin:18px 12px 10px;
     }
-        .type-nav button {
+
+    .type-nav button {
       width:100%;
       text-align:left;
       background:transparent;
@@ -195,10 +196,31 @@
 
     .main { padding:28px; }
 
+    .welcome { margin-bottom:18px; }
+
+    .welcome h1 {
+      margin:0 0 8px;
+      font-size:28px;
+    }
+
+    .welcome p {
+      margin:0;
+      color:var(--muted);
+    }
+
     .topbar {
       display:flex;
       justify-content:space-between;
+      gap:12px;
       margin-bottom:20px;
+      flex-wrap:wrap;
+    }
+
+    .topbar-left,
+    .topbar-right {
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
     }
 
     .primary-btn {
@@ -210,6 +232,7 @@
       padding:0 22px;
       font-weight:900;
       cursor:pointer;
+      box-shadow:0 12px 30px rgba(6,183,165,.3);
     }
 
     .secondary-btn {
@@ -217,20 +240,127 @@
       border:1px solid var(--line);
       border-radius:14px;
       background:white;
+      color:var(--text);
       padding:0 20px;
+      font-weight:800;
       cursor:pointer;
+    }
+
+    .secondary-btn.active {
+      background:#dff7f3;
+      color:var(--brand-dark);
+      border-color:var(--brand);
+    }
+
+    .type-filter-bar {
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+
+    .type-chip {
+      height:40px;
+      border:1px solid var(--line);
+      background:white;
+      border-radius:999px;
+      padding:0 14px;
+      font-weight:900;
+      cursor:pointer;
+      color:var(--text);
+      box-shadow:0 10px 25px rgba(6,20,46,.04);
+    }
+
+    .type-chip.active,
+    .type-chip:hover {
+      background:#dff7f3;
+      color:var(--brand-dark);
+      border-color:var(--brand);
+    }
+        .action-btn {
+      border:0;
+      border-radius:12px;
+      padding:9px 11px;
+      margin-right:6px;
+      cursor:pointer;
+      background:#f4f7f8;
+    }
+
+    .stats {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:16px;
+      margin-bottom:16px;
+    }
+
+    .card {
+      background:white;
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(0,0,0,.03);
+      overflow:hidden;
+    }
+
+    .stat-card {
+      padding:22px;
+    }
+
+    .stat-label {
+      color:var(--muted);
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:6px;
+    }
+
+    .stat-value {
+      font-size:30px;
+      font-weight:900;
+    }
+
+    .grid {
+      display:grid;
+      grid-template-columns:1.4fr 1fr;
+      gap:16px;
+      margin-bottom:16px;
+    }
+
+    .section-head {
+      padding:20px 20px 12px;
+      border-bottom:1px solid var(--line);
+    }
+
+    .section-head h2 {
+      margin:0;
+      color:var(--brand-dark);
+      font-size:18px;
+    }
+
+    #map {
+      height:420px;
+      border-radius:18px;
+      margin:16px;
     }
 
     table {
       width:100%;
       border-collapse:collapse;
-      margin-top:20px;
     }
 
     th, td {
       padding:12px;
       border-bottom:1px solid var(--line);
     }
+
+    .pill {
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .pending { background:#fff1da; color:#d88d10; }
+    .transit { background:#dff7f3; color:#069788; }
+    .delayed { background:#ffe4e4; color:#ef5c5c; }
 
     .modal {
       display:none;
@@ -247,8 +377,17 @@
       background:white;
       padding:20px;
       border-radius:16px;
-      width:400px;
+      width:500px;
     }
+
+    .doc-upload-box {
+      border:2px dashed var(--line);
+      padding:14px;
+      margin-bottom:12px;
+      text-align:center;
+      border-radius:12px;
+    }
+
   </style>
 </head>
 
@@ -273,7 +412,7 @@
     </div>
     <div id="sideTypeFilters"></div>
     <div class="sidebar-footer">
-      <div id="avatar"></div>
+      <div class="avatar" id="avatar"></div>
       <div id="userEmail"></div>
     </div>
   </aside>
@@ -284,18 +423,42 @@
       <button class="secondary-btn" id="logoutBtn">Logout</button>
     </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Customer</th>
-          <th>Route</th>
-          <th>ETA</th>
-          <th>Docs</th>
-        </tr>
-      </thead>
-      <tbody id="rows"></tbody>
-    </table>
+    <section class="stats">
+      <div class="card stat-card">
+        <div class="stat-label">Total</div>
+        <div class="stat-value" id="totalStat">0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">In Transit</div>
+        <div class="stat-value" id="transitStat">0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Delayed</div>
+        <div class="stat-value" id="delayedStat">0</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head"><h2>Live Map</h2></div>
+      <div id="map"></div>
+    </section>
+
+    <section class="card">
+      <div class="section-head"><h2>Shipments</h2></div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Route</th>
+            <th>Status</th>
+            <th>ETA</th>
+            <th>Docs</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </section>
   </main>
 </div>
 
@@ -303,15 +466,15 @@
   <div class="modal-box">
     <h2>Add Shipment</h2>
 
+    <div class="doc-upload-box">
+      <input id="docUpload" type="file" multiple>
+      <div id="docList">No documents</div>
+    </div>
+
     <input id="client" placeholder="Customer">
     <input id="origin" placeholder="Origin">
     <input id="destination" placeholder="Destination">
     <input id="eta" type="date">
-
-    <div>
-      <input id="docUpload" type="file" multiple>
-      <div id="docList">No documents</div>
-    </div>
 
     <button id="saveBtn">Save</button>
   </div>
@@ -330,8 +493,8 @@ if (window.pdfjsLib) {
 }
 
 const users = [
-  { name:"Gerard Hall", email:"gerard.hall@mauriceward.com" },
-  { name:"Balazs Bekes", email:"balazs.bekes@mauriceward.com" },
+  { name:"Gerard Hall", email:"gerard.hall@mauriceward.com", admin:true },
+  { name:"Balazs Bekes", email:"balazs.bekes@mauriceward.com", admin:true },
   { name:"Ashley Nason", email:"ashley.nason@mauriceward.com" },
   { name:"Lisa O'Neill", email:"lisa.oneill@mauriceward.com" },
   { name:"Damian Halpin", email:"damian.halpin@mauriceward.com" },
@@ -349,15 +512,22 @@ const users = [
 ];
 
 let user = null;
+let shipments = [];
 let selectedDocs = [];
-let uploadedUrls = [];
+let map = null;
+let mapLayer = null;
+const geoCache = {};
 
-function getVal(id) {
-  return document.getElementById(id).value.trim();
+const getVal = id => document.getElementById(id)?.value?.trim() || "";
+
+function initials(email) {
+  return String(email || "GK").slice(0, 2).toUpperCase();
 }
 
 function renderLoginUsers() {
   const select = document.getElementById("loginUserSelect");
+  if (!select) return;
+
   select.innerHTML = `<option value="">Select user</option>` +
     users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
 
@@ -382,7 +552,6 @@ function fillIfEmpty(id, value) {
 
 function normaliseDate(value) {
   if (!value) return "";
-
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
 
   const parts = value.split(/[\/.-]/);
@@ -415,10 +584,6 @@ async function readDocText(file) {
 function parseShipmentText(text) {
   const clean = text.replace(/\r/g, "\n");
 
-  const awb = extractFirst(clean, [
-    /(?:AWB|Waybill|Waybill No|Waybill Number|Tracking No|Tracking Number)[:\s#-]+([A-Z0-9\-]+)/i
-  ]);
-
   const etaRaw = extractFirst(clean, [
     /(?:ETA|Arrival Date|Date of Arrival)[:\s]+([0-9]{4}-[0-9]{2}-[0-9]{2})/i,
     /(?:ETA|Arrival Date|Date of Arrival)[:\s]+([0-9]{1,2}[\/.-][0-9]{1,2}[\/.-][0-9]{2,4})/i
@@ -444,13 +609,12 @@ function parseShipmentText(text) {
   fillIfEmpty("origin", origin);
   fillIfEmpty("destination", destination);
   fillIfEmpty("eta", normaliseDate(etaRaw));
-
-  console.log("Parsed document:", { awb, eta: normaliseDate(etaRaw), shipper, consignee });
 }
 
 function initDocUpload() {
   const input = document.getElementById("docUpload");
   const list = document.getElementById("docList");
+  if (!input || !list) return;
 
   input.addEventListener("change", async e => {
     selectedDocs = Array.from(e.target.files || []);
@@ -491,28 +655,103 @@ async function uploadSelectedDocs() {
   return urls;
 }
 
-async function login() {
-  const { data, error } = await sb.auth.signInWithPassword({
-    email: getVal("loginEmail"),
-    password: getVal("loginPassword")
-  });
-
-  if (error) {
-    document.getElementById("loginError").textContent = error.message;
+function initMap() {
+  if (map) {
+    map.invalidateSize();
     return;
   }
 
-  user = data.user;
-  document.getElementById("loginScreen").style.display = "none";
-  document.getElementById("app").style.display = "grid";
-  document.getElementById("userEmail").textContent = user.email;
+  map = L.map("map").setView([53.3498, -6.2603], 4);
 
-  await loadShipments();
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap"
+  }).addTo(map);
+
+  mapLayer = L.layerGroup().addTo(map);
+  setTimeout(() => map.invalidateSize(), 300);
 }
 
-async function logout() {
-  await sb.auth.signOut();
-  location.reload();
+async function geocode(place) {
+  if (!place) return [53.3498, -6.2603];
+
+  const key = place.toLowerCase();
+  if (geoCache[key]) return geoCache[key];
+
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(place)}`
+    );
+    const data = await res.json();
+
+    if (data[0]) {
+      const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+      geoCache[key] = coords;
+      return coords;
+    }
+  } catch {}
+
+  return [53.3498, -6.2603];
+}
+
+async function renderMap(data) {
+  if (!mapLayer) return;
+
+  mapLayer.clearLayers();
+  const bounds = [];
+
+  for (const x of data.slice(0, 10)) {
+    const o = await geocode(x.origin);
+    const d = await geocode(x.destination);
+
+    bounds.push(o, d);
+
+    L.marker(o).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>${x.client || ""}<br>${x.origin || ""}`);
+    L.marker(d).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>${x.client || ""}<br>${x.destination || ""}`);
+
+    L.polyline([o, d], {
+      color: x.status === "Delivered" ? "green" : x.status === "Delayed" ? "red" : "#06b7a5",
+      weight: 4,
+      opacity: .85,
+      dashArray: x.status === "In Transit" ? "8,8" : null
+    }).addTo(mapLayer);
+  }
+
+  if (bounds.length) {
+    map.fitBounds(bounds, { padding: [30, 30], maxZoom: 6 });
+  }
+}
+
+function statusClass(status) {
+  if (status === "In Transit") return "transit";
+  if (status === "Delayed") return "delayed";
+  return "pending";
+}
+
+function renderRows(data) {
+  shipments = data || [];
+
+  document.getElementById("totalStat").textContent = shipments.length;
+  document.getElementById("transitStat").textContent =
+    shipments.filter(x => x.status === "In Transit").length;
+  document.getElementById("delayedStat").textContent =
+    shipments.filter(x => x.status === "Delayed").length;
+
+  document.getElementById("rows").innerHTML = shipments.map(x => {
+    const docs = Array.isArray(x.document_urls) ? x.document_urls : [];
+
+    return `
+      <tr>
+        <td>${x.shipment_ref || ""}</td>
+        <td>${x.client || ""}</td>
+        <td>${x.origin || ""} → ${x.destination || ""}</td>
+        <td><span class="pill ${statusClass(x.status)}">${x.status || "Pending"}</span></td>
+        <td>${x.eta || "-"}</td>
+        <td>${docs.length ? docs.map((u, i) => `<a href="${u}" target="_blank">Doc ${i + 1}</a>`).join("<br>") : "-"}</td>
+      </tr>
+    `;
+  }).join("");
+
+  renderMap(shipments);
 }
 
 async function loadShipments() {
@@ -529,20 +768,31 @@ async function loadShipments() {
   renderRows(data || []);
 }
 
-function renderRows(data) {
-  document.getElementById("rows").innerHTML = data.map(x => {
-    const docs = Array.isArray(x.document_urls) ? x.document_urls : [];
+async function login() {
+  const { data, error } = await sb.auth.signInWithPassword({
+    email: getVal("loginEmail"),
+    password: getVal("loginPassword")
+  });
 
-    return `
-      <tr>
-        <td>${x.shipment_ref || ""}</td>
-        <td>${x.client || ""}</td>
-        <td>${x.origin || ""} → ${x.destination || ""}</td>
-        <td>${x.eta || "-"}</td>
-        <td>${docs.length ? docs.map((u, i) => `<a href="${u}" target="_blank">Doc ${i + 1}</a>`).join("<br>") : "-"}</td>
-      </tr>
-    `;
-  }).join("");
+  if (error) {
+    document.getElementById("loginError").textContent = error.message;
+    return;
+  }
+
+  user = data.user;
+
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("app").style.display = "grid";
+  document.getElementById("userEmail").textContent = user.email;
+  document.getElementById("avatar").textContent = initials(user.email);
+
+  initMap();
+  await loadShipments();
+}
+
+async function logout() {
+  await sb.auth.signOut();
+  location.reload();
 }
 
 document.getElementById("loginBtn").onclick = login;
@@ -582,7 +832,6 @@ document.getElementById("saveBtn").onclick = async () => {
   }
 
   selectedDocs = [];
-  uploadedUrls = [];
   document.getElementById("docUpload").value = "";
   document.getElementById("docList").innerHTML = "No documents";
   document.getElementById("client").value = "";
