@@ -21,6 +21,7 @@
       --danger:#ef5c5c;
       --success:#18a66e;
       --warning:#f0a227;
+      --blue:#2d79ff;
       --shadow:0 25px 60px rgba(6,20,46,0.08);
     }
 
@@ -57,7 +58,6 @@
       display:block;
       max-width:200px;
       margin:0 auto 20px;
-      filter:drop-shadow(0 10px 30px rgba(6,183,165,.35));
     }
 
     .login-card h1 {
@@ -115,7 +115,6 @@
     .brand img {
       max-width:180px;
       margin-bottom:12px;
-      filter:drop-shadow(0 10px 30px rgba(6,183,165,.35));
     }
 
     .brand strong {
@@ -165,8 +164,7 @@
       background:rgba(6,183,165,.18);
       color:#8efff1;
     }
-
-    .sidebar-footer {
+        .sidebar-footer {
       margin-top:auto;
       padding-top:18px;
       border-top:1px solid rgba(255,255,255,.08);
@@ -268,7 +266,7 @@
 
     .stats {
       display:grid;
-      grid-template-columns:repeat(3,1fr);
+      grid-template-columns:repeat(4,1fr);
       gap:16px;
       margin-bottom:16px;
     }
@@ -332,16 +330,31 @@
       border:1px solid var(--line);
       border-radius:14px;
       padding:10px;
-      min-height:130px;
+      min-height:140px;
       font-size:12px;
+    }
+
+    .timeline-day strong {
+      display:block;
+      margin-bottom:8px;
     }
 
     .timeline-item {
       margin-top:8px;
-      padding:7px;
+      padding:8px;
       border-left:4px solid var(--brand);
       background:white;
       border-radius:8px;
+    }
+
+    .timeline-item.risk {
+      border-left-color:var(--warning);
+      background:#fff9f0;
+    }
+
+    .timeline-item.overdue {
+      border-left-color:var(--danger);
+      background:#fff3f3;
     }
 
     table {
@@ -359,13 +372,21 @@
 
     th { background:#f6f9fb; }
 
+    tr.row-risk {
+      background:#fff9f0;
+    }
+
+    tr.row-overdue {
+      background:#fff3f3;
+    }
+
     .pill {
       display:inline-flex;
       padding:6px 10px;
       border-radius:999px;
       font-size:12px;
       font-weight:800;
-      margin-bottom:4px;
+      margin:0 4px 4px 0;
     }
 
     .pending { background:#fff1da; color:#d88d10; }
@@ -373,6 +394,8 @@
     .delivered { background:#dff5eb; color:#18a66e; }
     .delayed { background:#ffe4e4; color:#ef5c5c; }
     .type-pill { background:#e4f0ff; color:#2d79ff; }
+    .risk-pill { background:#fff1da; color:#d88d10; }
+    .overdue-pill { background:#ffe4e4; color:#ef5c5c; }
 
     .action-btn {
       border:0;
@@ -395,8 +418,7 @@
       display:block;
       margin-bottom:4px;
     }
-
-    .modal {
+        .modal {
       display:none;
       position:fixed;
       inset:0;
@@ -455,13 +477,14 @@
     }
   </style>
 </head>
+
 <body>
 
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
-    <img src="logo.png" alt="Logo">
+    <img src="logo.png">
     <h1>GateKeeper</h1>
-    <p>Choose your user, then log in</p>
+    <p>Operations Control</p>
     <select id="loginUserSelect"></select>
     <input id="loginEmail" placeholder="Email">
     <input id="loginPassword" type="password" placeholder="Password">
@@ -473,16 +496,9 @@
 <div class="app" id="app">
   <aside class="sidebar">
     <div class="brand">
-      <img src="logo.png" alt="Logo">
+      <img src="logo.png">
       <strong>Operations</strong>
     </div>
-
-    <nav class="nav">
-      <a class="active">Dashboard</a>
-      <a>Shipments</a>
-      <a>Calendar</a>
-      <a>Map</a>
-    </nav>
 
     <div class="side-label">Shipment Types</div>
     <div class="type-nav" id="sideTypeFilters"></div>
@@ -494,10 +510,6 @@
   </aside>
 
   <main class="main">
-    <div class="welcome">
-      <h1>Operations Dashboard</h1>
-      <p>Live shipment visibility, document parsing, unassigned jobs and weekly planning</p>
-    </div>
 
     <div class="topbar">
       <div class="topbar-left">
@@ -509,7 +521,7 @@
       </div>
     </div>
 
-    <div id="topTypeFilters" class="type-filter-bar"></div>
+    <div id="typeFilters" class="type-filter-bar"></div>
 
     <section class="stats">
       <div class="card stat-card">
@@ -521,8 +533,12 @@
         <div class="stat-value" id="transitStat">0</div>
       </div>
       <div class="card stat-card">
-        <div class="stat-label">Delayed / Risk</div>
-        <div class="stat-value" id="delayedStat">0</div>
+        <div class="stat-label">At Risk</div>
+        <div class="stat-value" id="riskStat">0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Overdue</div>
+        <div class="stat-value" id="overdueStat">0</div>
       </div>
     </section>
 
@@ -538,7 +554,7 @@
       </div>
 
       <div class="card">
-        <div class="section-head"><h2>Unassigned Shipments</h2></div>
+        <div class="section-head"><h2>Unassigned</h2></div>
         <div id="unassigned"></div>
       </div>
     </section>
@@ -549,7 +565,7 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Customer / AWB</th>
+            <th>Customer</th>
             <th>Type</th>
             <th>Route</th>
             <th>Status</th>
@@ -562,61 +578,45 @@
         <tbody id="rows"></tbody>
       </table>
     </section>
+
   </main>
 </div>
 
 <div class="modal" id="modal">
   <div class="modal-box">
-    <h2 id="modalTitle">Add Shipment</h2>
+    <h2>Add Shipment</h2>
 
     <div class="doc-upload-box">
-      <strong>Shipment Documents</strong><br>
-      <small>Upload PDFs or files. Parser will auto-fill what it can.</small><br><br>
       <input id="docUpload" type="file" multiple>
-      <div id="docList" class="doc-list">No documents selected.</div>
+      <div id="docList" class="doc-list">No documents</div>
     </div>
 
     <div class="modal-grid">
       <input id="client" placeholder="Customer">
-      <select id="shipmentType"></select>
-
       <input id="origin" placeholder="Origin">
       <input id="destination" placeholder="Destination">
-
-      <input id="awb" placeholder="AWB / Waybill">
-      <input id="carrier" placeholder="Carrier / Courier">
-
+      <input id="awb" placeholder="AWB">
+      <input id="carrier" placeholder="Carrier">
       <input id="pieces" placeholder="Pieces">
       <input id="weight" placeholder="Weight">
-
       <input id="shipper" placeholder="Shipper">
       <input id="consignee" placeholder="Consignee">
-
-      <input id="pickupDate" type="date">
-      <input id="etdDate" type="date">
-
       <input id="eta" type="date">
       <select id="assigned"></select>
-
-      <select id="status">
-        <option>Pending</option>
-        <option>In Transit</option>
-        <option>Delivered</option>
-        <option>Delayed</option>
-      </select>
+      <select id="shipmentType"></select>
     </div>
 
     <div class="modal-actions">
-      <button class="secondary-btn" id="autoCreateBtn" type="button">Auto Create from Documents</button>
-      <button class="secondary-btn" id="cancelBtn" type="button">Cancel</button>
-      <button class="primary-btn" id="saveBtn" type="button">Save</button>
+      <button class="secondary-btn" id="autoCreateBtn">Auto Create</button>
+      <button class="secondary-btn" id="cancelBtn">Cancel</button>
+      <button class="primary-btn" id="saveBtn">Save</button>
     </div>
   </div>
 </div>
 <script>
 const sb = window.supabase.createClient(
-  "https://edxgkwkdgvsajfmkejbk.supabase.co."
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0."hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek
+  "https://edxgkwkdgvsajfmkejbk.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
 );
 
 const BUCKET = "shipment-documents";
@@ -625,13 +625,16 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 const shipmentTypes = [
-  "Air Import","Air Export","Ocean Import","Ocean Export",
-  "Road Import","Road Export","Road Domestic","Customs Clearance"
+  "All",
+  "Air Import","Air Export",
+  "Ocean Import","Ocean Export",
+  "Road Import","Road Export",
+  "Road Domestic","Customs Clearance"
 ];
 
 const users = [
-  { name:"Gerard Hall", email:"gerard.hall@mauriceward.com", admin:true },
-  { name:"Balazs Bekes", email:"balazs.bekes@mauriceward.com", admin:true }
+  { name:"Gerard Hall", email:"gerard.hall@mauriceward.com" },
+  { name:"Balazs Bekes", email:"balazs.bekes@mauriceward.com" }
 ];
 
 let user = null;
@@ -640,11 +643,26 @@ let selectedDocs = [];
 let editingId = null;
 let existingDocs = [];
 let showMine = false;
+let typeFilter = "All";
 
 const getVal = id => document.getElementById(id)?.value || "";
 const setVal = (id,val)=>{ if(val && !getVal(id)) document.getElementById(id).value = val; };
 
 function localDateOnly(d){ return d ? d.slice(0,10) : ""; }
+
+// ---------------- RISK ENGINE ----------------
+function getRiskLevel(shipment){
+  if(!shipment.eta || shipment.status === "Delivered") return "none";
+
+  const today = new Date();
+  const eta = new Date(shipment.eta);
+
+  const diff = (eta - today) / (1000*60*60*24);
+
+  if(diff < 0) return "overdue";
+  if(diff <= 2) return "risk";
+  return "none";
+}
 
 // ---------------- LOGIN ----------------
 document.getElementById("loginBtn").onclick = async () => {
@@ -658,6 +676,7 @@ document.getElementById("loginBtn").onclick = async () => {
   document.getElementById("loginScreen").style.display="none";
   document.getElementById("app").style.display="grid";
   document.getElementById("userEmail").textContent=user.email;
+
   loadShipments();
 };
 
@@ -668,58 +687,185 @@ async function loadShipments(){
   render();
 }
 
-// ---------------- RENDER ----------------
+// ---------------- FILTERS ----------------
+function renderTypeFilters(){
+  document.getElementById("typeFilters").innerHTML =
+    shipmentTypes.map(t => `
+      <button class="secondary-btn ${typeFilter===t?"active":""}"
+        onclick="setTypeFilter('${t}')">${t}</button>
+    `).join("");
+}
+
+function setTypeFilter(t){
+  typeFilter = t;
+  renderTypeFilters();
+  render();
+}
+function filteredShipments(){
+  let data = [...shipments];
+
+  if(showMine){
+    data = data.filter(x => x.assigned_to === user?.email);
+  }
+
+  if(typeFilter !== "All"){
+    data = data.filter(x => x.shipment_type === typeFilter);
+  }
+
+  return data;
+}
+
 function render(){
-  document.getElementById("rows").innerHTML = shipments.map(x=>{
+  const data = filteredShipments();
+
+  document.getElementById("totalStat").textContent = data.length;
+  document.getElementById("transitStat").textContent = data.filter(x => x.status === "In Transit").length;
+  document.getElementById("riskStat").textContent = data.filter(x => getRiskLevel(x) === "risk").length;
+  document.getElementById("overdueStat").textContent = data.filter(x => getRiskLevel(x) === "overdue").length;
+
+  document.getElementById("rows").innerHTML = data.map(x => {
+    const risk = getRiskLevel(x);
+    const docs = Array.isArray(x.document_urls) ? x.document_urls : [];
+
     return `
-    <tr>
-      <td>${x.shipment_ref}</td>
-      <td>${x.client}<br>${x.awb_number||""}</td>
-      <td>${x.shipment_type||""}</td>
-      <td>${x.origin} → ${x.destination}</td>
-      <td>${x.status}</td>
-      <td>${localDateOnly(x.eta)}</td>
-      <td>${(x.document_urls||[]).map(d=>`<a href="${d}" target="_blank">Doc</a>`).join("<br>")}</td>
-      <td>${x.assigned_to||"Unassigned"}</td>
-      <td>
-        <button onclick="editShipment('${x.id}')">✏️</button>
-        <button onclick="setStatus('${x.id}','In Transit')">🚚</button>
-        <button onclick="setStatus('${x.id}','Delivered')">✅</button>
-        <button onclick="deleteShipment('${x.id}')">🗑️</button>
-      </td>
-    </tr>`;
+      <tr class="${risk === "overdue" ? "row-overdue" : risk === "risk" ? "row-risk" : ""}">
+        <td>${x.shipment_ref || ""}</td>
+        <td>${x.client || ""}<br><small>${x.awb_number || ""}</small></td>
+        <td><span class="pill type-pill">${x.shipment_type || ""}</span></td>
+        <td>${x.origin || ""} → ${x.destination || ""}</td>
+        <td>
+          <span class="pill ${x.status === "In Transit" ? "transit" : x.status === "Delivered" ? "delivered" : x.status === "Delayed" ? "delayed" : "pending"}">
+            ${x.status || "Pending"}
+          </span>
+          ${risk === "risk" ? `<span class="pill risk-pill">At Risk</span>` : ""}
+          ${risk === "overdue" ? `<span class="pill overdue-pill">Overdue</span>` : ""}
+        </td>
+        <td>${localDateOnly(x.eta) || "-"}</td>
+        <td>${docs.length ? docs.map((u,i)=>`<a class="doc-link" href="${u}" target="_blank">Doc ${i+1}</a>`).join("") : "-"}</td>
+        <td>${x.assigned_to || "Unassigned"}</td>
+        <td>
+          <button class="action-btn" onclick="editShipment('${x.id}')">✏️</button>
+          <button class="action-btn" onclick="setStatus('${x.id}','In Transit')">🚚</button>
+          <button class="action-btn" onclick="setStatus('${x.id}','Delivered')">✅</button>
+          <button class="action-btn" onclick="deleteShipment('${x.id}')">🗑️</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  renderTimeline(data);
+  renderUnassigned();
+}
+
+function renderTimeline(data){
+  const box = document.getElementById("timeline");
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const days = Array.from({length:7},(_,i)=>{
+    const d = new Date(today);
+    d.setDate(today.getDate()+i);
+    return d;
+  });
+
+  box.innerHTML = days.map(day => {
+    const key = day.getFullYear()+"-"+String(day.getMonth()+1).padStart(2,"0")+"-"+String(day.getDate()).padStart(2,"0");
+
+    const events = data.filter(x => localDateOnly(x.eta) === key);
+
+    return `
+      <div class="timeline-day">
+        <strong>${day.toLocaleDateString("en-GB",{weekday:"short",day:"2-digit",month:"short"})}</strong>
+        ${events.length ? events.map(x => {
+          const risk = getRiskLevel(x);
+          return `
+            <div class="timeline-item ${risk === "overdue" ? "overdue" : risk === "risk" ? "risk" : ""}">
+              <b>${x.client || "No customer"}</b><br>
+              <small>${x.shipment_ref || ""}</small><br>
+              <small>${x.origin || ""} → ${x.destination || ""}</small>
+            </div>
+          `;
+        }).join("") : `<small>No events</small>`}
+      </div>
+    `;
   }).join("");
 }
 
-// ---------------- ACTIONS ----------------
+function renderUnassigned(){
+  const box = document.getElementById("unassigned");
+  const list = shipments.filter(x => !x.assigned_to);
+
+  box.innerHTML = list.length ? list.map(x => `
+    <div class="unassigned-card">
+      <strong>${x.client || "No customer"}</strong><br>
+      ${x.origin || ""} → ${x.destination || ""}<br>
+      <button class="primary-btn" style="height:34px;margin-top:8px;" onclick="takeShipment('${x.id}')">Take</button>
+    </div>
+  `).join("") : `<div style="padding:16px;color:#6f7d93;">No unassigned shipments</div>`;
+}
+
+async function takeShipment(id){
+  await sb.from("shipments").update({assigned_to:user.email}).eq("id",id);
+  await loadShipments();
+}
+
 async function setStatus(id,status){
   await sb.from("shipments").update({status}).eq("id",id);
-  loadShipments();
+  await loadShipments();
 }
 
 async function deleteShipment(id){
-  if(!confirm("Delete?")) return;
+  if(!confirm("Delete this shipment?")) return;
   await sb.from("shipments").delete().eq("id",id);
-  loadShipments();
+  await loadShipments();
 }
 
 function editShipment(id){
-  const x = shipments.find(s=>s.id===id);
-  editingId=id;
-  existingDocs=x.document_urls||[];
+  const x = shipments.find(s => s.id === id);
+  if(!x) return;
 
-  ["client","origin","destination","awb","carrier","pieces","weight","shipper","consignee"].forEach(f=>{
-    document.getElementById(f).value = x[f]||"";
-  });
+  editingId = id;
+  existingDocs = Array.isArray(x.document_urls) ? x.document_urls : [];
 
-  document.getElementById("eta").value=localDateOnly(x.eta);
+  document.getElementById("client").value = x.client || "";
+  document.getElementById("origin").value = x.origin || "";
+  document.getElementById("destination").value = x.destination || "";
+  document.getElementById("awb").value = x.awb_number || "";
+  document.getElementById("carrier").value = x.carrier || "";
+  document.getElementById("pieces").value = x.pieces || "";
+  document.getElementById("weight").value = x.weight || "";
+  document.getElementById("shipper").value = x.shipper || "";
+  document.getElementById("consignee").value = x.consignee || "";
+  document.getElementById("eta").value = localDateOnly(x.eta);
+  document.getElementById("assigned").value = x.assigned_to || "";
+  document.getElementById("shipmentType").value = x.shipment_type || "Air Import";
+
   document.getElementById("modal").classList.add("show");
 }
 
-// ---------------- SAVE ----------------
-document.getElementById("saveBtn").onclick = async ()=>{
+async function uploadDocs(){
+  const urls = [];
+
+  for(const file of selectedDocs){
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+    const path = Date.now() + "_" + safeName;
+
+    const { error } = await sb.storage.from("shipment-documents").upload(path,file);
+    if(error){
+      alert("Upload failed: " + error.message);
+      return urls;
+    }
+
+    const { data } = sb.storage.from("shipment-documents").getPublicUrl(path);
+    urls.push(data.publicUrl);
+  }
+
+  return urls;
+}
+
+async function saveShipment(){
   const newDocs = await uploadDocs();
-  const docs = [...existingDocs,...newDocs];
+  const docs = [...existingDocs, ...newDocs];
 
   const payload = {
     client:getVal("client"),
@@ -731,90 +877,82 @@ document.getElementById("saveBtn").onclick = async ()=>{
     weight:getVal("weight"),
     shipper:getVal("shipper"),
     consignee:getVal("consignee"),
-    eta:getVal("eta"),
-    shipment_type:getVal("shipmentType"),
-    assigned_to:getVal("assigned"),
-    status:getVal("status"),
-    document_urls:docs
-  };
-
-  if(editingId){
-    await sb.from("shipments").update(payload).eq("id",editingId);
-  }else{
-    await sb.from("shipments").insert([{...payload,shipment_ref:"SHP"+Date.now()}]);
-  }
-
-  editingId=null;
-  existingDocs=[];
-  selectedDocs=[];
-  document.getElementById("modal").classList.remove("show");
-  loadShipments();
-};
-
-// ---------------- DOC UPLOAD ----------------
-async function uploadDocs(){
-  const urls=[];
-  for(const file of selectedDocs){
-    const path=Date.now()+"_"+file.name;
-    await sb.storage.from(BUCKET).upload(path,file);
-    const { data } = sb.storage.from(BUCKET).getPublicUrl(path);
-    urls.push(data.publicUrl);
-  }
-  return urls;
-}
-
-document.getElementById("docUpload").onchange = e=>{
-  selectedDocs=[...e.target.files];
-};
-
-// ---------------- PARSER ----------------
-function parseShipmentText(text){
-  const clean=text.replace(/\s+/g," ");
-
-  const awb = clean.match(/\b[0-9]{3}-[0-9]{8}\b/);
-  if(awb) setVal("awb",awb[0]);
-
-  const eta = clean.match(/(\d{4}-\d{2}-\d{2})/);
-  if(eta) setVal("eta",eta[0]);
-}
-
-// ---------------- AUTO CREATE ----------------
-document.getElementById("autoCreateBtn").onclick = async ()=>{
-  const docs = await uploadDocs();
-
-  const payload = {
-    shipment_ref:"SHP"+Date.now(),
-    client:getVal("client")||"Parsed Shipment",
-    origin:getVal("origin")||"TBC",
-    destination:getVal("destination")||"TBC",
-    awb_number:getVal("awb"),
-    eta:getVal("eta"),
-    shipment_type:"Customs Clearance",
+    eta:getVal("eta") || null,
+    assigned_to:getVal("assigned") || null,
+    shipment_type:getVal("shipmentType") || "Air Import",
     status:"Pending",
     document_urls:docs
   };
 
-  if(payload.awb_number){
-    const { data } = await sb.from("shipments")
-      .select("*")
-      .eq("awb_number",payload.awb_number)
-      .limit(1);
-
-    if(data && data.length){
-      await sb.from("shipments")
-        .update(payload)
-        .eq("id",data[0].id);
-
-      alert("Updated existing shipment");
-      loadShipments();
-      return;
-    }
+  if(!payload.client || !payload.origin || !payload.destination){
+    alert("Fill Customer, Origin and Destination.");
+    return;
   }
 
-  await sb.from("shipments").insert([payload]);
-  loadShipments();
+  let error;
+
+  if(editingId){
+    const res = await sb.from("shipments").update(payload).eq("id",editingId);
+    error = res.error;
+  } else {
+    const res = await sb.from("shipments").insert([{
+      ...payload,
+      shipment_ref:"SHP"+Date.now(),
+      created_by_email:user?.email || null,
+      source:"manual"
+    }]);
+    error = res.error;
+  }
+
+  if(error){
+    alert("Save error: " + error.message);
+    return;
+  }
+
+  editingId = null;
+  existingDocs = [];
+  selectedDocs = [];
+
+  document.getElementById("modal").classList.remove("show");
+  await loadShipments();
+}
+
+document.getElementById("saveBtn").onclick = saveShipment;
+document.getElementById("cancelBtn").onclick = () => document.getElementById("modal").classList.remove("show");
+document.getElementById("openBtn").onclick = () => document.getElementById("modal").classList.add("show");
+document.getElementById("logoutBtn").onclick = async () => { await sb.auth.signOut(); location.reload(); };
+
+document.getElementById("myBtn").onclick = () => {
+  showMine = !showMine;
+  document.getElementById("myBtn").classList.toggle("active", showMine);
+  render();
 };
 
+document.getElementById("docUpload").onchange = e => {
+  selectedDocs = Array.from(e.target.files || []);
+  document.getElementById("docList").innerHTML = selectedDocs.length
+    ? selectedDocs.map(f => "📄 " + f.name).join("<br>")
+    : "No documents";
+};
+
+document.getElementById("assigned").innerHTML =
+  `<option value="">Unassigned</option>` +
+  users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
+
+document.getElementById("shipmentType").innerHTML =
+  shipmentTypes.filter(t => t !== "All").map(t => `<option>${t}</option>`).join("");
+
+document.getElementById("loginUserSelect").innerHTML =
+  `<option value="">Select user</option>` +
+  users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
+
+document.getElementById("loginUserSelect").onchange = e => {
+  document.getElementById("loginEmail").value = e.target.value;
+};
+
+renderTypeFilters();
 </script>
 </body>
 </html>
+
+    
