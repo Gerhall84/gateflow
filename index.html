@@ -541,7 +541,7 @@
 
 <div class="modal" id="modal">
   <div class="modal-box">
-    <h2>Add Shipment</h2>
+    <h2 id="modalTitle">Add Shipment</h2>
     <input id="client" placeholder="Client">
     <input id="origin" placeholder="Origin">
     <input id="destination" placeholder="Destination">
@@ -571,11 +571,11 @@
 
   let user = null;
   let shipments = [];
-  let editingId = null;
   let map;
   let mapLayer;
   let showMine = false;
   let alertFilter = "all";
+  let editingId = null;
   const geoCache = {};
 
   const loginScreen = document.getElementById("loginScreen");
@@ -591,6 +591,15 @@
 
   function initials(email) {
     return String(email || "GK").slice(0, 2).toUpperCase();
+  }
+
+  function clearForm() {
+    editingId = null;
+    document.getElementById("modalTitle").textContent = "Add Shipment";
+    ["client", "origin", "destination", "assigned", "pickupDate", "etdDate", "eta"].forEach(id => {
+      document.getElementById(id).value = "";
+    });
+    document.getElementById("status").value = "Pending";
   }
 
   async function login() {
@@ -707,8 +716,8 @@
   }
 
   function eventDateValue(x, field) {
-    if (field === "pickup") return x.pickup_date || x.pickupDate || "";
-    if (field === "etd") return x.etd || x.etd_date || "";
+    if (field === "pickup") return x.pickup_date || "";
+    if (field === "etd") return x.etd || "";
     if (field === "eta") return x.eta || "";
     return "";
   }
@@ -726,7 +735,6 @@
 
     grid.innerHTML = days.map(day => {
       const key = day.toISOString().slice(0, 10);
-
       const events = [];
 
       data.forEach(x => {
@@ -751,7 +759,7 @@
               </div>
             `;
           }).join("")
-        : `<div class="small">No events</div>`;
+        : `<div style="color:#6f7d93; font-size:12px;">No events</div>`;
 
       return `
         <div class="timeline-day">
@@ -822,11 +830,11 @@
           <td>${eventDateValue(x, "eta") || "-"}</td>
           <td>${x.assigned_to || "-"}</td>
           <td>
-  <button class="action-btn" onclick="editShipment('${x.id}')">✏️</button>
-  <button class="action-btn" onclick="setStatus('${x.id}','In Transit')">🚚</button>
-  <button class="action-btn" onclick="setStatus('${x.id}','Delivered')">✅</button>
-  <button class="action-btn" onclick="deleteShipment('${x.id}')">🗑️</button>
-</td>
+            <button class="action-btn" onclick="editShipment('${x.id}')">✏️</button>
+            <button class="action-btn" onclick="setStatus('${x.id}','In Transit')">🚚</button>
+            <button class="action-btn" onclick="setStatus('${x.id}','Delivered')">✅</button>
+            <button class="action-btn" onclick="deleteShipment('${x.id}')">🗑️</button>
+          </td>
         </tr>`;
       }).join("");
     }
@@ -847,24 +855,26 @@
       : "Loaded " + data.length + " shipment(s)";
   }
 
+  function editShipment(id) {
+    const x = shipments.find(s => s.id === id);
+    if (!x) return;
+
+    editingId = id;
+    document.getElementById("modalTitle").textContent = "Edit Shipment";
+
+    document.getElementById("client").value = x.client || "";
+    document.getElementById("origin").value = x.origin || "";
+    document.getElementById("destination").value = x.destination || "";
+    document.getElementById("assigned").value = x.assigned_to || "";
+    document.getElementById("pickupDate").value = x.pickup_date || "";
+    document.getElementById("etdDate").value = x.etd || "";
+    document.getElementById("eta").value = x.eta || "";
+    document.getElementById("status").value = x.status || "Pending";
+
+    modal.classList.add("show");
+  }
+
   async function setStatus(id, status) {
-    function editShipment(id) {
-  const x = shipments.find(s => s.id === id);
-  if (!x) return;
-
-  editingId = id;
-
-  document.getElementById("client").value = x.client || "";
-  document.getElementById("origin").value = x.origin || "";
-  document.getElementById("destination").value = x.destination || "";
-  document.getElementById("assigned").value = x.assigned_to || "";
-  document.getElementById("pickupDate").value = x.pickup_date || "";
-  document.getElementById("etdDate").value = x.etd || "";
-  document.getElementById("eta").value = x.eta || "";
-  document.getElementById("status").value = x.status || "Pending";
-
-  modal.classList.add("show");
-}
     const { error } = await sb
       .from("shipments")
       .update({ status })
@@ -877,6 +887,23 @@
 
     await loadShipments();
     statusMsg.textContent = "Shipment updated ✔";
+  }
+
+  async function deleteShipment(id) {
+    if (!confirm("Delete this shipment?")) return;
+
+    const { error } = await sb
+      .from("shipments")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      alert("Delete failed: " + error.message);
+      return;
+    }
+
+    await loadShipments();
+    statusMsg.textContent = "Shipment deleted ✔";
   }
 
   async function loadShipments() {
@@ -905,16 +932,25 @@
     renderRows();
   };
 
-  document.getElementById("openBtn").onclick = () => modal.classList.add("show");
-  document.getElementById("cancelBtn").onclick = () => modal.classList.remove("show");
+  document.getElementById("openBtn").onclick = () => {
+    clearForm();
+    modal.classList.add("show");
+  };
+
+  document.getElementById("cancelBtn").onclick = () => {
+    clearForm();
+    modal.classList.remove("show");
+  };
 
   modal.onclick = e => {
-    if (e.target === modal) modal.classList.remove("show");
+    if (e.target === modal) {
+      clearForm();
+      modal.classList.remove("show");
+    }
   };
 
   document.getElementById("saveBtn").onclick = async () => {
     const payload = {
-      shipment_ref: "SHP" + Date.now(),
       client: getVal("client"),
       origin: getVal("origin"),
       destination: getVal("destination"),
@@ -922,11 +958,7 @@
       pickup_date: getVal("pickupDate") || null,
       etd: getVal("etdDate") || null,
       eta: getVal("eta") || null,
-      shipment_type: "Road",
-      status: getVal("status") || "Pending",
-      priority: "Medium",
-      created_by_email: user?.email || null,
-      source: "manual"
+      status: getVal("status") || "Pending"
     };
 
     if (!payload.client || !payload.origin || !payload.destination) {
@@ -934,24 +966,39 @@
       return;
     }
 
-    const { error } = await sb.from("shipments").insert([payload]);
+    let error;
+
+    if (editingId) {
+      const res = await sb
+        .from("shipments")
+        .update(payload)
+        .eq("id", editingId);
+
+      error = res.error;
+    } else {
+      const res = await sb
+        .from("shipments")
+        .insert([{
+          ...payload,
+          shipment_ref: "SHP" + Date.now(),
+          shipment_type: "Road",
+          priority: "Medium",
+          created_by_email: user?.email || null,
+          source: "manual"
+        }]);
+
+      error = res.error;
+    }
 
     if (error) {
       alert("SAVE ERROR: " + error.message);
       return;
     }
 
-    document.getElementById("client").value = "";
-    document.getElementById("origin").value = "";
-    document.getElementById("destination").value = "";
-    document.getElementById("assigned").value = "";
-    document.getElementById("pickupDate").value = "";
-    document.getElementById("etdDate").value = "";
-    document.getElementById("eta").value = "";
-
+    clearForm();
     modal.classList.remove("show");
     await loadShipments();
-    statusMsg.textContent = "Shipment saved ✔";
+    statusMsg.textContent = "Saved ✔";
   };
 
   async function init() {
