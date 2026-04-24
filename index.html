@@ -1,79 +1,202 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GateKeeper Pro</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
-  <style>
-    :root {
-      --nav:#04142e; --text:#11213d; --muted:#6f7d93; --brand:#06b7a5;
-      --brand-dark:#069788; --line:#e4ebed; --danger:#ef5c5c;
-      --success:#18a66e; --warning:#f0a227; --shadow:0 25px 60px rgba(6,20,46,.08);
+    .stats {
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:16px;
+      margin-bottom:16px;
     }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(180deg,#f4f7f8,#eef4f5);color:var(--text)}
-    button{font-family:inherit;cursor:pointer}
-    input,select{width:100%;height:46px;border:1px solid var(--line);border-radius:12px;padding:0 12px;margin-bottom:10px;background:white}
-    .login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#04142e,#063b63);padding:20px}
-    .login-card{width:100%;max-width:430px;background:white;border-radius:24px;padding:32px;box-shadow:0 30px 80px rgba(0,0,0,.28)}
-    .login-card img{display:block;max-width:200px;margin:0 auto 20px}
-    .login-card h1{text-align:center;margin:0 0 8px;color:var(--nav)}
-    .login-card p{text-align:center;margin:0 0 24px;color:var(--muted)}
-    .app{display:none;min-height:100vh;grid-template-columns:250px 1fr}
-    .sidebar{background:linear-gradient(180deg,#04142e,#021127);color:white;padding:26px 16px;display:flex;flex-direction:column;min-height:100vh;box-shadow:4px 0 30px rgba(0,0,0,.25)}
-    .brand{text-align:center;padding:10px 8px 22px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:18px}
-    .brand img{max-width:180px;margin-bottom:12px}
-    .brand strong{color:#3f73e8;font-size:14px}
-    .nav a{display:flex;color:white;padding:14px;border-radius:16px;font-weight:700;margin-bottom:8px;text-decoration:none;cursor:pointer}
-    .nav a.active,.nav a:hover{background:rgba(6,183,165,.18);color:#8efff1}
-    .sidebar-footer{margin-top:auto;padding-top:18px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:12px;align-items:center;font-size:12px}
-    .avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand-dark));display:flex;align-items:center;justify-content:center;font-weight:900}
-    .main{padding:28px}
-    .topbar{display:flex;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
-    .topbar-left,.topbar-right{display:flex;gap:10px;flex-wrap:wrap}
-    .primary-btn{height:46px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;padding:0 22px;font-weight:900;box-shadow:0 12px 30px rgba(6,183,165,.3)}
-    .secondary-btn{height:46px;border:1px solid var(--line);border-radius:14px;background:white;color:var(--text);padding:0 20px;font-weight:800}
-    .secondary-btn.active{background:#dff7f3;color:var(--brand-dark);border-color:var(--brand)}
-    .search-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
-    .search-row input{max-width:360px;margin-bottom:0}
-    .quick-filters{display:flex;gap:8px;flex-wrap:wrap}
-    .card{background:white;border-radius:22px;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,.03);overflow:hidden;margin-bottom:16px}
-    .grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px}
-    .section-head{padding:20px 20px 12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
-    .section-head h2{margin:0;color:var(--brand-dark);font-size:18px}
-    #map{height:420px;border-radius:18px;margin:16px}
-    .calendar-grid{padding:16px;display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
-    .calendar-day-name{color:var(--muted);font-size:12px;font-weight:900;text-align:center;text-transform:uppercase}
-    .calendar-cell{min-height:125px;background:#f8fbfc;border:1px solid var(--line);border-radius:14px;padding:8px;font-size:12px}
-    .calendar-cell.muted{opacity:.35}
-    .calendar-date{font-weight:900;margin-bottom:6px}
-    .calendar-item{background:white;border-left:4px solid var(--brand);border-radius:8px;padding:6px;margin-top:6px;line-height:1.25}
-    .calendar-item.overdue{border-left-color:var(--danger);background:#ffecec}
-    .calendar-item.risk{border-left-color:var(--warning);background:#fff4e0}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left;font-size:13px}
-    th{background:#f6f9fb}
-    tr.row-risk{background:#fff4e0;border-left:6px solid var(--warning)}
-    tr.row-overdue{background:#ffe4e4;border-left:6px solid var(--danger);font-weight:700}
-    .pill{display:inline-flex;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;margin:0 4px 4px 0}
-    .pending{background:#fff1da;color:#d88d10}.transit{background:#dff7f3;color:#069788}.delivered{background:#dff5eb;color:#18a66e}.delayed{background:#ffe4e4;color:#ef5c5c}
-    .risk-pill{background:#fff1da;color:#d88d10}.overdue-pill{background:#ffe4e4;color:#ef5c5c}
-    .action-btn{border:0;border-radius:12px;padding:9px 11px;margin:2px;background:#f4f7f8}
-    .doc-link{color:var(--brand-dark);font-weight:800;text-decoration:none;display:block;margin-bottom:4px}
-    .screen{display:none}.screen.active{display:block}
-    .modal{display:none;position:fixed;inset:0;background:rgba(3,12,28,.6);align-items:center;justify-content:center;z-index:1000;padding:20px}
-    .modal.show{display:flex}
-    .modal-box{width:min(760px,100%);background:white;border-radius:22px;padding:24px;box-shadow:0 30px 80px rgba(2,17,39,.28);max-height:90vh;overflow:auto}
-    .doc-upload-box{border:2px dashed var(--line);border-radius:18px;padding:16px;margin-bottom:14px;background:#fbfdfd;text-align:center}
-    .doc-list{font-size:13px;color:var(--muted);margin-bottom:12px}
-    .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:10px;flex-wrap:wrap}
-    @media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.grid,.calendar-grid{grid-template-columns:1fr}.main{padding:16px}}
+
+    .stat-card {
+      padding:22px;
+    }
+
+    .stat-label {
+      color:var(--muted);
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:6px;
+    }
+
+    .stat-value {
+      font-size:30px;
+      font-weight:900;
+    }
+
+    .operator-load {
+      padding:14px 18px;
+      font-size:13px;
+      color:var(--muted);
+      border-bottom:1px solid var(--line);
+      line-height:1.8;
+    }
+
+    .calendar-grid {
+      padding:16px;
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:10px;
+    }
+
+    .calendar-day-name {
+      color:var(--muted);
+      font-size:12px;
+      font-weight:900;
+      text-align:center;
+      text-transform:uppercase;
+    }
+
+    .calendar-cell {
+      min-height:125px;
+      background:#f8fbfc;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:8px;
+      font-size:12px;
+    }
+
+    .calendar-cell.muted {
+      opacity:.35;
+    }
+
+    .calendar-date {
+      font-weight:900;
+      margin-bottom:6px;
+    }
+
+    .calendar-item {
+      background:white;
+      border-left:4px solid var(--brand);
+      border-radius:8px;
+      padding:6px;
+      margin-top:6px;
+      line-height:1.25;
+    }
+
+    .calendar-item.overdue {
+      border-left-color:var(--danger);
+      background:#ffecec;
+    }
+
+    .calendar-item.risk {
+      border-left-color:var(--warning);
+      background:#fff4e0;
+    }
+
+    table {
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    th, td {
+      padding:12px;
+      border-bottom:1px solid var(--line);
+      vertical-align:top;
+      text-align:left;
+      font-size:13px;
+    }
+
+    th { background:#f6f9fb; }
+
+    tr.row-risk {
+      background:#fff4e0;
+      border-left:6px solid var(--warning);
+    }
+
+    tr.row-overdue {
+      background:#ffe4e4;
+      border-left:6px solid var(--danger);
+      font-weight:700;
+    }
+
+    .pill {
+      display:inline-flex;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      margin:0 4px 4px 0;
+    }
+
+    .pending { background:#fff1da; color:#d88d10; }
+    .transit { background:#dff7f3; color:#069788; }
+    .delivered { background:#dff5eb; color:#18a66e; }
+    .delayed { background:#ffe4e4; color:#ef5c5c; }
+    .risk-pill { background:#fff1da; color:#d88d10; }
+    .overdue-pill { background:#ffe4e4; color:#ef5c5c; }
+    .sla-ok { background:#dff5eb; color:#18a66e; }
+    .sla-risk { background:#fff1da; color:#d88d10; }
+    .sla-breach { background:#ffe4e4; color:#ef5c5c; }
+
+    .action-btn {
+      border:0;
+      border-radius:12px;
+      padding:9px 11px;
+      margin:2px;
+      background:#f4f7f8;
+    }
+
+    .doc-link {
+      color:var(--brand-dark);
+      font-weight:800;
+      text-decoration:none;
+      display:block;
+      margin-bottom:4px;
+    }
+
+    .screen { display:none; }
+    .screen.active { display:block; }
+
+    .modal {
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(3,12,28,.6);
+      align-items:center;
+      justify-content:center;
+      z-index:1000;
+      padding:20px;
+    }
+
+    .modal.show { display:flex; }
+
+    .modal-box {
+      width:min(760px,100%);
+      background:white;
+      border-radius:22px;
+      padding:24px;
+      box-shadow:0 30px 80px rgba(2,17,39,.28);
+      max-height:90vh;
+      overflow:auto;
+    }
+
+    .doc-upload-box {
+      border:2px dashed var(--line);
+      border-radius:18px;
+      padding:16px;
+      margin-bottom:14px;
+      background:#fbfdfd;
+      text-align:center;
+    }
+
+    .doc-list {
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:12px;
+    }
+
+    .modal-actions {
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+
+    @media(max-width:900px){
+      .app { grid-template-columns:1fr; }
+      .sidebar { display:none; }
+      .grid,.calendar-grid,.stats { grid-template-columns:1fr; }
+      .main { padding:16px; }
+    }
   </style>
 </head>
 
@@ -92,15 +215,23 @@
 
 <div class="app" id="app">
   <aside class="sidebar">
-    <div class="brand"><img src="logo.png" alt="Logo"><strong>Operations</strong></div>
+    <div class="brand">
+      <img src="logo.png" alt="Logo">
+      <strong>Operations</strong>
+    </div>
+
     <nav class="nav">
       <a class="active" onclick="showScreen('dashboard')">Dashboard</a>
       <a onclick="showScreen('shipments')">Shipments</a>
       <a onclick="showScreen('calendar')">Calendar</a>
     </nav>
+
     <div class="sidebar-footer">
       <div class="avatar" id="avatar">GK</div>
-      <div id="userEmail"></div>
+      <div>
+        <div id="userEmail"></div>
+        <small id="userRole"></small>
+      </div>
     </div>
   </aside>
 
@@ -123,17 +254,342 @@
     </div>
 
     <section id="screenDashboard" class="screen active">
-      <section class="card"><div class="section-head"><h2>Live Map</h2></div><div id="map"></div></section>
+      <section class="stats">
+        <div class="card stat-card">
+          <div class="stat-label">Visible</div>
+          <div class="stat-value" id="visibleStat">0</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-label">Unassigned</div>
+          <div class="stat-value" id="unassignedStat">0</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-label">At Risk</div>
+          <div class="stat-value" id="riskStat">0</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-label">SLA Breach</div>
+          <div class="stat-value" id="slaStat">0</div>
+        </div>
+      </section>
+
       <section class="card">
+        <div class="section-head"><h2>Live Map</h2></div>
+        <div id="map"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-head"><h2>Operator Load</h2></div>
+        <div id="operatorLoad" class="operator-load"></div>
+      </section>
+          .stats {
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:16px;
+      margin-bottom:16px;
+    }
+
+    .stat-card {
+      padding:22px;
+    }
+
+    .stat-label {
+      color:var(--muted);
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:6px;
+    }
+
+    .stat-value {
+      font-size:30px;
+      font-weight:900;
+    }
+
+    .operator-load {
+      padding:14px 18px;
+      font-size:13px;
+      color:var(--muted);
+      border-bottom:1px solid var(--line);
+      line-height:1.8;
+    }
+
+    .calendar-grid {
+      padding:16px;
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:10px;
+    }
+
+    .calendar-day-name {
+      color:var(--muted);
+      font-size:12px;
+      font-weight:900;
+      text-align:center;
+      text-transform:uppercase;
+    }
+
+    .calendar-cell {
+      min-height:125px;
+      background:#f8fbfc;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:8px;
+      font-size:12px;
+    }
+
+    .calendar-cell.muted {
+      opacity:.35;
+    }
+
+    .calendar-date {
+      font-weight:900;
+      margin-bottom:6px;
+    }
+
+    .calendar-item {
+      background:white;
+      border-left:4px solid var(--brand);
+      border-radius:8px;
+      padding:6px;
+      margin-top:6px;
+      line-height:1.25;
+    }
+
+    .calendar-item.overdue {
+      border-left-color:var(--danger);
+      background:#ffecec;
+    }
+
+    .calendar-item.risk {
+      border-left-color:var(--warning);
+      background:#fff4e0;
+    }
+
+    table {
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    th, td {
+      padding:12px;
+      border-bottom:1px solid var(--line);
+      vertical-align:top;
+      text-align:left;
+      font-size:13px;
+    }
+
+    th { background:#f6f9fb; }
+
+    tr.row-risk {
+      background:#fff4e0;
+      border-left:6px solid var(--warning);
+    }
+
+    tr.row-overdue {
+      background:#ffe4e4;
+      border-left:6px solid var(--danger);
+      font-weight:700;
+    }
+
+    .pill {
+      display:inline-flex;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      margin:0 4px 4px 0;
+    }
+
+    .pending { background:#fff1da; color:#d88d10; }
+    .transit { background:#dff7f3; color:#069788; }
+    .delivered { background:#dff5eb; color:#18a66e; }
+    .delayed { background:#ffe4e4; color:#ef5c5c; }
+    .risk-pill { background:#fff1da; color:#d88d10; }
+    .overdue-pill { background:#ffe4e4; color:#ef5c5c; }
+    .sla-ok { background:#dff5eb; color:#18a66e; }
+    .sla-risk { background:#fff1da; color:#d88d10; }
+    .sla-breach { background:#ffe4e4; color:#ef5c5c; }
+
+    .action-btn {
+      border:0;
+      border-radius:12px;
+      padding:9px 11px;
+      margin:2px;
+      background:#f4f7f8;
+    }
+
+    .doc-link {
+      color:var(--brand-dark);
+      font-weight:800;
+      text-decoration:none;
+      display:block;
+      margin-bottom:4px;
+    }
+
+    .screen { display:none; }
+    .screen.active { display:block; }
+
+    .modal {
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(3,12,28,.6);
+      align-items:center;
+      justify-content:center;
+      z-index:1000;
+      padding:20px;
+    }
+
+    .modal.show { display:flex; }
+
+    .modal-box {
+      width:min(760px,100%);
+      background:white;
+      border-radius:22px;
+      padding:24px;
+      box-shadow:0 30px 80px rgba(2,17,39,.28);
+      max-height:90vh;
+      overflow:auto;
+    }
+
+    .doc-upload-box {
+      border:2px dashed var(--line);
+      border-radius:18px;
+      padding:16px;
+      margin-bottom:14px;
+      background:#fbfdfd;
+      text-align:center;
+    }
+
+    .doc-list {
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:12px;
+    }
+
+    .modal-actions {
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+
+    @media(max-width:900px){
+      .app { grid-template-columns:1fr; }
+      .sidebar { display:none; }
+      .grid,.calendar-grid,.stats { grid-template-columns:1fr; }
+      .main { padding:16px; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <img src="logo.png" alt="Logo">
+    <h1>GateKeeper</h1>
+    <p>Select your name</p>
+    <select id="loginUserSelect"></select>
+    <input id="loginEmail" style="display:none;">
+    <input id="loginPassword" type="password" placeholder="Password">
+    <button class="primary-btn" id="loginBtn">Login</button>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="logo.png" alt="Logo">
+      <strong>Operations</strong>
+    </div>
+
+    <nav class="nav">
+      <a class="active" onclick="showScreen('dashboard')">Dashboard</a>
+      <a onclick="showScreen('shipments')">Shipments</a>
+      <a onclick="showScreen('calendar')">Calendar</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar" id="avatar">GK</div>
+      <div>
+        <div id="userEmail"></div>
+        <small id="userRole"></small>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="primary-btn" id="openBtn">+ Add Shipment</button>
+        <button class="secondary-btn" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+
+    <div class="search-row">
+      <input id="searchInput" placeholder="Search client, AWB, route...">
+      <div class="quick-filters">
+        <button class="secondary-btn" onclick="setQuick('all')">All</button>
+        <button class="secondary-btn" onclick="setQuick('mine')">My</button>
+        <button class="secondary-btn" onclick="setQuick('unassigned')">Unassigned</button>
+        <button class="secondary-btn" onclick="setQuick('risk')">At Risk</button>
+      </div>
+    </div>
+
+    <section id="screenDashboard" class="screen active">
+      <section class="stats">
+        <div class="card stat-card">
+          <div class="stat-label">Visible</div>
+          <div class="stat-value" id="visibleStat">0</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-label">Unassigned</div>
+          <div class="stat-value" id="unassignedStat">0</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-label">At Risk</div>
+          <div class="stat-value" id="riskStat">0</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-label">SLA Breach</div>
+          <div class="stat-value" id="slaStat">0</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-head"><h2>Live Map</h2></div>
+        <div id="map"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-head"><h2>Operator Load</h2></div>
+        <div id="operatorLoad" class="operator-load"></div>
+      </section>
+            <section class="card">
         <div class="section-head"><h2>My + Unassigned</h2></div>
-        <table><tbody id="dashboardRows"></tbody></table>
+        <table>
+          <tbody id="dashboardRows"></tbody>
+        </table>
       </section>
     </section>
 
     <section id="screenShipments" class="screen">
       <div class="section-head"><h2>All Shipments</h2></div>
       <table>
-        <thead><tr><th>ID</th><th>Customer</th><th>Type</th><th>Route</th><th>Status</th><th>ETA</th><th>Docs</th><th>Assigned</th><th>Actions</th></tr></thead>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Type</th>
+            <th>Route</th>
+            <th>Status</th>
+            <th>ETA / SLA</th>
+            <th>Docs</th>
+            <th>Assigned</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
         <tbody id="shipmentRows"></tbody>
       </table>
     </section>
@@ -148,6 +604,7 @@
 <div class="modal" id="modal">
   <div class="modal-box">
     <h2 id="modalTitle">Add Shipment</h2>
+
     <div class="doc-upload-box">
       <strong>Shipment Documents</strong><br>
       <small>Upload PDF/text files. Parser will auto-fill fields.</small><br><br>
@@ -156,6 +613,7 @@
     </div>
 
     <input id="client" placeholder="Customer">
+    <input id="customerEmail" placeholder="Customer Email (optional)">
     <input id="origin" placeholder="Origin">
     <input id="destination" placeholder="Destination">
     <input id="awb" placeholder="AWB">
@@ -165,6 +623,7 @@
     <input id="shipper" placeholder="Shipper">
     <input id="consignee" placeholder="Consignee">
     <input id="eta" type="date">
+
     <select id="assigned"></select>
     <select id="shipmentType"></select>
 
@@ -174,7 +633,6 @@
     </div>
   </div>
 </div>
-
 <script>
 const sb = window.supabase.createClient(
   "https://edxgkwkdgvsajfmkejbk.supabase.co",
@@ -182,60 +640,104 @@ const sb = window.supabase.createClient(
 );
 
 const users = [
-  { name:"Gerard Hall", email:"gerard.hall@mauriceward.com" },
-  { name:"Balazs Bekes", email:"balazs.bekes@mauriceward.com" },
-  { name:"Ashley Nason", email:"ashley.nason@mauriceward.com" },
-  { name:"Lisa O'Neill", email:"lisa.oneill@mauriceward.com" },
-  { name:"Damian Halpin", email:"damian.halpin@mauriceward.com" },
-  { name:"Jason O'Neill", email:"jason.o.neill@mauriceward.com" },
-  { name:"Ciara Burns", email:"ciara.burns@mauriceward.com" },
-  { name:"Dominic Martins", email:"dominic.martins@mauriceward.com" },
-  { name:"Roisin Hogan", email:"roisin.hogan@mauriceward.com" },
-  { name:"Lee Hodges", email:"lee.hodges@mauriceward.com" },
-  { name:"Allanah O'Brien", email:"allanah.obrien@mauriceward.com" },
-  { name:"Darragh O Neill", email:"darragh.oneill@mauriceward.com" },
-  { name:"Tea Pitanti-Ivanac", email:"tea.pitanti-ivanac@mauriceward.com" },
-  { name:"Gary Mc Gettrick", email:"gary.mcgettrick@mauriceward.com" },
-  { name:"Eoin Ryan", email:"eoin.ryan@mauriceward.com" },
-  { name:"Natacha Martins", email:"natacha.martins@mauriceward.com" }
+  { name:"Gerard Hall", email:"gerard.hall@mauriceward.com", role:"admin" },
+  { name:"Balazs Bekes", email:"balazs.bekes@mauriceward.com", role:"admin" },
+  { name:"Ashley Nason", email:"ashley.nason@mauriceward.com", role:"operator" },
+  { name:"Lisa O'Neill", email:"lisa.oneill@mauriceward.com", role:"operator" },
+  { name:"Damian Halpin", email:"damian.halpin@mauriceward.com", role:"operator" },
+  { name:"Jason O'Neill", email:"jason.o.neill@mauriceward.com", role:"operator" },
+  { name:"Ciara Burns", email:"ciara.burns@mauriceward.com", role:"operator" },
+  { name:"Dominic Martins", email:"dominic.martins@mauriceward.com", role:"operator" },
+  { name:"Roisin Hogan", email:"roisin.hogan@mauriceward.com", role:"operator" },
+  { name:"Lee Hodges", email:"lee.hodges@mauriceward.com", role:"operator" },
+  { name:"Allanah O'Brien", email:"allanah.obrien@mauriceward.com", role:"operator" },
+  { name:"Darragh O Neill", email:"darragh.oneill@mauriceward.com", role:"operator" },
+  { name:"Tea Pitanti-Ivanac", email:"tea.pitanti-ivanac@mauriceward.com", role:"operator" },
+  { name:"Gary Mc Gettrick", email:"gary.mcgettrick@mauriceward.com", role:"operator" },
+  { name:"Eoin Ryan", email:"eoin.ryan@mauriceward.com", role:"operator" },
+  { name:"Natacha Martins", email:"natacha.martins@mauriceward.com", role:"operator" }
 ];
 
-const shipmentTypes = ["Air Import","Air Export","Ocean Import","Ocean Export","Road Import","Road Export","Road Domestic","Customs Clearance"];
+const shipmentTypes = [
+  "Air Import","Air Export","Ocean Import","Ocean Export",
+  "Road Import","Road Export","Road Domestic","Customs Clearance"
+];
 
-let user = null, shipments = [], editingId = null, searchTerm = "", quickFilter = "all";
-let map = null, mapLayer = null, selectedDocs = [], existingDocs = [];
+let user = null;
+let currentUser = null;
+let shipments = [];
+let editingId = null;
+let selectedDocs = [];
+let existingDocs = [];
+let searchTerm = "";
+let quickFilter = "all";
+let map = null;
+let mapLayer = null;
 
 const getVal = id => document.getElementById(id)?.value?.trim() || "";
 const localDateOnly = d => d ? String(d).slice(0,10) : "";
+const isAdmin = () => currentUser?.role === "admin";
 
 if (window.pdfjsLib) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 }
 
 function initDropdowns(){
-  const loginSelect = document.getElementById("loginUserSelect");
-  const loginEmail = document.getElementById("loginEmail");
-  loginSelect.innerHTML = `<option value="">Select your name</option>`;
+  loginUserSelect.innerHTML = `<option value="">Select your name</option>`;
   users.forEach(u => {
     const opt = document.createElement("option");
     opt.value = u.email;
     opt.textContent = u.name;
-    loginSelect.appendChild(opt);
+    loginUserSelect.appendChild(opt);
   });
-  loginSelect.onchange = e => loginEmail.value = e.target.value;
 
-  assigned.innerHTML = `<option value="">Unassigned</option>` + users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
-  shipmentType.innerHTML = shipmentTypes.map(t => `<option>${t}</option>`).join("");
+  loginUserSelect.onchange = e => {
+    loginEmail.value = e.target.value;
+  };
+
+  assigned.innerHTML =
+    `<option value="">Unassigned</option>` +
+    users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
+
+  shipmentType.innerHTML =
+    shipmentTypes.map(t => `<option>${t}</option>`).join("");
+}
+
+function displayUser(email){
+  if (!email) return "Unassigned";
+  return users.find(u => u.email === email)?.name || email;
 }
 
 function getRiskLevel(x){
   if(!x.eta || x.status === "Delivered") return "none";
-  const today = new Date(); today.setHours(0,0,0,0);
-  const eta = new Date(x.eta); eta.setHours(0,0,0,0);
-  const diff = (eta - today) / 86400000;
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const etaDate = new Date(x.eta);
+  etaDate.setHours(0,0,0,0);
+
+  const diff = (etaDate - today) / 86400000;
+
   if(diff < 0) return "overdue";
   if(diff <= 2) return "risk";
   return "none";
+}
+
+function getSlaLevel(x){
+  if(x.status === "Delivered") return "ok";
+  const risk = getRiskLevel(x);
+  if(risk === "overdue") return "breach";
+  if(risk === "risk") return "risk";
+  return "ok";
+}
+
+function getSlaText(x){
+  const level = getSlaLevel(x);
+  if(level === "breach") return "SLA Breach";
+  if(level === "risk") return "SLA Risk";
+  return "SLA OK";
 }
 
 async function login(){
@@ -243,20 +745,39 @@ async function login(){
     email:getVal("loginEmail"),
     password:getVal("loginPassword")
   });
-  if(error){ alert(error.message); return; }
+
+  if(error){
+    alert(error.message);
+    return;
+  }
 
   user = data.user;
+  currentUser =
+    users.find(u => u.email.toLowerCase() === user.email.toLowerCase()) ||
+    { name:user.email, email:user.email, role:"operator" };
+
   loginScreen.style.display = "none";
   app.style.display = "grid";
-  userEmail.textContent = user.email;
-  avatar.textContent = user.email.slice(0,2).toUpperCase();
+
+  userEmail.textContent = currentUser.name;
+  userRole.textContent = currentUser.role.toUpperCase();
+  avatar.textContent = currentUser.name.slice(0,2).toUpperCase();
+
   initMap();
   await loadShipments();
 }
 
 async function loadShipments(){
-  const { data, error } = await sb.from("shipments").select("*").order("created_at", { ascending:false });
-  if(error){ alert("Load error: " + error.message); return; }
+  const { data, error } = await sb
+    .from("shipments")
+    .select("*")
+    .order("created_at", { ascending:false });
+
+  if(error){
+    alert("Load error: " + error.message);
+    return;
+  }
+
   shipments = data || [];
   render();
 }
@@ -264,16 +785,27 @@ async function loadShipments(){
 function showScreen(name){
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.getElementById("screen" + name[0].toUpperCase() + name.slice(1)).classList.add("active");
+
   document.querySelectorAll(".nav a").forEach(a => a.classList.remove("active"));
-  [...document.querySelectorAll(".nav a")].find(a => a.textContent.toLowerCase() === name)?.classList.add("active");
-  setTimeout(() => { if(map) map.invalidateSize(); }, 200);
+  [...document.querySelectorAll(".nav a")]
+    .find(a => a.textContent.toLowerCase() === name)
+    ?.classList.add("active");
+
+  setTimeout(() => {
+    if(map) map.invalidateSize();
+  }, 200);
+
   render();
 }
 
-function setQuick(type){ quickFilter = type; render(); }
+function setQuick(type){
+  quickFilter = type;
+  render();
+}
 
 function filteredAll(){
   let data = [...shipments];
+
   if(searchTerm){
     data = data.filter(x =>
       (x.client || "").toLowerCase().includes(searchTerm) ||
@@ -281,19 +813,40 @@ function filteredAll(){
       ((x.origin || "") + " " + (x.destination || "")).toLowerCase().includes(searchTerm)
     );
   }
-  if(quickFilter === "mine") data = data.filter(x => x.assigned_to === user?.email);
-  if(quickFilter === "unassigned") data = data.filter(x => !x.assigned_to);
-  if(quickFilter === "risk") data = data.filter(x => getRiskLevel(x) !== "none");
+
+  if(quickFilter === "mine"){
+    data = data.filter(x => x.assigned_to === user?.email);
+  }
+
+  if(quickFilter === "unassigned"){
+    data = data.filter(x => !x.assigned_to);
+  }
+
+  if(quickFilter === "risk"){
+    data = data.filter(x => getRiskLevel(x) !== "none");
+  }
+
   return data;
 }
 
 function dashboardData(){
+  if(isAdmin()) return filteredAll();
   return filteredAll().filter(x => !x.assigned_to || x.assigned_to === user?.email);
+}
+
+function canEditShipment(x){
+  return isAdmin() || !x.assigned_to || x.assigned_to === user?.email;
+}
+
+function canDeleteShipment(){
+  return isAdmin();
 }
 
 function rowHtml(x){
   const risk = getRiskLevel(x);
   const docs = Array.isArray(x.document_urls) ? x.document_urls : [];
+  const sla = getSlaLevel(x);
+
   return `
     <tr class="${risk === "overdue" ? "row-overdue" : risk === "risk" ? "row-risk" : ""}">
       <td>${x.shipment_ref || ""}</td>
@@ -301,84 +854,179 @@ function rowHtml(x){
       <td>${x.shipment_type || ""}</td>
       <td>${x.origin || ""} → ${x.destination || ""}</td>
       <td>
-        <span class="pill ${x.status === "Delivered" ? "delivered" : x.status === "In Transit" ? "transit" : x.status === "Delayed" ? "delayed" : "pending"}">${x.status || "Pending"}</span>
+        <span class="pill ${
+          x.status === "Delivered" ? "delivered" :
+          x.status === "In Transit" ? "transit" :
+          x.status === "Delayed" ? "delayed" : "pending"
+        }">${x.status || "Pending"}</span>
         ${risk === "overdue" ? `<span class="pill overdue-pill">⚠ OVERDUE</span>` : ""}
         ${risk === "risk" ? `<span class="pill risk-pill">⚠ AT RISK</span>` : ""}
       </td>
-      <td>${localDateOnly(x.eta) || "-"}</td>
-      <td>${docs.length ? docs.map((u,i)=>`<a class="doc-link" href="${u}" target="_blank">Doc ${i+1}</a>`).join("") : "-"}</td>
-      <td>${x.assigned_to || "Unassigned"}</td>
       <td>
-        <button class="action-btn" onclick="editShipment('${x.id}')">✏️</button>
-        <button class="action-btn" onclick="setStatus('${x.id}','In Transit')">🚚</button>
-        <button class="action-btn" onclick="setStatus('${x.id}','Delivered')">✅</button>
-        <button class="action-btn" onclick="deleteShipment('${x.id}')">🗑️</button>
+        ${localDateOnly(x.eta) || "-"}<br>
+        <span class="pill ${
+          sla === "breach" ? "sla-breach" :
+          sla === "risk" ? "sla-risk" : "sla-ok"
+        }">${getSlaText(x)}</span>
+      </td>
+      <td>${docs.length ? docs.map((u,i)=>`<a class="doc-link" href="${u}" target="_blank">Doc ${i+1}</a>`).join("") : "-"}</td>
+      <td>${displayUser(x.assigned_to)}</td>
+      <td>
+        ${canEditShipment(x) ? `<button class="action-btn" onclick="editShipment('${x.id}')">✏️</button>` : ""}
+        ${canEditShipment(x) ? `<button class="action-btn" onclick="setStatus('${x.id}','In Transit')">🚚</button>` : ""}
+        ${canEditShipment(x) ? `<button class="action-btn" onclick="setStatus('${x.id}','Delivered')">✅</button>` : ""}
+        ${!x.assigned_to ? `<button class="action-btn" onclick="takeShipment('${x.id}')">🙋</button>` : ""}
+        <button class="action-btn" onclick="customerUpdate('${x.id}')">✉️</button>
+        ${canDeleteShipment() ? `<button class="action-btn" onclick="deleteShipment('${x.id}')">🗑️</button>` : ""}
       </td>
     </tr>`;
 }
 
 function render(){
-  dashboardRows.innerHTML = dashboardData().map(rowHtml).join("");
-  shipmentRows.innerHTML = filteredAll().map(rowHtml).join("");
+  const dash = dashboardData();
+  const all = filteredAll();
+
+  dashboardRows.innerHTML = dash.map(rowHtml).join("");
+  shipmentRows.innerHTML = all.map(rowHtml).join("");
+
+  visibleStat.textContent = dash.length;
+  unassignedStat.textContent = shipments.filter(x => !x.assigned_to).length;
+  riskStat.textContent = dash.filter(x => getRiskLevel(x) === "risk").length;
+  slaStat.textContent = dash.filter(x => getSlaLevel(x) === "breach").length;
+
+  renderOperatorLoad();
   renderCalendar();
-  renderMap(dashboardData());
+  renderMap(dash);
+}
+
+function renderOperatorLoad(){
+  const counts = {};
+
+  shipments.forEach(s => {
+    const key = s.assigned_to || "Unassigned";
+    counts[key] = (counts[key] || 0) + 1;
+  });
+
+  operatorLoad.innerHTML = Object.entries(counts)
+    .map(([k,v]) => `<b>${displayUser(k)}</b>: ${v}`)
+    .join(" | ");
 }
 
 function renderCalendar(){
-  const now = new Date(), year = now.getFullYear(), month = now.getMonth();
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
   const first = new Date(year, month, 1);
-  const start = new Date(first); start.setDate(first.getDate() - first.getDay());
-  let html = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d => `<div class="calendar-day-name">${d}</div>`).join("");
+  const start = new Date(first);
+  start.setDate(first.getDate() - first.getDay());
+
+  let html = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
+    .map(d => `<div class="calendar-day-name">${d}</div>`)
+    .join("");
+
   for(let i=0;i<42;i++){
-    const d = new Date(start); d.setDate(start.getDate()+i);
-    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    const d = new Date(start);
+    d.setDate(start.getDate()+i);
+
+    const key =
+      `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+
     const events = filteredAll().filter(x => localDateOnly(x.eta) === key);
-    html += `<div class="calendar-cell ${d.getMonth() !== month ? "muted" : ""}">
-      <div class="calendar-date">${d.getDate()}</div>
-      ${events.map(x => `<div class="calendar-item ${getRiskLevel(x)}"><strong>${x.client || ""}</strong><br><small>${x.shipment_ref || ""}</small></div>`).join("")}
-    </div>`;
+
+    html += `
+      <div class="calendar-cell ${d.getMonth() !== month ? "muted" : ""}">
+        <div class="calendar-date">${d.getDate()}</div>
+        ${events.map(x => `
+          <div class="calendar-item ${getRiskLevel(x)}">
+            <strong>${x.client || ""}</strong><br>
+            <small>${x.shipment_ref || ""}</small>
+          </div>
+        `).join("")}
+      </div>`;
   }
+
   calendarGrid.innerHTML = html;
 }
 
 function initMap(){
   if(map) return;
+
   map = L.map("map").setView([53.3498,-6.2603], 4);
+
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+
   mapLayer = L.layerGroup().addTo(map);
 }
 
 async function geocode(place){
   if(!place) return [53.3498,-6.2603];
+
   try{
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(place)}`);
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(place)}`
+    );
     const data = await res.json();
-    if(data[0]) return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+
+    if(data[0]){
+      return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+    }
   }catch(e){}
+
   return [53.3498,-6.2603];
 }
 
 async function renderMap(data){
   if(!mapLayer) return;
+
   mapLayer.clearLayers();
+
   const bounds = [];
+
   for(const x of data.slice(0,8)){
-    const o = await geocode(x.origin), d = await geocode(x.destination);
+    const o = await geocode(x.origin);
+    const d = await geocode(x.destination);
+
     bounds.push(o,d);
+
     L.marker(o).addTo(mapLayer).bindPopup(`${x.client || ""}<br>${x.origin || ""}`);
     L.marker(d).addTo(mapLayer).bindPopup(`${x.client || ""}<br>${x.destination || ""}`);
-    L.polyline([o,d], { color:getRiskLevel(x)==="overdue" ? "red" : "#06b7a5", weight:4 }).addTo(mapLayer);
+
+    L.polyline([o,d], {
+      color:getRiskLevel(x)==="overdue" ? "red" : "#06b7a5",
+      weight:4
+    }).addTo(mapLayer);
   }
-  if(bounds.length) map.fitBounds(bounds, { padding:[30,30], maxZoom:6 });
+
+  if(bounds.length){
+    map.fitBounds(bounds, { padding:[30,30], maxZoom:6 });
+  }
+}
+
+async function takeShipment(id){
+  await sb.from("shipments").update({assigned_to:user.email}).eq("id",id);
+  await loadShipments();
 }
 
 async function setStatus(id,status){
+  const x = shipments.find(s => s.id === id);
+
+  if(x && !canEditShipment(x)){
+    alert("You do not have permission to update this shipment.");
+    return;
+  }
+
   await sb.from("shipments").update({status}).eq("id",id);
   await loadShipments();
 }
 
 async function deleteShipment(id){
+  if(!canDeleteShipment()){
+    alert("Only admins can delete shipments.");
+    return;
+  }
+
   if(!confirm("Delete this shipment?")) return;
+
   await sb.from("shipments").delete().eq("id",id);
   await loadShipments();
 }
@@ -386,10 +1034,20 @@ async function deleteShipment(id){
 function editShipment(id){
   const x = shipments.find(s => s.id === id);
   if(!x) return;
+
+  if(!canEditShipment(x)){
+    alert("You do not have permission to edit this shipment.");
+    return;
+  }
+
   editingId = id;
   existingDocs = Array.isArray(x.document_urls) ? x.document_urls : [];
+
   modal.classList.add("show");
+  modalTitle.textContent = "Edit Shipment";
+
   client.value = x.client || "";
+  customerEmail.value = x.customer_email || "";
   origin.value = x.origin || "";
   destination.value = x.destination || "";
   awb.value = x.awb_number || "";
@@ -405,21 +1063,36 @@ function editShipment(id){
 
 async function uploadDocs(){
   const urls = [];
+
   for(const file of selectedDocs){
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
     const path = Date.now() + "_" + safeName;
-    const { error } = await sb.storage.from("shipment-documents").upload(path,file);
-    if(error){ alert("Upload failed: " + error.message); return urls; }
-    const { data } = sb.storage.from("shipment-documents").getPublicUrl(path);
+
+    const { error } = await sb.storage
+      .from("shipment-documents")
+      .upload(path,file);
+
+    if(error){
+      alert("Upload failed: " + error.message);
+      return urls;
+    }
+
+    const { data } = sb.storage
+      .from("shipment-documents")
+      .getPublicUrl(path);
+
     urls.push(data.publicUrl);
   }
+
   return urls;
 }
 
 async function saveShipment(){
   const newDocs = await uploadDocs();
+
   const payload = {
     client:getVal("client"),
+    customer_email:getVal("customerEmail") || null,
     origin:getVal("origin"),
     destination:getVal("destination"),
     awb_number:getVal("awb"),
@@ -429,41 +1102,109 @@ async function saveShipment(){
     shipper:getVal("shipper"),
     consignee:getVal("consignee"),
     eta:getVal("eta") || null,
-    assigned_to:getVal("assigned") || null,
+    assigned_to:getVal("assigned") || user?.email || null,
     shipment_type:getVal("shipmentType") || "Air Import",
     status:"Pending",
     document_urls:[...existingDocs, ...newDocs]
   };
+
   if(!payload.client || !payload.origin || !payload.destination){
     alert("Fill Customer, Origin and Destination.");
     return;
   }
+
+  const duplicate = shipments.find(s =>
+    s.id !== editingId &&
+    s.awb_number &&
+    payload.awb_number &&
+    s.awb_number.toLowerCase() === payload.awb_number.toLowerCase()
+  );
+
+  if(duplicate){
+    if(!confirm("⚠ Duplicate AWB detected. Continue anyway?")){
+      return;
+    }
+  }
+
   let error;
+
   if(editingId){
-    const res = await sb.from("shipments").update(payload).eq("id",editingId);
+    const res = await sb
+      .from("shipments")
+      .update(payload)
+      .eq("id",editingId);
+
     error = res.error;
   } else {
-    const res = await sb.from("shipments").insert([{...payload, shipment_ref:"SHP"+Date.now()}]);
+    const res = await sb
+      .from("shipments")
+      .insert([{
+        ...payload,
+        shipment_ref:"SHP"+Date.now(),
+        created_by_email:user?.email || null
+      }]);
+
     error = res.error;
   }
-  if(error){ alert("Save error: " + error.message); return; }
-  editingId = null; selectedDocs = []; existingDocs = [];
+
+  if(error){
+    alert("Save error: " + error.message);
+    return;
+  }
+
+  editingId = null;
+  selectedDocs = [];
+  existingDocs = [];
+
   modal.classList.remove("show");
   await loadShipments();
+}
+
+function customerUpdate(id){
+  const x = shipments.find(s => s.id === id);
+  if(!x) return;
+
+  const subject = `Shipment Update ${x.shipment_ref || ""}`;
+
+  const body =
+`Hello,
+
+Please see the latest update for your shipment.
+
+Customer: ${x.client || ""}
+Reference: ${x.shipment_ref || ""}
+AWB / Waybill: ${x.awb_number || ""}
+Route: ${x.origin || ""} to ${x.destination || ""}
+ETA: ${localDateOnly(x.eta) || "TBC"}
+Status: ${x.status || "Pending"}
+SLA: ${getSlaText(x)}
+
+Kind regards,`;
+
+  navigator.clipboard?.writeText(body);
+
+  const to = x.customer_email || "";
+
+  window.location.href =
+    `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 async function readDocText(file) {
   if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
     const buffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+
     let text = "";
+
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
       text += content.items.map(item => item.str).join(" ") + "\n";
     }
+
     return text;
   }
+
   return await file.text();
 }
 
@@ -477,42 +1218,72 @@ function findField(text, patterns) {
 
 function normaliseParsedDate(value) {
   if (!value) return "";
+
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+
   const parts = value.split(/[\/.-]/);
   if (parts.length !== 3) return "";
+
   let [d, m, y] = parts;
   if (y.length === 2) y = "20" + y;
-  return `${y.padStart(4, "0")}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+
+  return `${y.padStart(4,"0")}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`;
 }
 
 function guessShipmentType(text) {
   const t = text.toLowerCase();
+
   if (t.includes("customs") || t.includes("commercial invoice")) return "Customs Clearance";
   if (t.includes("awb") || t.includes("air waybill") || /\b\d{3}[-\s]?\d{8}\b/.test(text)) return "Air Import";
   if (t.includes("bill of lading") || t.includes("container") || t.includes("vessel")) return "Ocean Import";
   if (t.includes("cmr") || t.includes("road") || t.includes("truck")) return "Road Import";
+
   return "";
 }
 
 function parseShipmentText(text) {
-  const clean = text.replace(/\r/g, "\n");
-  const flat = clean.replace(/\s+/g, " ");
+  const clean = text.replace(/\r/g,"\n");
+  const flat = clean.replace(/\s+/g," ");
+
   const awbRaw = findField(flat, [
     /\b(\d{3}[-\s]?\d{8})\b/i,
     /(?:AWB|Air Waybill|Waybill|HAWB|MAWB|Tracking|Consignment)(?: No| Number| Ref)?[:\s#-]+([A-Z0-9-]{6,})/i
   ]);
-  const awbVal = awbRaw ? awbRaw.replace(/\s/g, "-") : "";
+
+  const awbVal = awbRaw ? awbRaw.replace(/\s/g,"-") : "";
+
   const etaRaw = findField(flat, [
     /(?:ETA|Arrival|Arrives|Delivery Date|Expected Delivery|Date of Arrival)[^\d]{0,20}(\d{4}-\d{2}-\d{2})/i,
     /(?:ETA|Arrival|Arrives|Delivery Date|Expected Delivery|Date of Arrival)[^\d]{0,20}(\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4})/i
   ]);
-  const carrierVal = findField(flat, [/(DHL|UPS|FEDEX|TNT|MAERSK|MSC|CMA CGM|QATAR AIRWAYS|EMIRATES|LUFTHANSA|KLM|AER LINGUS)/i]);
-  const piecesVal = findField(flat, [/(?:Pieces|PCS|Pkgs?|Packages|Quantity)[^\d]{0,10}(\d+)/i]);
-  const weightVal = findField(flat, [/(?:Gross Weight|Chargeable Weight|Weight|Total Weight)[^\d]{0,10}([0-9.,]+\s?(?:KG|KGS|LB|LBS|KILOS)?)/i]);
-  const shipperVal = findField(clean, [/(?:Shipper|Sender|Exporter|Collection From|From)[:\s-]+([^\n]{3,80})/i]);
-  const consigneeVal = findField(clean, [/(?:Consignee|Receiver|Importer|Deliver To|Delivery To|Ship To)[:\s-]+([^\n]{3,80})/i]);
-  const originVal = findField(clean, [/(?:Origin|From|POL|Port of Loading|Collection Address)[:\s-]+([^\n]{3,80})/i]);
-  const destVal = findField(clean, [/(?:Destination|To|POD|Port of Discharge|Delivery Address)[:\s-]+([^\n]{3,80})/i]);
+
+  const carrierVal = findField(flat, [
+    /(DHL|UPS|FEDEX|TNT|MAERSK|MSC|CMA CGM|QATAR AIRWAYS|EMIRATES|LUFTHANSA|KLM|AER LINGUS)/i
+  ]);
+
+  const piecesVal = findField(flat, [
+    /(?:Pieces|PCS|Pkgs?|Packages|Quantity)[^\d]{0,10}(\d+)/i
+  ]);
+
+  const weightVal = findField(flat, [
+    /(?:Gross Weight|Chargeable Weight|Weight|Total Weight)[^\d]{0,10}([0-9.,]+\s?(?:KG|KGS|LB|LBS|KILOS)?)/i
+  ]);
+
+  const shipperVal = findField(clean, [
+    /(?:Shipper|Sender|Exporter|Collection From|From)[:\s-]+([^\n]{3,80})/i
+  ]);
+
+  const consigneeVal = findField(clean, [
+    /(?:Consignee|Receiver|Importer|Deliver To|Delivery To|Ship To)[:\s-]+([^\n]{3,80})/i
+  ]);
+
+  const originVal = findField(clean, [
+    /(?:Origin|POL|Port of Loading|Collection Address)[:\s-]+([^\n]{3,80})/i
+  ]);
+
+  const destVal = findField(clean, [
+    /(?:Destination|POD|Port of Discharge|Delivery Address)[:\s-]+([^\n]{3,80})/i
+  ]);
 
   if(awbVal) awb.value = awbVal;
   if(carrierVal) carrier.value = carrierVal;
@@ -524,13 +1295,18 @@ function parseShipmentText(text) {
   if(consigneeVal || shipperVal) client.value = consigneeVal || shipperVal;
   if(originVal) origin.value = originVal;
   if(destVal) destination.value = destVal;
+
   const guessedType = guessShipmentType(flat);
   if(guessedType) shipmentType.value = guessedType;
 }
 
 async function handleDocUpload(e) {
   selectedDocs = Array.from(e.target.files || []);
-  docList.innerHTML = selectedDocs.length ? selectedDocs.map(f => "📄 " + f.name).join("<br>") : "No documents selected.";
+
+  docList.innerHTML = selectedDocs.length
+    ? selectedDocs.map(f => "📄 " + f.name).join("<br>")
+    : "No documents selected.";
+
   for (const file of selectedDocs) {
     try {
       const text = await readDocText(file);
@@ -543,14 +1319,42 @@ async function handleDocUpload(e) {
 
 loginBtn.onclick = login;
 saveBtn.onclick = saveShipment;
-cancelBtn.onclick = () => modal.classList.remove("show");
+
+cancelBtn.onclick = () => {
+  modal.classList.remove("show");
+};
+
 openBtn.onclick = () => {
-  editingId = null; selectedDocs = []; existingDocs = [];
+  editingId = null;
+  selectedDocs = [];
+  existingDocs = [];
+
   modalTitle.textContent = "Add Shipment";
+
+  [
+    "client","customerEmail","origin","destination","awb","carrier",
+    "pieces","weight","shipper","consignee","eta"
+  ].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+
+  assigned.value = "";
+  shipmentType.value = "Air Import";
+  docList.innerHTML = "No documents selected.";
+
   modal.classList.add("show");
 };
-logoutBtn.onclick = async () => { await sb.auth.signOut(); location.reload(); };
-searchInput.oninput = e => { searchTerm = e.target.value.toLowerCase(); render(); };
+
+logoutBtn.onclick = async () => {
+  await sb.auth.signOut();
+  location.reload();
+};
+
+searchInput.oninput = e => {
+  searchTerm = e.target.value.toLowerCase();
+  render();
+};
+
 docUpload.onchange = handleDocUpload;
 
 window.onload = initDropdowns;
