@@ -564,8 +564,8 @@
     <img src="logo.png" alt="Logo">
     <h1>GateKeeper</h1>
     <p>Select your name</p>
-    <select id="loginUserSelect"></select>
-    <input id="loginEmail" style="display:none;">
+   <select id="loginUserSelect"></select>
+<input id="loginEmail" style="display:none;">
     <input id="loginPassword" type="password" placeholder="Password">
     <button class="primary-btn" id="loginBtn">Login</button>
   </div>
@@ -748,36 +748,34 @@ function getRiskLevel(x){
 console.log("Users loaded:", users.length);
 function initDropdowns(){
   const loginSelect = document.getElementById("loginUserSelect");
-  const loginEmailField = document.getElementById("loginEmail");
-  const assignedSelect = document.getElementById("assigned");
-  const typeSelect = document.getElementById("shipmentType");
+  const loginEmail = document.getElementById("loginEmail");
 
-  if (loginSelect) {
-    loginSelect.innerHTML =
-      `<option value="">Select your name</option>` +
-      users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
+  if(!loginSelect) return;
 
-    loginSelect.onchange = e => {
-      if (loginEmailField) loginEmailField.value = e.target.value;
-    };
-  }
+  // 🔥 FORCE RESET (this fixes empty dropdown issue)
+  loginSelect.innerHTML = "";
 
-  if (assignedSelect) {
-    assignedSelect.innerHTML =
-      `<option value="">Unassigned</option>` +
-      users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
-  }
+  // Default option
+  const defaultOpt = document.createElement("option");
+  defaultOpt.value = "";
+  defaultOpt.textContent = "Select your name";
+  loginSelect.appendChild(defaultOpt);
 
-  if (typeSelect) {
-    typeSelect.innerHTML =
-      shipmentTypes.map(t => `<option>${t}</option>`).join("");
-  }
-
-async function login(){
-  const { data, error } = await sb.auth.signInWithPassword({
-    email:getVal("loginEmail"),
-    password:getVal("loginPassword")
+  // Add users safely
+  users.forEach(u => {
+    const opt = document.createElement("option");
+    opt.value = u.email;
+    opt.textContent = u.name;
+    loginSelect.appendChild(opt);
   });
+
+  // Sync email field
+  loginSelect.onchange = e => {
+    if(loginEmail){
+      loginEmail.value = e.target.value;
+    }
+  };
+}
 
   if(error){ alert(error.message); return; }
 
