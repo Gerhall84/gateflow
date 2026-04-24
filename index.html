@@ -1029,68 +1029,61 @@ function parseShipmentText(text) {
   const clean = text.replace(/\r/g, "\n");
   const flat = clean.replace(/\s+/g, " ");
 
-  const awb =
-    findField(flat, [
-      /\b(\d{3}-\d{8})\b/i,
-      /(?:AWB|Air Waybill|Waybill|Tracking)(?: No| Number)?[:\s#-]+([A-Z0-9-]{6,})/i
-    ]);
+  const awb = findField(flat, [
+    /\b(\d{3}[-\s]?\d{8})\b/i,
+    /(?:AWB|Air Waybill|Waybill|HAWB|MAWB|Tracking|Consignment)(?: No| Number| Ref)?[:\s#-]+([A-Z0-9-]{6,})/i
+  ]).replace(/\s/g, "-");
 
-  const etaRaw =
-    findField(flat, [
-      /(?:ETA|Arrival Date|Date of Arrival|Arrives?)[:\s]+(\d{4}-\d{2}-\d{2})/i,
-      /(?:ETA|Arrival Date|Date of Arrival|Arrives?)[:\s]+(\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4})/i
-    ]);
+  const carrier = findField(flat, [
+    /(?:Carrier|Courier|Airline|Forwarder|Transporter|Service)[:\s-]+([A-Z0-9 .&-]{3,40})/i,
+    /\b(DHL|UPS|FEDEX|TNT|MAERSK|MSC|CMA CGM|QATAR AIRWAYS|EMIRATES|LUFTHANSA|KLM|AER LINGUS)\b/i
+  ]);
 
-  const shipper =
-    findField(clean, [
-      /(?:Shipper|Sender|Exporter)[:\s]+([^\n]+)/i
-    ]);
+  const etaRaw = findField(flat, [
+    /(?:ETA|Arrival|Arrives|Delivery Date|Expected Delivery|Date of Arrival)[^\d]{0,20}(\d{4}-\d{2}-\d{2})/i,
+    /(?:ETA|Arrival|Arrives|Delivery Date|Expected Delivery|Date of Arrival)[^\d]{0,20}(\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4})/i
+  ]);
 
-  const consignee =
-    findField(clean, [
-      /(?:Consignee|Receiver|Importer)[:\s]+([^\n]+)/i
-    ]);
+  const pieces = findField(flat, [
+    /(?:Pieces|PCS|Pkgs?|Packages|No\.?\s*of\s*Pieces|Quantity)[^\d]{0,10}(\d+)/i
+  ]);
 
-  const origin =
-    findField(clean, [
-      /(?:Origin|From|POL|Port of Loading)[:\s]+([^\n]+)/i
-    ]);
+  const weight = findField(flat, [
+    /(?:Gross Weight|Chargeable Weight|Weight|Total Weight)[^\d]{0,10}([0-9.,]+\s?(?:KG|KGS|LB|LBS|KILOS)?)/i
+  ]);
 
-  const destination =
-    findField(clean, [
-      /(?:Destination|To|POD|Port of Discharge)[:\s]+([^\n]+)/i
-    ]);
+  const shipper = findField(clean, [
+    /(?:Shipper|Sender|Exporter|Collection From|From)[:\s-]+([^\n]{3,80})/i
+  ]);
 
-  const carrier =
-    findField(clean, [
-      /(?:Carrier|Courier|Airline|Forwarder)[:\s]+([^\n]+)/i
-    ]);
+  const consignee = findField(clean, [
+    /(?:Consignee|Receiver|Importer|Deliver To|Delivery To|Ship To)[:\s-]+([^\n]{3,80})/i
+  ]);
 
-  const pieces =
-    findField(flat, [
-      /(?:Pieces|PCS|Packages|Pkgs?)[:\s]+(\d+)/i
-    ]);
+  const origin = findField(clean, [
+    /(?:Origin|From|POL|Port of Loading|Collection Address)[:\s-]+([^\n]{3,80})/i
+  ]);
 
-  const weight =
-    findField(flat, [
-      /(?:Weight|Gross Weight|Chargeable Weight)[:\s]+([0-9.,]+\s?(?:KG|KGS|LB|LBS)?)/i
-    ]);
+  const destination = findField(clean, [
+    /(?:Destination|To|POD|Port of Discharge|Delivery Address)[:\s-]+([^\n]{3,80})/i
+  ]);
 
-  setIfBlank("awb", awb);
-  setIfBlank("eta", normaliseParsedDate(etaRaw));
-  setIfBlank("shipper", shipper);
-  setIfBlank("consignee", consignee);
-  setIfBlank("client", consignee || shipper);
-  setIfBlank("origin", origin);
-  setIfBlank("destination", destination);
-  setIfBlank("carrier", carrier);
-  setIfBlank("pieces", pieces);
-  setIfBlank("weight", weight);
+  document.getElementById("awb").value = awb || getVal("awb");
+  document.getElementById("carrier").value = carrier || getVal("carrier");
+  document.getElementById("eta").value = normaliseParsedDate(etaRaw) || getVal("eta");
+  document.getElementById("pieces").value = pieces || getVal("pieces");
+  document.getElementById("weight").value = weight || getVal("weight");
+  document.getElementById("shipper").value = shipper || getVal("shipper");
+  document.getElementById("consignee").value = consignee || getVal("consignee");
+  document.getElementById("client").value = consignee || shipper || getVal("client");
+  document.getElementById("origin").value = origin || getVal("origin");
+  document.getElementById("destination").value = destination || getVal("destination");
 
   const guessedType = guessShipmentType(flat);
-  if (guessedType && document.getElementById("shipmentType")) {
-    document.getElementById("shipmentType").value = guessedType;
-  }
+  if (guessedType) document.getElementById("shipmentType").value = guessedType;
+
+  console.log("Parsed:", { awb, carrier, etaRaw, pieces, weight, shipper, consignee, origin, destination });
+}
 }
 
 function initSmartParser() {
