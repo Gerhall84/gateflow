@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Maurice Ward Operations - GateKeeper V2.0</title>
+  <title>GateKeeper Pro</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -258,8 +258,7 @@
       font-size:30px;
       font-weight:900;
     }
-
-    .grid {
+        .grid {
       display:grid;
       grid-template-columns:1.4fr 1fr;
       gap:16px;
@@ -316,6 +315,7 @@
     .transit { background:#dff7f3; color:#069788; }
     .delivered { background:#dff5eb; color:#18a66e; }
     .delayed { background:#ffe4e4; color:#ef5c5c; }
+    .pickup { background:#e4f0ff; color:#2d79ff; }
 
     #statusMsg {
       padding:16px 18px;
@@ -329,6 +329,55 @@
       display:flex;
       gap:14px;
       flex-wrap:wrap;
+    }
+
+    .timeline-grid {
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:12px;
+      padding:18px;
+    }
+
+    .timeline-day {
+      min-height:160px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:#fbfdfd;
+      padding:12px;
+    }
+
+    .timeline-day h3 {
+      margin:0 0 10px;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .timeline-item {
+      padding:9px;
+      border-radius:12px;
+      margin-bottom:8px;
+      font-size:12px;
+      background:#f4f7f8;
+      border-left:4px solid var(--brand);
+    }
+
+    .timeline-item.overdue {
+      background:#fff3f3;
+      border-left-color:var(--danger);
+    }
+
+    .timeline-item.risk {
+      background:#fff9f0;
+      border-left-color:var(--warning);
+    }
+
+    .timeline-item.delivered {
+      background:#f0fbf5;
+      border-left-color:var(--success);
+    }
+
+    .calendar-panel {
+      margin-bottom:16px;
     }
 
     .modal {
@@ -345,7 +394,7 @@
     .modal.show { display:flex; }
 
     .modal-box {
-      width:min(560px,100%);
+      width:min(620px,100%);
       background:white;
       border-radius:22px;
       padding:24px;
@@ -368,10 +417,14 @@
       gap:10px;
     }
 
+    @media(max-width:1100px){
+      .timeline-grid{grid-template-columns:1fr 1fr}
+    }
+
     @media(max-width:900px){
       .app{grid-template-columns:1fr}
       .sidebar{display:none}
-      .grid,.stats{grid-template-columns:1fr}
+      .grid,.stats,.timeline-grid{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -400,6 +453,7 @@
     <nav class="nav">
       <a class="active">Dashboard</a>
       <a>Shipments</a>
+      <a>Calendar</a>
       <a>Map</a>
     </nav>
 
@@ -412,7 +466,7 @@
   <main class="main">
     <div class="welcome">
       <h1>Operations Dashboard</h1>
-      <p>Live shipment visibility, risk alerts and control tower actions</p>
+      <p>Live shipment visibility, risk alerts and weekly planning</p>
     </div>
 
     <div class="topbar">
@@ -446,6 +500,11 @@
       <button class="secondary-btn" onclick="setAlertFilter('risk')">🟠 At Risk: <strong id="alertRisk">0</strong></button>
     </section>
 
+    <section class="card calendar-panel">
+      <div class="section-head"><h2>Weekly Timeline</h2></div>
+      <div class="timeline-grid" id="timelineGrid"></div>
+    </section>
+
     <section class="grid">
       <div class="card">
         <div class="section-head"><h2>Live Map</h2></div>
@@ -467,6 +526,8 @@
             <th>Client</th>
             <th>Route</th>
             <th>Status</th>
+            <th>Pickup</th>
+            <th>ETD</th>
             <th>ETA</th>
             <th>Assigned</th>
             <th>Actions</th>
@@ -485,6 +546,8 @@
     <input id="origin" placeholder="Origin">
     <input id="destination" placeholder="Destination">
     <input id="assigned" placeholder="Assign to email">
+    <input id="pickupDate" type="date">
+    <input id="etdDate" type="date">
     <input id="eta" type="date">
 
     <select id="status">
@@ -500,7 +563,6 @@
     </div>
   </div>
 </div>
-
 <script>
   const sb = window.supabase.createClient(
     "https://edxgkwkdgvsajfmkejbk.supabase.co",
@@ -527,7 +589,7 @@
   }
 
   function initials(email) {
-    return String(email || "GK").slice(0,2).toUpperCase();
+    return String(email || "GK").slice(0, 2).toUpperCase();
   }
 
   async function login() {
@@ -563,10 +625,10 @@
       return;
     }
 
-    map = L.map("map").setView([53.3498,-6.2603],4);
+    map = L.map("map").setView([53.3498, -6.2603], 4);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution:"© OpenStreetMap"
+      attribution: "© OpenStreetMap"
     }).addTo(map);
 
     mapLayer = L.layerGroup().addTo(map);
@@ -574,7 +636,7 @@
   }
 
   async function geocode(place) {
-    if (!place) return [53.3,-6.2];
+    if (!place) return [53.3, -6.2];
 
     const key = place.toLowerCase();
     if (geoCache[key]) return geoCache[key];
@@ -592,7 +654,7 @@
       }
     } catch {}
 
-    return [53.3,-6.2];
+    return [53.3, -6.2];
   }
 
   function statusClass(s) {
@@ -606,10 +668,10 @@
     if (!x.eta || x.status === "Delivered") return "";
 
     const today = new Date();
-    today.setHours(0,0,0,0);
+    today.setHours(0, 0, 0, 0);
 
     const eta = new Date(x.eta);
-    eta.setHours(0,0,0,0);
+    eta.setHours(0, 0, 0, 0);
 
     const diff = Math.ceil((eta - today) / 86400000);
 
@@ -623,10 +685,14 @@
     renderRows();
   }
 
-  function getVisible() {
-    let data = showMine
+  function baseVisible() {
+    return showMine
       ? shipments.filter(x => String(x.assigned_to || "").toLowerCase() === String(user?.email || "").toLowerCase())
       : shipments;
+  }
+
+  function getVisible() {
+    let data = baseVisible();
 
     if (alertFilter === "overdue") {
       data = data.filter(x => riskLabel(x) === "Overdue");
@@ -639,28 +705,84 @@
     return data;
   }
 
+  function eventDateValue(x, field) {
+    if (field === "pickup") return x.pickup_date || x.pickupDate || "";
+    if (field === "etd") return x.etd || x.etd_date || "";
+    if (field === "eta") return x.eta || "";
+    return "";
+  }
+
+  function renderTimeline(data) {
+    const grid = document.getElementById("timelineGrid");
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      return d;
+    });
+
+    grid.innerHTML = days.map(day => {
+      const key = day.toISOString().slice(0, 10);
+
+      const events = [];
+
+      data.forEach(x => {
+        if (eventDateValue(x, "pickup") === key) events.push({ type: "Pickup", item: x });
+        if (eventDateValue(x, "etd") === key) events.push({ type: "ETD", item: x });
+        if (eventDateValue(x, "eta") === key) events.push({ type: "ETA", item: x });
+      });
+
+      const eventHtml = events.length
+        ? events.map(e => {
+            const r = riskLabel(e.item);
+            const cls =
+              r === "Overdue" ? "overdue" :
+              r === "At Risk" ? "risk" :
+              e.item.status === "Delivered" ? "delivered" : "";
+
+            return `
+              <div class="timeline-item ${cls}">
+                <strong>${e.type}</strong><br>
+                ${e.item.shipment_ref || ""}<br>
+                ${e.item.origin || ""} → ${e.item.destination || ""}
+              </div>
+            `;
+          }).join("")
+        : `<div class="small">No events</div>`;
+
+      return `
+        <div class="timeline-day">
+          <h3>${day.toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short" })}</h3>
+          ${eventHtml}
+        </div>
+      `;
+    }).join("");
+  }
+
   async function renderMap(data) {
     if (!mapLayer) return;
 
     mapLayer.clearLayers();
     const bounds = [];
 
-    for (const x of data.slice(0,10)) {
+    for (const x of data.slice(0, 10)) {
       const o = await geocode(x.origin);
       const d = await geocode(x.destination);
 
-      bounds.push(o,d);
+      bounds.push(o, d);
 
       const color =
         riskLabel(x) === "Overdue" || x.status === "Delayed" ? "red" :
         x.status === "Delivered" ? "green" :
         "#06b7a5";
 
-      L.polyline([o,d], {
+      L.polyline([o, d], {
         color,
-        weight:4,
-        opacity:.85,
-        dashArray:x.status === "In Transit" ? "8,8" : null
+        weight: 4,
+        opacity: .85,
+        dashArray: x.status === "In Transit" ? "8,8" : null
       }).addTo(mapLayer);
 
       L.marker(o).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>${x.origin || ""}`);
@@ -668,18 +790,16 @@
     }
 
     if (bounds.length) {
-      map.fitBounds(bounds, { padding:[30,30], maxZoom:6 });
+      map.fitBounds(bounds, { padding: [30, 30], maxZoom: 6 });
     }
   }
 
   function renderRows() {
     const data = getVisible();
-    const allVisible = showMine
-      ? shipments.filter(x => String(x.assigned_to || "").toLowerCase() === String(user?.email || "").toLowerCase())
-      : shipments;
+    const allVisible = baseVisible();
 
     if (!data.length) {
-      rows.innerHTML = `<tr><td colspan="7">No shipments found.</td></tr>`;
+      rows.innerHTML = `<tr><td colspan="9">No shipments found.</td></tr>`;
     } else {
       rows.innerHTML = data.map(x => {
         const risk = riskLabel(x);
@@ -696,7 +816,9 @@
             <span class="pill ${statusClass(x.status)}">${x.status || "Pending"}</span>
             ${risk ? `<span class="pill ${risk === "Overdue" ? "delayed" : "pending"}">${risk}</span>` : ""}
           </td>
-          <td>${x.eta || "-"}</td>
+          <td>${eventDateValue(x, "pickup") || "-"}</td>
+          <td>${eventDateValue(x, "etd") || "-"}</td>
+          <td>${eventDateValue(x, "eta") || "-"}</td>
           <td>${x.assigned_to || "-"}</td>
           <td>
             <button class="action-btn" onclick="setStatus('${x.id}','In Transit')">🚚</button>
@@ -714,6 +836,7 @@
     document.getElementById("alertOverdue").textContent = allVisible.filter(x => riskLabel(x) === "Overdue").length;
     document.getElementById("alertRisk").textContent = allVisible.filter(x => riskLabel(x) === "At Risk").length;
 
+    renderTimeline(data);
     renderMap(data);
 
     statusMsg.textContent = showMine
@@ -721,8 +844,11 @@
       : "Loaded " + data.length + " shipment(s)";
   }
 
-  async function setStatus(id,status) {
-    const { error } = await sb.from("shipments").update({ status }).eq("id",id);
+  async function setStatus(id, status) {
+    const { error } = await sb
+      .from("shipments")
+      .update({ status })
+      .eq("id", id);
 
     if (error) {
       alert("Update failed: " + error.message);
@@ -739,7 +865,7 @@
     const { data, error } = await sb
       .from("shipments")
       .select("*")
-      .order("created_at", { ascending:false });
+      .order("created_at", { ascending: false });
 
     if (error) {
       statusMsg.textContent = "LOAD ERROR: " + error.message;
@@ -768,17 +894,19 @@
 
   document.getElementById("saveBtn").onclick = async () => {
     const payload = {
-      shipment_ref:"SHP" + Date.now(),
-      client:getVal("client"),
-      origin:getVal("origin"),
-      destination:getVal("destination"),
-      assigned_to:getVal("assigned") || null,
-      eta:getVal("eta") || null,
-      shipment_type:"Road",
-      status:getVal("status") || "Pending",
-      priority:"Medium",
-      created_by_email:user?.email || null,
-      source:"manual"
+      shipment_ref: "SHP" + Date.now(),
+      client: getVal("client"),
+      origin: getVal("origin"),
+      destination: getVal("destination"),
+      assigned_to: getVal("assigned") || null,
+      pickup_date: getVal("pickupDate") || null,
+      etd: getVal("etdDate") || null,
+      eta: getVal("eta") || null,
+      shipment_type: "Road",
+      status: getVal("status") || "Pending",
+      priority: "Medium",
+      created_by_email: user?.email || null,
+      source: "manual"
     };
 
     if (!payload.client || !payload.origin || !payload.destination) {
@@ -797,6 +925,8 @@
     document.getElementById("origin").value = "";
     document.getElementById("destination").value = "";
     document.getElementById("assigned").value = "";
+    document.getElementById("pickupDate").value = "";
+    document.getElementById("etdDate").value = "";
     document.getElementById("eta").value = "";
 
     modal.classList.remove("show");
