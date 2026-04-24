@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GateKeeper Pro</title>
+  <title>Maurice Ward Operations - GateKeeper V2.0</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -13,7 +13,6 @@
     :root {
       --bg:#f4f7f8;
       --nav:#04142e;
-      --nav2:#021127;
       --text:#11213d;
       --muted:#6f7d93;
       --brand:#06b7a5;
@@ -58,14 +57,13 @@
       display:block;
       max-width:190px;
       margin:0 auto 20px;
-      filter:drop-shadow(0 10px 30px rgba(6,183,165,0.35));
+      filter:drop-shadow(0 10px 30px rgba(6,183,165,.35));
     }
 
     .login-card h1 {
       text-align:center;
       margin:0 0 8px;
       color:var(--nav);
-      font-size:28px;
     }
 
     .login-card p {
@@ -82,12 +80,6 @@
       border-radius:14px;
       padding:0 14px;
       font-size:15px;
-      outline:none;
-    }
-
-    .login-card input:focus {
-      border-color:var(--brand);
-      box-shadow:0 0 0 4px rgba(6,183,165,.12);
     }
 
     .login-error {
@@ -110,7 +102,7 @@
       display:flex;
       flex-direction:column;
       min-height:100vh;
-      box-shadow:4px 0 30px rgba(0,0,0,0.25);
+      box-shadow:4px 0 30px rgba(0,0,0,.25);
     }
 
     .brand {
@@ -123,39 +115,29 @@
     .brand img {
       max-width:180px;
       margin-bottom:12px;
-      filter:drop-shadow(0 10px 30px rgba(6,183,165,0.35));
-      transition:.3s;
-    }
-
-    .brand img:hover {
-      transform:scale(1.05);
+      filter:drop-shadow(0 10px 30px rgba(6,183,165,.35));
     }
 
     .brand strong {
       display:block;
       color:#3f73e8;
       font-size:14px;
-      letter-spacing:.2px;
     }
 
     .nav a {
       display:flex;
-      align-items:center;
-      gap:12px;
       color:white;
       padding:14px;
       border-radius:16px;
       font-weight:700;
       margin-bottom:8px;
       text-decoration:none;
-      transition:.2s ease;
     }
 
     .nav a.active,
     .nav a:hover {
       background:rgba(6,183,165,.18);
       color:#8efff1;
-      box-shadow:inset 0 0 0 1px rgba(6,183,165,.16);
     }
 
     .sidebar-footer {
@@ -179,30 +161,23 @@
       color:white;
     }
 
-    .main {
-      padding:28px;
-    }
+    .main { padding:28px; }
 
-    .welcome {
-      margin-bottom:18px;
-    }
+    .welcome { margin-bottom:18px; }
 
     .welcome h1 {
       margin:0 0 8px;
       font-size:28px;
-      letter-spacing:-.5px;
     }
 
     .welcome p {
       margin:0;
       color:var(--muted);
-      font-size:16px;
     }
 
     .topbar {
       display:flex;
       justify-content:space-between;
-      align-items:center;
       gap:12px;
       margin-bottom:20px;
       flex-wrap:wrap;
@@ -212,10 +187,10 @@
     .topbar-right {
       display:flex;
       gap:10px;
-      align-items:center;
       flex-wrap:wrap;
     }
-        .primary-btn {
+
+    .primary-btn {
       height:46px;
       border:0;
       border-radius:14px;
@@ -225,12 +200,6 @@
       font-weight:900;
       cursor:pointer;
       box-shadow:0 12px 30px rgba(6,183,165,.3);
-      transition:.2s ease;
-    }
-
-    .primary-btn:hover {
-      transform:translateY(-2px);
-      box-shadow:0 18px 42px rgba(6,183,165,.38);
     }
 
     .secondary-btn {
@@ -242,10 +211,8 @@
       padding:0 20px;
       font-weight:800;
       cursor:pointer;
-      transition:.2s ease;
     }
 
-    .secondary-btn:hover,
     .secondary-btn.active {
       background:#dff7f3;
       color:var(--brand-dark);
@@ -259,12 +226,6 @@
       margin-right:6px;
       cursor:pointer;
       background:#f4f7f8;
-      transition:.15s ease;
-    }
-
-    .action-btn:hover {
-      transform:translateY(-1px);
-      background:#e8f4f2;
     }
 
     .stats {
@@ -277,31 +238,13 @@
     .card {
       background:white;
       border-radius:22px;
-      box-shadow:0 25px 60px rgba(6,20,46,0.08);
-      border:1px solid rgba(0,0,0,0.03);
-      transition:all .25s ease;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(0,0,0,.03);
       overflow:hidden;
-    }
-
-    .card:hover {
-      transform:translateY(-4px);
-      box-shadow:0 35px 80px rgba(6,20,46,0.12);
     }
 
     .stat-card {
       padding:22px;
-      position:relative;
-      overflow:hidden;
-    }
-
-    .stat-card::after {
-      content:"";
-      position:absolute;
-      right:-20px;
-      bottom:-20px;
-      width:120px;
-      height:120px;
-      background:radial-gradient(circle, rgba(6,183,165,0.15), transparent);
     }
 
     .stat-label {
@@ -330,8 +273,8 @@
 
     .section-head h2 {
       margin:0;
-      font-size:18px;
       color:var(--brand-dark);
+      font-size:18px;
     }
 
     #map {
@@ -340,7 +283,6 @@
       overflow:hidden;
       margin:0 16px 16px;
       border:1px solid var(--line);
-      box-shadow:inset 0 0 0 1px rgba(0,0,0,0.03);
     }
 
     table {
@@ -361,15 +303,6 @@
       font-size:13px;
     }
 
-    tbody tr {
-      transition:all .15s ease;
-    }
-
-    tbody tr:hover {
-      background:#f8fcfb;
-      transform:scale(1.01);
-    }
-
     .pill {
       display:inline-flex;
       padding:6px 10px;
@@ -388,6 +321,14 @@
       padding:16px 18px;
       color:var(--muted);
       font-size:13px;
+    }
+
+    .alert-panel {
+      margin-bottom:16px;
+      padding:18px;
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
     }
 
     .modal {
@@ -464,16 +405,14 @@
 
     <div class="sidebar-footer">
       <div class="avatar" id="avatar">GK</div>
-      <div>
-        <strong id="userEmail"></strong>
-      </div>
+      <div><strong id="userEmail"></strong></div>
     </div>
   </aside>
 
   <main class="main">
     <div class="welcome">
       <h1>Operations Dashboard</h1>
-      <p>Live shipment visibility and risk tracking</p>
+      <p>Live shipment visibility, risk alerts and control tower actions</p>
     </div>
 
     <div class="topbar">
@@ -499,6 +438,12 @@
         <div class="stat-label">Delayed / Risk</div>
         <div class="stat-value" id="delayedStat">0</div>
       </div>
+    </section>
+
+    <section class="card alert-panel">
+      <button class="secondary-btn" onclick="setAlertFilter('all')">All: <strong id="alertAll">0</strong></button>
+      <button class="secondary-btn" onclick="setAlertFilter('overdue')">🔴 Overdue: <strong id="alertOverdue">0</strong></button>
+      <button class="secondary-btn" onclick="setAlertFilter('risk')">🟠 At Risk: <strong id="alertRisk">0</strong></button>
     </section>
 
     <section class="grid">
@@ -530,14 +475,12 @@
         <tbody id="rows"></tbody>
       </table>
     </section>
-
   </main>
 </div>
 
 <div class="modal" id="modal">
   <div class="modal-box">
     <h2>Add Shipment</h2>
-
     <input id="client" placeholder="Client">
     <input id="origin" placeholder="Origin">
     <input id="destination" placeholder="Destination">
@@ -557,6 +500,7 @@
     </div>
   </div>
 </div>
+
 <script>
   const sb = window.supabase.createClient(
     "https://edxgkwkdgvsajfmkejbk.supabase.co",
@@ -568,6 +512,7 @@
   let map;
   let mapLayer;
   let showMine = false;
+  let alertFilter = "all";
   const geoCache = {};
 
   const loginScreen = document.getElementById("loginScreen");
@@ -603,7 +548,7 @@
     loginScreen.style.display = "none";
     app.style.display = "grid";
 
-    setTimeout(initMap, 200);
+    initMap();
     await loadShipments();
   }
 
@@ -613,30 +558,36 @@
   }
 
   function initMap() {
-    if (map) return;
+    if (map) {
+      map.invalidateSize();
+      return;
+    }
 
     map = L.map("map").setView([53.3498,-6.2603],4);
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
-      .addTo(map);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution:"© OpenStreetMap"
+    }).addTo(map);
 
     mapLayer = L.layerGroup().addTo(map);
+    setTimeout(() => map.invalidateSize(), 300);
   }
 
   async function geocode(place) {
     if (!place) return [53.3,-6.2];
 
-    if (geoCache[place]) return geoCache[place];
+    const key = place.toLowerCase();
+    if (geoCache[key]) return geoCache[key];
 
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place)}`
+        `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(place)}`
       );
       const data = await res.json();
 
       if (data[0]) {
         const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-        geoCache[place] = coords;
+        geoCache[key] = coords;
         return coords;
       }
     } catch {}
@@ -655,7 +606,10 @@
     if (!x.eta || x.status === "Delivered") return "";
 
     const today = new Date();
+    today.setHours(0,0,0,0);
+
     const eta = new Date(x.eta);
+    eta.setHours(0,0,0,0);
 
     const diff = Math.ceil((eta - today) / 86400000);
 
@@ -664,110 +618,212 @@
     return "";
   }
 
+  function setAlertFilter(type) {
+    alertFilter = type;
+    renderRows();
+  }
+
   function getVisible() {
-    return showMine
-      ? shipments.filter(x => x.assigned_to === user.email)
+    let data = showMine
+      ? shipments.filter(x => String(x.assigned_to || "").toLowerCase() === String(user?.email || "").toLowerCase())
       : shipments;
+
+    if (alertFilter === "overdue") {
+      data = data.filter(x => riskLabel(x) === "Overdue");
+    }
+
+    if (alertFilter === "risk") {
+      data = data.filter(x => riskLabel(x) === "At Risk");
+    }
+
+    return data;
   }
 
   async function renderMap(data) {
+    if (!mapLayer) return;
+
     mapLayer.clearLayers();
+    const bounds = [];
 
     for (const x of data.slice(0,10)) {
       const o = await geocode(x.origin);
       const d = await geocode(x.destination);
 
+      bounds.push(o,d);
+
       const color =
-        riskLabel(x)==="Overdue" ? "red" :
-        x.status==="Delivered" ? "green" :
+        riskLabel(x) === "Overdue" || x.status === "Delayed" ? "red" :
+        x.status === "Delivered" ? "green" :
         "#06b7a5";
 
-      L.polyline([o,d],{color,weight:4}).addTo(mapLayer);
-      L.marker(o).addTo(mapLayer);
-      L.marker(d).addTo(mapLayer);
+      L.polyline([o,d], {
+        color,
+        weight:4,
+        opacity:.85,
+        dashArray:x.status === "In Transit" ? "8,8" : null
+      }).addTo(mapLayer);
+
+      L.marker(o).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>${x.origin || ""}`);
+      L.marker(d).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>${x.destination || ""}`);
+    }
+
+    if (bounds.length) {
+      map.fitBounds(bounds, { padding:[30,30], maxZoom:6 });
     }
   }
 
   function renderRows() {
     const data = getVisible();
+    const allVisible = showMine
+      ? shipments.filter(x => String(x.assigned_to || "").toLowerCase() === String(user?.email || "").toLowerCase())
+      : shipments;
 
-    rows.innerHTML = data.map(x=>{
-      const risk = riskLabel(x);
+    if (!data.length) {
+      rows.innerHTML = `<tr><td colspan="7">No shipments found.</td></tr>`;
+    } else {
+      rows.innerHTML = data.map(x => {
+        const risk = riskLabel(x);
 
-      return `
-      <tr style="
-        ${risk==="Overdue" ? "background:#fff3f3;" : ""}
-        ${risk==="At Risk" ? "background:#fff9f0;" : ""}
-      ">
-        <td>${x.shipment_ref}</td>
-        <td>${x.client}</td>
-        <td>${x.origin} → ${x.destination}</td>
-        <td>
-          <span class="pill ${statusClass(x.status)}">${x.status}</span>
-          ${risk ? `<span class="pill ${risk==="Overdue"?"delayed":"pending"}">${risk}</span>`:""}
-        </td>
-        <td>${x.eta||"-"}</td>
-        <td>${x.assigned_to||"-"}</td>
-        <td>
-          <button class="action-btn" onclick="setStatus('${x.id}','In Transit')">🚚</button>
-          <button class="action-btn" onclick="setStatus('${x.id}','Delivered')">✅</button>
-        </td>
-      </tr>`;
-    }).join("");
+        return `
+        <tr style="
+          ${risk === "Overdue" ? "background:#fff3f3;" : ""}
+          ${risk === "At Risk" ? "background:#fff9f0;" : ""}
+        ">
+          <td>${x.shipment_ref || ""}</td>
+          <td>${x.client || ""}</td>
+          <td>${x.origin || ""} → ${x.destination || ""}</td>
+          <td>
+            <span class="pill ${statusClass(x.status)}">${x.status || "Pending"}</span>
+            ${risk ? `<span class="pill ${risk === "Overdue" ? "delayed" : "pending"}">${risk}</span>` : ""}
+          </td>
+          <td>${x.eta || "-"}</td>
+          <td>${x.assigned_to || "-"}</td>
+          <td>
+            <button class="action-btn" onclick="setStatus('${x.id}','In Transit')">🚚</button>
+            <button class="action-btn" onclick="setStatus('${x.id}','Delivered')">✅</button>
+          </td>
+        </tr>`;
+      }).join("");
+    }
 
     document.getElementById("totalStat").textContent = data.length;
-    document.getElementById("transitStat").textContent =
-      data.filter(x=>x.status==="In Transit").length;
-    document.getElementById("delayedStat").textContent =
-      data.filter(x=>x.status==="Delayed"||riskLabel(x)).length;
+    document.getElementById("transitStat").textContent = data.filter(x => x.status === "In Transit").length;
+    document.getElementById("delayedStat").textContent = data.filter(x => x.status === "Delayed" || riskLabel(x)).length;
+
+    document.getElementById("alertAll").textContent = allVisible.length;
+    document.getElementById("alertOverdue").textContent = allVisible.filter(x => riskLabel(x) === "Overdue").length;
+    document.getElementById("alertRisk").textContent = allVisible.filter(x => riskLabel(x) === "At Risk").length;
 
     renderMap(data);
+
+    statusMsg.textContent = showMine
+      ? "Showing my shipments: " + data.length
+      : "Loaded " + data.length + " shipment(s)";
   }
 
   async function setStatus(id,status) {
-    await sb.from("shipments").update({status}).eq("id",id);
+    const { error } = await sb.from("shipments").update({ status }).eq("id",id);
+
+    if (error) {
+      alert("Update failed: " + error.message);
+      return;
+    }
+
     await loadShipments();
+    statusMsg.textContent = "Shipment updated ✔";
   }
 
   async function loadShipments() {
     statusMsg.textContent = "Loading...";
 
-    const { data } = await sb.from("shipments").select("*");
+    const { data, error } = await sb
+      .from("shipments")
+      .select("*")
+      .order("created_at", { ascending:false });
+
+    if (error) {
+      statusMsg.textContent = "LOAD ERROR: " + error.message;
+      return;
+    }
 
     shipments = data || [];
     renderRows();
-
-    statusMsg.textContent = "Loaded " + shipments.length;
   }
 
   document.getElementById("loginBtn").onclick = login;
   document.getElementById("logoutBtn").onclick = logout;
 
-  myBtn.onclick = ()=>{
+  myBtn.onclick = () => {
     showMine = !showMine;
-    myBtn.classList.toggle("active");
+    myBtn.classList.toggle("active", showMine);
     renderRows();
   };
 
-  document.getElementById("openBtn").onclick = ()=> modal.classList.add("show");
-  document.getElementById("cancelBtn").onclick = ()=> modal.classList.remove("show");
+  document.getElementById("openBtn").onclick = () => modal.classList.add("show");
+  document.getElementById("cancelBtn").onclick = () => modal.classList.remove("show");
 
-  document.getElementById("saveBtn").onclick = async ()=>{
+  modal.onclick = e => {
+    if (e.target === modal) modal.classList.remove("show");
+  };
+
+  document.getElementById("saveBtn").onclick = async () => {
     const payload = {
-      shipment_ref: "SHP"+Date.now(),
+      shipment_ref:"SHP" + Date.now(),
       client:getVal("client"),
       origin:getVal("origin"),
       destination:getVal("destination"),
-      assigned_to:getVal("assigned"),
-      eta:getVal("eta"),
-      status:getVal("status")
+      assigned_to:getVal("assigned") || null,
+      eta:getVal("eta") || null,
+      shipment_type:"Road",
+      status:getVal("status") || "Pending",
+      priority:"Medium",
+      created_by_email:user?.email || null,
+      source:"manual"
     };
 
-    await sb.from("shipments").insert([payload]);
+    if (!payload.client || !payload.origin || !payload.destination) {
+      alert("Fill Client, Origin and Destination.");
+      return;
+    }
+
+    const { error } = await sb.from("shipments").insert([payload]);
+
+    if (error) {
+      alert("SAVE ERROR: " + error.message);
+      return;
+    }
+
+    document.getElementById("client").value = "";
+    document.getElementById("origin").value = "";
+    document.getElementById("destination").value = "";
+    document.getElementById("assigned").value = "";
+    document.getElementById("eta").value = "";
 
     modal.classList.remove("show");
     await loadShipments();
+    statusMsg.textContent = "Shipment saved ✔";
   };
+
+  async function init() {
+    const { data } = await sb.auth.getSession();
+
+    if (data.session?.user) {
+      user = data.session.user;
+      document.getElementById("userEmail").textContent = user.email;
+      document.getElementById("avatar").textContent = initials(user.email);
+
+      loginScreen.style.display = "none";
+      app.style.display = "grid";
+
+      initMap();
+      await loadShipments();
+    } else {
+      loginScreen.style.display = "flex";
+      app.style.display = "none";
+    }
+  }
+
+  init();
 </script>
 </body>
 </html>
