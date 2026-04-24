@@ -13,19 +13,14 @@
   <style>
     :root {
       --bg:#f4f7f8;
-      --panel:#ffffff;
       --nav:#04142e;
       --text:#11213d;
       --muted:#6f7d93;
       --brand:#06b7a5;
       --brand-dark:#069788;
-      --brand-soft:#dff7f3;
       --line:#e4ebed;
       --danger:#ef5c5c;
-      --warning:#f0a227;
       --success:#18a66e;
-      --blue:#2d79ff;
-      --purple:#7a3fd1;
       --shadow:0 10px 30px rgba(6,20,46,.08);
     }
 
@@ -56,16 +51,6 @@
       box-shadow:0 30px 80px rgba(0,0,0,.25);
     }
 
-    .login-card h1 {
-      margin:0 0 8px;
-      color:var(--nav);
-    }
-
-    .login-card p {
-      margin:0 0 20px;
-      color:var(--muted);
-    }
-
     .login-card input {
       width:100%;
       height:46px;
@@ -73,33 +58,29 @@
       border:1px solid var(--line);
       border-radius:12px;
       padding:0 12px;
-      font-size:14px;
     }
 
     .login-error {
       color:var(--danger);
       font-size:13px;
       margin-top:12px;
-      white-space:pre-wrap;
     }
 
     .app {
       display:none;
-      grid-template-columns:240px 1fr;
       min-height:100vh;
+      grid-template-columns:240px 1fr;
     }
 
     .sidebar {
       background:linear-gradient(180deg,var(--nav),#021127);
       color:white;
       padding:22px 14px;
-      display:flex;
-      flex-direction:column;
     }
 
     .brand {
       text-align:center;
-      padding:12px 8px 20px;
+      padding-bottom:18px;
       border-bottom:1px solid rgba(255,255,255,.08);
       margin-bottom:18px;
     }
@@ -109,17 +90,9 @@
       margin-bottom:10px;
     }
 
-    .brand strong {
-      color:#2b63d9;
-      font-size:14px;
-    }
-
     .nav a {
-      display:flex;
-      gap:12px;
-      align-items:center;
+      display:block;
       color:white;
-      text-decoration:none;
       padding:14px;
       border-radius:14px;
       font-weight:700;
@@ -131,71 +104,15 @@
       background:rgba(6,183,165,.18);
       color:#8efff1;
     }
-        .sidebar-user {
-      margin-top:auto;
-      border-top:1px solid rgba(255,255,255,.08);
-      padding-top:18px;
-      display:flex;
-      gap:12px;
-      align-items:center;
-    }
-
-    .avatar {
-      width:42px;
-      height:42px;
-      border-radius:50%;
-      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:white;
-      font-weight:800;
-      flex-shrink:0;
-    }
 
     .main { padding:20px; }
 
     .topbar {
       display:flex;
       justify-content:space-between;
-      align-items:center;
-      gap:16px;
-      margin-bottom:18px;
-    }
-
-    .top-actions {
-      display:flex;
       gap:12px;
-      align-items:center;
+      margin-bottom:18px;
       flex-wrap:wrap;
-    }
-
-    .search {
-      background:white;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:0 14px;
-      height:46px;
-      width:300px;
-      box-shadow:var(--shadow);
-    }
-
-    .search input {
-      border:0;
-      outline:0;
-      width:100%;
-      height:100%;
-      font-size:14px;
-    }
-
-    select {
-      height:44px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:0 12px;
-      background:white;
-      font-weight:700;
-      color:var(--text);
     }
 
     .primary-btn {
@@ -211,43 +128,19 @@
     }
 
     .secondary-btn {
-      height:44px;
+      height:46px;
       border:1px solid var(--line);
       border-radius:12px;
       background:white;
       color:var(--text);
-      padding:0 16px;
+      padding:0 20px;
       font-weight:800;
       cursor:pointer;
-    }
-
-    .danger-btn {
-      height:44px;
-      border:0;
-      border-radius:12px;
-      background:var(--danger);
-      color:white;
-      padding:0 16px;
-      font-weight:800;
-      cursor:pointer;
-    }
-
-    .welcome { margin-bottom:18px; }
-
-    .welcome h1 {
-      margin:0 0 8px;
-      font-size:26px;
-    }
-
-    .welcome p {
-      margin:0;
-      color:var(--muted);
-      font-size:16px;
     }
 
     .stats {
       display:grid;
-      grid-template-columns:repeat(5,1fr);
+      grid-template-columns:repeat(3,1fr);
       gap:14px;
       margin-bottom:14px;
     }
@@ -257,36 +150,23 @@
       border:1px solid var(--line);
       border-radius:18px;
       box-shadow:var(--shadow);
+      overflow:hidden;
     }
 
     .stat-card {
       padding:20px;
-      display:flex;
-      gap:14px;
-      align-items:center;
-    }
-
-    .stat-icon {
-      width:54px;
-      height:54px;
-      border-radius:50%;
-      background:var(--brand-soft);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:24px;
     }
 
     .stat-label {
-      font-size:13px;
       color:var(--muted);
-      margin-bottom:6px;
+      font-size:13px;
       font-weight:700;
     }
 
     .stat-value {
-      font-size:24px;
+      font-size:28px;
       font-weight:900;
+      margin-top:6px;
     }
 
     .grid {
@@ -297,90 +177,22 @@
     }
 
     .section-head {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
       padding:18px;
+      border-bottom:1px solid var(--line);
     }
 
     .section-head h2 {
       margin:0;
-      font-size:18px;
       color:var(--brand-dark);
+      font-size:18px;
     }
 
-    .small {
-      display:block;
-      color:var(--muted);
-      font-size:13px;
-      margin-top:4px;
-    }
-
-    .pill {
-      display:inline-flex;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:800;
-      white-space:nowrap;
-    }
-
-    .transit { background:var(--brand-soft); color:var(--brand-dark); }
-    .pending { background:#fff1da; color:#d88d10; }
-    .delivered { background:#dff5eb; color:var(--success); }
-    .delayed { background:#ffe4e4; color:var(--danger); }
-    .vip { background:#efe4ff; color:var(--purple); }
-    .pickup { background:#e4f0ff; color:var(--blue); }
-
-    .map-box {
+    #map {
       height:430px;
-      margin:0 18px 18px;
-      border-radius:16px;
-      overflow:hidden;
-      border:1px solid var(--line);
-      background:#06264d;
+      width:100%;
     }
 
-    .calendar-list, .bd-list, .detail-body, .workload-list {
-      padding:0 18px 18px;
-    }
-
-    .calendar-row, .bd-row, .detail-row, .workload-row {
-      display:grid;
-      grid-template-columns:46px 1fr auto;
-      gap:12px;
-      padding:14px 0;
-      border-top:1px solid var(--line);
-      align-items:center;
-    }
-
-    .bd-row, .detail-row, .workload-row {
-      grid-template-columns:1fr auto;
-    }
-
-    .date-box {
-      border:1px solid var(--line);
-      border-radius:10px;
-      overflow:hidden;
-      text-align:center;
-      background:white;
-    }
-
-    .date-box span {
-      display:block;
-      background:var(--brand-dark);
-      color:white;
-      font-size:10px;
-      font-weight:800;
-      padding:4px 0;
-    }
-
-    .date-box strong {
-      display:block;
-      padding:6px 0;
-      font-size:14px;
-    }
-        table {
+    table {
       width:100%;
       border-collapse:collapse;
       font-size:14px;
@@ -395,31 +207,25 @@
 
     th {
       background:#f6f9fb;
-      font-size:13px;
     }
 
-    tbody tr { cursor:pointer; }
-    tbody tr:hover { background:#f8fcfb; }
+    .pill {
+      display:inline-flex;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .pending { background:#fff1da; color:#d88d10; }
+    .transit { background:#dff7f3; color:#069788; }
+    .delivered { background:#dff5eb; color:#18a66e; }
+    .delayed { background:#ffe4e4; color:#ef5c5c; }
 
     #statusMsg {
-      padding:0 18px 16px;
+      padding:14px 18px;
       color:var(--muted);
       font-size:13px;
-    }
-
-    .lower-grid {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-      margin-top:14px;
-    }
-
-    textarea {
-      width:100%;
-      min-height:110px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:12px;
     }
 
     .modal {
@@ -430,289 +236,395 @@
       align-items:center;
       justify-content:center;
       z-index:1000;
+      padding:20px;
     }
 
     .modal.show { display:flex; }
 
     .modal-box {
-      width:90%;
-      max-width:800px;
+      width:min(520px,100%);
       background:white;
       border-radius:20px;
-      padding:20px;
+      padding:22px;
+      box-shadow:0 30px 80px rgba(2,17,39,.28);
     }
 
+    .modal-box input,
+    .modal-box select {
+      width:100%;
+      height:44px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:0 12px;
+      margin-bottom:12px;
+    }
+
+    .modal-actions {
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+    }
+
+    @media(max-width:900px) {
+      .app { grid-template-columns:1fr; }
+      .sidebar { display:none; }
+      .grid, .stats { grid-template-columns:1fr; }
+    }
   </style>
 </head>
 
 <body>
 
-<div class="login-screen" id="loginScreen">
-  <div class="login-card">
-    <h1>GateKeeper</h1>
-    <input id="loginEmail" placeholder="Email">
-    <input id="loginPassword" type="password" placeholder="Password">
-    <button class="primary-btn" id="loginBtn">Login</button>
-    <div id="loginError"></div>
-  </div>
-</div>
-
-<div class="app" id="app">
-  <main class="main">
-
-    <div class="topbar">
-      <button class="primary-btn" id="openBtn">+ Add Shipment</button>
-      <button class="secondary-btn" id="logoutBtn">Logout</button>
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <h1>GateKeeper Pro</h1>
+      <p>Login to manage shipments.</p>
+      <input id="loginEmail" type="email" placeholder="Email">
+      <input id="loginPassword" type="password" placeholder="Password">
+      <button class="primary-btn" id="loginBtn" style="width:100%;">Login</button>
+      <div class="login-error" id="loginError"></div>
     </div>
-
-    <section class="stats">
-      <div class="card stat-card"><div class="stat-value" id="totalStat">0</div></div>
-      <div class="card stat-card"><div class="stat-value" id="transitStat">0</div></div>
-      <div class="card stat-card"><div class="stat-value" id="delayedStat">0</div></div>
-    </section>
-
-    <section class="grid">
-      <div class="card">
-        <div id="map" class="map-box"></div>
-      </div>
-      <div class="card">
-        <div class="calendar-list" id="calendarList"></div>
-      </div>
-    </section>
-
-    <section class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Client</th>
-            <th>Route</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
-      <div id="statusMsg"></div>
-    </section>
-
-  </main>
-</div>
-
-<div class="modal" id="modal">
-  <div class="modal-box">
-    <input id="client" placeholder="Client">
-    <input id="origin" placeholder="Origin">
-    <input id="destination" placeholder="Destination">
-    <button id="saveBtn">Save</button>
   </div>
-</div>
-<script>
-  const sb = window.supabase.createClient(
-    "https://edxgkwkdgvsajfmkejbk.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
-  );
 
-  let user = null;
-  let shipments = [];
-  let map;
-  let mapLayer;
+  <div class="app" id="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="logo.png" alt="Maurice Ward Group">
+        <strong>Maurice Ward Group</strong>
+      </div>
 
-  const loginScreen = document.getElementById("loginScreen");
-  const app = document.getElementById("app");
-  const modal = document.getElementById("modal");
-  const rows = document.getElementById("rows");
-  const statusMsg = document.getElementById("statusMsg");
+      <nav class="nav">
+        <a class="active">🏠 Dashboard</a>
+        <a>📦 Shipments</a>
+        <a>🌍 Map</a>
+        <a>⚙ Settings</a>
+      </nav>
+    </aside>
 
-  function getVal(id) {
-    return document.getElementById(id).value.trim();
-  }
+    <main class="main">
+      <div class="topbar">
+        <button class="primary-btn" id="openBtn">+ Add Shipment</button>
+        <button class="secondary-btn" id="logoutBtn">Logout</button>
+      </div>
 
-  function showApp() {
-    loginScreen.style.display = "none";
-    app.style.display = "grid";
-    setTimeout(initMap, 200);
-  }
+      <section class="stats">
+        <div class="card stat-card">
+          <div class="stat-label">Total Shipments</div>
+          <div class="stat-value" id="totalStat">0</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-label">In Transit</div>
+          <div class="stat-value" id="transitStat">0</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-label">Delayed</div>
+          <div class="stat-value" id="delayedStat">0</div>
+        </div>
+      </section>
 
-  async function login() {
-    const email = getVal("loginEmail");
-    const password = getVal("loginPassword");
+      <section class="grid">
+        <div class="card">
+          <div class="section-head"><h2>Live Map</h2></div>
+          <div id="map"></div>
+        </div>
 
-    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        <div class="card">
+          <div class="section-head"><h2>Status</h2></div>
+          <div id="statusMsg">Loading...</div>
+        </div>
+      </section>
 
-    if (error) {
-      document.getElementById("loginError").textContent = error.message;
-      return;
+      <section class="card">
+        <div class="section-head"><h2>Shipments</h2></div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Client</th>
+                <th>Route</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-box">
+      <h2>Add Shipment</h2>
+
+      <input id="client" placeholder="Client">
+      <input id="origin" placeholder="Origin">
+      <input id="destination" placeholder="Destination">
+
+      <select id="shipmentType">
+        <option>Road</option>
+        <option>Air</option>
+        <option>Sea</option>
+      </select>
+
+      <select id="status">
+        <option>Pending</option>
+        <option>In Transit</option>
+        <option>Delivered</option>
+        <option>Delayed</option>
+      </select>
+
+      <div class="modal-actions">
+        <button class="secondary-btn" id="cancelBtn">Cancel</button>
+        <button class="primary-btn" id="saveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const sb = window.supabase.createClient(
+      "https://edxgkwkdgvsajfmkejbk.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
+    );
+
+    let user = null;
+    let shipments = [];
+    let map;
+    let mapLayer;
+    const geoCache = {};
+
+    const loginScreen = document.getElementById("loginScreen");
+    const app = document.getElementById("app");
+    const modal = document.getElementById("modal");
+    const rows = document.getElementById("rows");
+    const statusMsg = document.getElementById("statusMsg");
+
+    function getVal(id) {
+      return document.getElementById(id).value.trim();
     }
 
-    user = data.user;
-    showApp();
-    await loadShipments();
-  }
+    async function login() {
+      const email = getVal("loginEmail");
+      const password = getVal("loginPassword");
 
-  async function logout() {
-    await sb.auth.signOut();
-    user = null;
-    app.style.display = "none";
-    loginScreen.style.display = "flex";
-  }
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
 
-  function initMap() {
-    if (map) {
-      map.invalidateSize();
-      return;
-    }
+      if (error) {
+        document.getElementById("loginError").textContent = error.message;
+        return;
+      }
 
-    map = L.map("map").setView([53.3498, -6.2603], 4);
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap"
-    }).addTo(map);
-
-    mapLayer = L.layerGroup().addTo(map);
-  }
-
-  function simpleCoords(text) {
-    let hash = 0;
-    const str = String(text || "Dublin");
-
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    const lat = 35 + (Math.abs(hash) % 2500) / 100;
-    const lng = -12 + (Math.abs(hash * 7) % 5000) / 100;
-
-    return [lat, lng];
-  }
-
-  function renderMap(data) {
-    if (!mapLayer) return;
-
-    mapLayer.clearLayers();
-
-    const bounds = [];
-
-    data.slice(0, 10).forEach(x => {
-      const origin = simpleCoords(x.origin);
-      const destination = simpleCoords(x.destination);
-
-      bounds.push(origin, destination);
-
-      const color = x.status === "Delayed" ? "red" : "green";
-
-      L.marker(origin).addTo(mapLayer).bindPopup("Origin: " + (x.origin || ""));
-      L.marker(destination).addTo(mapLayer).bindPopup("Destination: " + (x.destination || ""));
-
-      L.polyline([origin, destination], {
-        color,
-        weight: 3,
-        opacity: 0.8
-      }).addTo(mapLayer);
-    });
-
-    if (bounds.length) {
-      map.fitBounds(bounds, { padding: [30, 30] });
-    }
-  }
-
-  function renderRows(data) {
-    if (!data.length) {
-      rows.innerHTML = `<tr><td colspan="4">No shipments yet.</td></tr>`;
-    } else {
-      rows.innerHTML = data.map(x => `
-        <tr>
-          <td>${x.shipment_ref || ""}</td>
-          <td>${x.client || ""}</td>
-          <td>${x.origin || ""} → ${x.destination || ""}</td>
-          <td>${x.status || ""}</td>
-        </tr>
-      `).join("");
-    }
-
-    document.getElementById("totalStat").textContent = data.length;
-    document.getElementById("transitStat").textContent = data.filter(x => x.status === "In Transit").length;
-    document.getElementById("delayedStat").textContent = data.filter(x => x.status === "Delayed").length;
-
-    renderMap(data);
-  }
-
-  async function loadShipments() {
-    statusMsg.textContent = "Loading shipments...";
-
-    const { data, error } = await sb
-      .from("shipments")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      statusMsg.textContent = "LOAD ERROR: " + error.message;
-      return;
-    }
-
-    shipments = data || [];
-    renderRows(shipments);
-    statusMsg.textContent = "Loaded " + shipments.length + " shipment(s)";
-  }
-
-  document.getElementById("loginBtn").onclick = login;
-  document.getElementById("logoutBtn").onclick = logout;
-
-  document.getElementById("openBtn").onclick = () => {
-    modal.classList.add("show");
-  };
-
-  modal.onclick = e => {
-    if (e.target === modal) modal.classList.remove("show");
-  };
-
-  document.getElementById("saveBtn").onclick = async () => {
-    const payload = {
-      shipment_ref: "SHP" + Date.now(),
-      client: getVal("client"),
-      origin: getVal("origin"),
-      destination: getVal("destination"),
-      shipment_type: "Road",
-      status: "Pending",
-      priority: "Medium",
-      created_by_email: user?.email || null,
-      source: "manual"
-    };
-
-    if (!payload.client || !payload.origin || !payload.destination) {
-      alert("Fill Client, Origin and Destination.");
-      return;
-    }
-
-    const { error } = await sb.from("shipments").insert([payload]);
-
-    if (error) {
-      alert("SAVE ERROR: " + error.message);
-      statusMsg.textContent = "SAVE ERROR: " + error.message;
-      return;
-    }
-
-    document.getElementById("client").value = "";
-    document.getElementById("origin").value = "";
-    document.getElementById("destination").value = "";
-
-    modal.classList.remove("show");
-    await loadShipments();
-  };
-
-  async function init() {
-    const { data } = await sb.auth.getSession();
-
-    if (data.session?.user) {
-      user = data.session.user;
+      user = data.user;
       showApp();
       await loadShipments();
-    } else {
-      loginScreen.style.display = "flex";
-      app.style.display = "none";
     }
-  }
 
-  init();
-</script>
+    async function logout() {
+      await sb.auth.signOut();
+      user = null;
+      app.style.display = "none";
+      loginScreen.style.display = "flex";
+    }
+
+    function showApp() {
+      loginScreen.style.display = "none";
+      app.style.display = "grid";
+      setTimeout(initMap, 200);
+    }
+
+    function initMap() {
+      if (map) {
+        map.invalidateSize();
+        return;
+      }
+
+      map = L.map("map").setView([53.3498, -6.2603], 4);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap"
+      }).addTo(map);
+
+      mapLayer = L.layerGroup().addTo(map);
+    }
+
+    async function geocode(place) {
+      if (!place) return [53.3498, -6.2603];
+
+      const key = place.toLowerCase();
+
+      if (geoCache[key]) return geoCache[key];
+
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(place)}`
+        );
+
+        const data = await res.json();
+
+        if (data[0]) {
+          const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+          geoCache[key] = coords;
+          return coords;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+
+      return [53.3498, -6.2603];
+    }
+
+    async function renderMap(data) {
+      if (!mapLayer) return;
+
+      mapLayer.clearLayers();
+
+      const bounds = [];
+
+      for (const x of data.slice(0, 10)) {
+        const origin = await geocode(x.origin);
+        const destination = await geocode(x.destination);
+
+        bounds.push(origin, destination);
+
+        const color = x.status === "Delayed" ? "red" : x.status === "Delivered" ? "green" : "#06b7a5";
+
+        L.marker(origin)
+          .addTo(mapLayer)
+          .bindPopup(`<strong>${x.shipment_ref}</strong><br>Origin: ${x.origin}`);
+
+        L.marker(destination)
+          .addTo(mapLayer)
+          .bindPopup(`<strong>${x.shipment_ref}</strong><br>Destination: ${x.destination}`);
+
+        L.polyline([origin, destination], {
+          color,
+          weight: 4,
+          opacity: 0.85,
+          dashArray: x.status === "In Transit" ? "8,8" : null
+        }).addTo(mapLayer);
+      }
+
+      if (bounds.length) {
+        map.fitBounds(bounds, { padding: [30, 30], maxZoom: 6 });
+      }
+
+      setTimeout(() => map.invalidateSize(), 200);
+    }
+
+    function statusClass(status) {
+      if (status === "In Transit") return "transit";
+      if (status === "Delivered") return "delivered";
+      if (status === "Delayed") return "delayed";
+      return "pending";
+    }
+
+    function renderRows(data) {
+      if (!data.length) {
+        rows.innerHTML = `<tr><td colspan="4">No shipments yet.</td></tr>`;
+      } else {
+        rows.innerHTML = data.map(x => `
+          <tr>
+            <td>${x.shipment_ref || ""}</td>
+            <td>${x.client || ""}</td>
+            <td>${x.origin || ""} → ${x.destination || ""}</td>
+            <td><span class="pill ${statusClass(x.status)}">${x.status || "Pending"}</span></td>
+          </tr>
+        `).join("");
+      }
+
+      document.getElementById("totalStat").textContent = data.length;
+      document.getElementById("transitStat").textContent = data.filter(x => x.status === "In Transit").length;
+      document.getElementById("delayedStat").textContent = data.filter(x => x.status === "Delayed").length;
+
+      renderMap(data);
+    }
+
+    async function loadShipments() {
+      statusMsg.textContent = "Loading shipments...";
+
+      const { data, error } = await sb
+        .from("shipments")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        statusMsg.textContent = "LOAD ERROR: " + error.message;
+        return;
+      }
+
+      shipments = data || [];
+      renderRows(shipments);
+      statusMsg.textContent = "Loaded " + shipments.length + " shipment(s)";
+    }
+
+    document.getElementById("loginBtn").onclick = login;
+    document.getElementById("logoutBtn").onclick = logout;
+
+    document.getElementById("openBtn").onclick = () => {
+      modal.classList.add("show");
+    };
+
+    document.getElementById("cancelBtn").onclick = () => {
+      modal.classList.remove("show");
+    };
+
+    modal.onclick = e => {
+      if (e.target === modal) modal.classList.remove("show");
+    };
+
+    document.getElementById("saveBtn").onclick = async () => {
+      const payload = {
+        shipment_ref: "SHP" + Date.now(),
+        client: getVal("client"),
+        origin: getVal("origin"),
+        destination: getVal("destination"),
+        shipment_type: getVal("shipmentType") || "Road",
+        status: getVal("status") || "Pending",
+        priority: "Medium",
+        created_by_email: user?.email || null,
+        source: "manual"
+      };
+
+      if (!payload.client || !payload.origin || !payload.destination) {
+        alert("Fill Client, Origin and Destination.");
+        return;
+      }
+
+      const { data, error } = await sb
+        .from("shipments")
+        .insert([payload])
+        .select();
+
+      if (error || !data) {
+        alert("SAVE ERROR: " + (error?.message || "No data returned"));
+        statusMsg.textContent = "SAVE ERROR: " + (error?.message || "No data returned");
+        return;
+      }
+
+      statusMsg.textContent = "Shipment saved ✔";
+
+      document.getElementById("client").value = "";
+      document.getElementById("origin").value = "";
+      document.getElementById("destination").value = "";
+
+      modal.classList.remove("show");
+      await loadShipments();
+    };
+
+    async function init() {
+      const { data } = await sb.auth.getSession();
+
+      if (data.session?.user) {
+        user = data.session.user;
+        showApp();
+        await loadShipments();
+      } else {
+        loginScreen.style.display = "flex";
+        app.style.display = "none";
+      }
+    }
+
+    init();
+  </script>
 </body>
 </html>
