@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
   <style>
     :root {
       --bg:#f4f7f8;
@@ -248,8 +250,7 @@
       color:var(--brand-dark);
       border-color:var(--brand);
     }
-
-    .type-filter-bar {
+        .type-filter-bar {
       display:flex;
       gap:10px;
       flex-wrap:wrap;
@@ -314,7 +315,8 @@
       font-size:30px;
       font-weight:900;
     }
-        .grid {
+
+    .grid {
       display:grid;
       grid-template-columns:1.4fr 1fr;
       gap:16px;
@@ -351,6 +353,7 @@
       padding:14px 18px;
       border-top:1px solid var(--line);
       text-align:left;
+      vertical-align:top;
     }
 
     th {
@@ -365,6 +368,7 @@
       font-size:12px;
       font-weight:800;
       margin-right:4px;
+      white-space:nowrap;
     }
 
     .pending { background:#fff1da; color:#d88d10; }
@@ -471,6 +475,26 @@
 
     .calendar-panel {
       margin-bottom:16px;
+    }
+
+    .parser-box {
+      border:2px dashed var(--line);
+      border-radius:18px;
+      padding:18px;
+      margin:16px;
+      background:#fbfdfd;
+      text-align:center;
+    }
+
+    .parser-box input {
+      margin-top:12px;
+    }
+
+    .parser-result {
+      padding:0 16px 16px;
+      color:var(--muted);
+      font-size:13px;
+      white-space:pre-wrap;
     }
 
     .modal {
@@ -619,6 +643,16 @@
     </section>
 
     <section class="card">
+      <div class="section-head"><h2>Customs Clearance Parser</h2></div>
+      <div class="parser-box">
+        <strong>Drop customs documents here</strong><br>
+        <small>Text PDFs and text files are supported. Scanned PDFs need OCR later.</small><br>
+        <input type="file" id="customsFile" accept=".pdf,.txt,.csv,.doc,.docx">
+      </div>
+      <div class="parser-result" id="parserResult">No document parsed yet.</div>
+    </section>
+
+    <section class="card">
       <div class="section-head"><h2>Shipments</h2></div>
       <table>
         <thead>
@@ -674,246 +708,738 @@ const sb = window.supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
 );
 
-// USERS (Admin + team)
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+}
+
 const users = [
-  { name: "Gerard Hall", email: "gerard.hall@mauriceward.com" },
-  { name: "Balazs Bekes", email: "balazs.bekes@mauriceward.com" }
+  { name: "Balazs Bekes", email: "balazs.bekes@mauriceward.com", role: "Country Manager", office: "Dublin", admin: true },
+  { name: "Gerard Hall", email: "gerard.hall@mauriceward.com", role: "Operations Manager", office: "Shannon", admin: true },
+  { name: "Ashley Nason", email: "ashley.nason@mauriceward.com", role: "Transport Planner", office: "Shannon" },
+  { name: "Lisa O'Neill", email: "lisa.oneill@mauriceward.com", role: "Operations", office: "Shannon" },
+  { name: "Damian Halpin", email: "damian.halpin@mauriceward.com", role: "Operations", office: "Shannon" },
+  { name: "Jason O'Neill", email: "jason.o.neill@mauriceward.com", role: "Operations", office: "Shannon" },
+  { name: "Ciara Burns", email: "ciara.burns@mauriceward.com", role: "Operations", office: "Shannon" },
+  { name: "Dominic Martins", email: "dominic.martins@mauriceward.com", role: "Operations", office: "Shannon" },
+  { name: "Roisin Hogan", email: "roisin.hogan@mauriceward.com", role: "Operations", office: "Shannon" },
+  { name: "Lee Hodges", email: "lee.hodges@mauriceward.com", role: "Operations", office: "Shannon" },
+  { name: "Allanah O'Brien", email: "allanah.obrien@mauriceward.com", role: "Operations", office: "Shannon" },
+  { name: "Darragh O Neill", email: "darragh.oneill@mauriceward.com", role: "Operations", office: "Shannon" },
+  { name: "Tea Pitanti-Ivanac", email: "tea.pitanti-ivanac@mauriceward.com", role: "Operations", office: "Shannon" },
+  { name: "Gary Mc Gettrick", email: "gary.mcgettrick@mauriceward.com", role: "Business Development", office: "Shannon" },
+  { name: "Eoin Ryan", email: "eoin.ryan@mauricewad.com", role: "Business Development", office: "Shannon" },
+  { name: "Natacha Martins", email: "natacha.martins@mauriceward.com", role: "Business Development", office: "Shannon" },
+  { name: "Marese Nevin", email: "marese.nevin@mauriceward.com", role: "Operations", office: "Dublin" },
+  { name: "Flaviu Damian", email: "flaviu.damian@mauriceward.com", role: "Operations", office: "Dublin" },
+  { name: "Yordan Dimitrov", email: "yordan.dimitrov@mauriceward.com", role: "Operations", office: "Sofia" },
+  { name: "Aleksander Nikolov", email: "aleksander.nikolov@mauriceward.com", role: "Operations", office: "Sofia" }
 ];
 
-// TYPES
 const shipmentTypes = [
   "All",
-  "Air Import","Air Export",
-  "Ocean Import","Ocean Export",
-  "Road Import","Road Export","Road Domestic",
+  "Air Import",
+  "Air Export",
+  "Ocean Import",
+  "Ocean Export",
+  "Road Import",
+  "Road Export",
+  "Road Domestic",
   "Customs Clearance"
 ];
 
-let user=null, shipments=[], map, mapLayer;
-let showMine=false, alertFilter="all", typeFilter="All", editingId=null;
+let user = null;
+let shipments = [];
+let map;
+let mapLayer;
+let showMine = false;
+let alertFilter = "all";
+let typeFilter = "All";
+let editingId = null;
+const geoCache = {};
 
+const loginScreen = document.getElementById("loginScreen");
+const app = document.getElementById("app");
+const modal = document.getElementById("modal");
 const rows = document.getElementById("rows");
 const statusMsg = document.getElementById("statusMsg");
 const myBtn = document.getElementById("myBtn");
+const parserResult = document.getElementById("parserResult");
 
-// ---------- BASIC ----------
-const getVal = id => document.getElementById(id).value.trim();
-const initials = e => String(e||"GK").slice(0,2).toUpperCase();
+function getVal(id) {
+  return document.getElementById(id).value.trim();
+}
 
-// ---------- DROPDOWNS ----------
-function renderUserDropdown(){
-  const el=document.getElementById("assigned");
-  el.innerHTML=`
+function initials(email) {
+  return String(email || "GK").slice(0, 2).toUpperCase();
+}
+
+function currentUserRecord() {
+  return users.find(u => String(u.email).toLowerCase() === String(user?.email || "").toLowerCase());
+}
+
+function isAdminUser() {
+  return !!currentUserRecord()?.admin;
+}
+
+function renderUserDropdown() {
+  const el = document.getElementById("assigned");
+  el.innerHTML = `
     <option value="">Unassigned</option>
-    ${users.map(u=>`<option value="${u.email}">${u.name}</option>`).join("")}
+    ${users.map(u => `<option value="${u.email}">${u.name} — ${u.role}</option>`).join("")}
   `;
 }
 
-function renderTypeFilters(){
-  const top=document.getElementById("topTypeFilters");
-  const side=document.getElementById("sideTypeFilters");
+function renderTypeFilters() {
+  const top = document.getElementById("topTypeFilters");
+  const side = document.getElementById("sideTypeFilters");
 
-  top.innerHTML=shipmentTypes.map(t=>`
-    <button class="type-chip ${typeFilter===t?"active":""}" onclick="setTypeFilter('${t}')">${t}</button>
+  top.innerHTML = shipmentTypes.map(t => `
+    <button class="type-chip ${typeFilter === t ? "active" : ""}" onclick="setTypeFilter('${t}')">${t}</button>
   `).join("");
 
-  side.innerHTML=shipmentTypes.map(t=>`
-    <button class="${typeFilter===t?"active":""}" onclick="setTypeFilter('${t}')">${t}</button>
+  side.innerHTML = shipmentTypes.map(t => `
+    <button class="${typeFilter === t ? "active" : ""}" onclick="setTypeFilter('${t}')">${t}</button>
   `).join("");
 
   document.getElementById("shipmentType").innerHTML =
-    shipmentTypes.filter(t=>t!=="All").map(t=>`<option>${t}</option>`).join("");
+    shipmentTypes.filter(t => t !== "All").map(t => `<option value="${t}">${t}</option>`).join("");
 }
 
-function setTypeFilter(t){ typeFilter=t; renderTypeFilters(); renderRows(); }
+function setTypeFilter(type) {
+  typeFilter = type;
+  renderTypeFilters();
+  renderRows();
+}
 
-// ---------- LOGIN ----------
-async function login(){
-  const {data,error}=await sb.auth.signInWithPassword({
-    email:getVal("loginEmail"),
-    password:getVal("loginPassword")
+function clearForm() {
+  editingId = null;
+  document.getElementById("modalTitle").textContent = "Add Shipment";
+
+  ["client", "origin", "destination", "pickupDate", "etdDate", "eta"].forEach(id => {
+    document.getElementById(id).value = "";
   });
 
-  if(error){
-    document.getElementById("loginError").textContent=error.message;
+  document.getElementById("assigned").value = "";
+  document.getElementById("shipmentType").value = "Air Import";
+  document.getElementById("status").value = "Pending";
+}
+
+async function login() {
+  const { data, error } = await sb.auth.signInWithPassword({
+    email: getVal("loginEmail"),
+    password: getVal("loginPassword")
+  });
+
+  if (error) {
+    document.getElementById("loginError").textContent = error.message;
     return;
   }
 
-  user=data.user;
-  document.getElementById("userEmail").textContent=user.email;
-  document.getElementById("avatar").textContent=initials(user.email);
+  user = data.user;
+  document.getElementById("userEmail").textContent = user.email;
+  document.getElementById("avatar").textContent = initials(user.email);
 
-  document.getElementById("loginScreen").style.display="none";
-  document.getElementById("app").style.display="grid";
+  loginScreen.style.display = "none";
+  app.style.display = "grid";
 
   initMap();
-  loadShipments();
+  await loadShipments();
 }
 
-// ---------- MAP ----------
-function initMap(){
-  map=L.map("map").setView([53,-6],4);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
-  mapLayer=L.layerGroup().addTo(map);
+async function logout() {
+  await sb.auth.signOut();
+  location.reload();
 }
 
-// ---------- FILTERS ----------
-function baseVisible(){
-  let data=showMine
-    ? shipments.filter(x=>x.assigned_to===user.email)
-    : shipments;
-
-  if(typeFilter!=="All"){
-    data=data.filter(x=>x.shipment_type===typeFilter);
+function initMap() {
+  if (map) {
+    map.invalidateSize();
+    return;
   }
 
-  return data;
+  map = L.map("map").setView([53.3498, -6.2603], 4);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap"
+  }).addTo(map);
+
+  mapLayer = L.layerGroup().addTo(map);
+  setTimeout(() => map.invalidateSize(), 300);
 }
 
-function getVisible(){
-  let data=baseVisible();
+async function geocode(place) {
+  if (!place) return [53.3, -6.2];
 
-  if(alertFilter==="overdue"){
-    data=data.filter(x=>riskLabel(x)==="Overdue");
-  }
+  const key = place.toLowerCase();
+  if (geoCache[key]) return geoCache[key];
 
-  if(alertFilter==="risk"){
-    data=data.filter(x=>riskLabel(x)==="At Risk");
-  }
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(place)}`
+    );
+    const data = await res.json();
 
-  return data;
+    if (data[0]) {
+      const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+      geoCache[key] = coords;
+      return coords;
+    }
+  } catch {}
+
+  return [53.3, -6.2];
 }
 
-// ---------- RISK ----------
-function riskLabel(x){
-  if(!x.eta || x.status==="Delivered") return "";
-  const diff=(new Date(x.eta)-new Date())/86400000;
-  if(diff<0) return "Overdue";
-  if(diff<=2) return "At Risk";
+function statusClass(s) {
+  if (s === "In Transit") return "transit";
+  if (s === "Delivered") return "delivered";
+  if (s === "Delayed") return "delayed";
+  return "pending";
+}
+
+function riskLabel(x) {
+  if (!x.eta || x.status === "Delivered") return "";
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const eta = new Date(x.eta);
+  eta.setHours(0, 0, 0, 0);
+
+  const diff = Math.ceil((eta - today) / 86400000);
+
+  if (diff < 0) return "Overdue";
+  if (diff <= 2) return "At Risk";
   return "";
 }
 
-// ---------- UNASSIGNED ----------
-function renderUnassigned(){
-  const box=document.getElementById("unassignedBox");
+function setAlertFilter(type) {
+  alertFilter = type;
+  renderRows();
+}
 
-  const list=shipments.filter(x=>!x.assigned_to);
+function baseVisible() {
+  let data = isAdminUser()
+    ? shipments
+    : shipments.filter(x => !x.assigned_to || String(x.assigned_to).toLowerCase() === String(user?.email || "").toLowerCase());
 
-  if(!list.length){
-    box.innerHTML=`<div style="color:#6f7d93;">No unassigned shipments</div>`;
+  if (showMine) {
+    data = data.filter(x => String(x.assigned_to || "").toLowerCase() === String(user?.email || "").toLowerCase());
+  }
+
+  if (typeFilter !== "All") {
+    data = data.filter(x => (x.shipment_type || "") === typeFilter);
+  }
+
+  return data;
+}
+
+function getVisible() {
+  let data = baseVisible();
+
+  if (alertFilter === "overdue") {
+    data = data.filter(x => riskLabel(x) === "Overdue");
+  }
+
+  if (alertFilter === "risk") {
+    data = data.filter(x => riskLabel(x) === "At Risk");
+  }
+
+  return data;
+}
+
+function eventDateValue(x, field) {
+  if (field === "pickup") return x.pickup_date || "";
+  if (field === "etd") return x.etd || "";
+  if (field === "eta") return x.eta || "";
+  return "";
+}
+
+function renderTimeline(data) {
+  const grid = document.getElementById("timelineGrid");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    return d;
+  });
+
+  grid.innerHTML = days.map(day => {
+    const key = day.toISOString().slice(0, 10);
+    const events = [];
+
+    data.forEach(x => {
+      if (eventDateValue(x, "pickup") === key) events.push({ type: "Pickup", item: x });
+      if (eventDateValue(x, "etd") === key) events.push({ type: "ETD", item: x });
+      if (eventDateValue(x, "eta") === key) events.push({ type: "ETA", item: x });
+    });
+
+    const eventHtml = events.length
+      ? events.map(e => {
+          const r = riskLabel(e.item);
+          const cls =
+            r === "Overdue" ? "overdue" :
+            r === "At Risk" ? "risk" :
+            e.item.status === "Delivered" ? "delivered" : "";
+
+          return `
+            <div class="timeline-item ${cls}">
+              <strong>${e.type} · ${e.item.shipment_type || "Shipment"}</strong>
+              <div class="timeline-customer">${e.item.client || "No customer"}</div>
+              <div>${e.item.shipment_ref || ""}</div>
+              <div class="timeline-route">${e.item.origin || ""} → ${e.item.destination || ""}</div>
+            </div>
+          `;
+        }).join("")
+      : `<div style="color:#6f7d93; font-size:12px;">No events</div>`;
+
+    return `
+      <div class="timeline-day">
+        <h3>${day.toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short" })}</h3>
+        ${eventHtml}
+      </div>
+    `;
+  }).join("");
+}
+
+async function renderMap(data) {
+  if (!mapLayer) return;
+
+  mapLayer.clearLayers();
+  const bounds = [];
+
+  for (const x of data.slice(0, 10)) {
+    const o = await geocode(x.origin);
+    const d = await geocode(x.destination);
+
+    bounds.push(o, d);
+
+    const color =
+      riskLabel(x) === "Overdue" || x.status === "Delayed" ? "red" :
+      x.status === "Delivered" ? "green" :
+      "#06b7a5";
+
+    L.polyline([o, d], {
+      color,
+      weight: 4,
+      opacity: .85,
+      dashArray: x.status === "In Transit" ? "8,8" : null
+    }).addTo(mapLayer);
+
+    L.marker(o).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>${x.client || ""}<br>${x.origin || ""}`);
+    L.marker(d).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>${x.client || ""}<br>${x.destination || ""}`);
+  }
+
+  if (bounds.length) {
+    map.fitBounds(bounds, { padding: [30, 30], maxZoom: 6 });
+  }
+}
+
+function renderUnassigned() {
+  const box = document.getElementById("unassignedBox");
+  const list = shipments.filter(x => !x.assigned_to);
+
+  if (!list.length) {
+    box.innerHTML = `<div style="color:#6f7d93;">No unassigned shipments</div>`;
     return;
   }
 
-  box.innerHTML=list.map(x=>`
+  box.innerHTML = list.slice(0, 8).map(x => `
     <div class="unassigned-card">
-      <strong>${x.client}</strong>
-      <small>${x.origin} → ${x.destination}</small><br>
-      <button class="primary-btn" onclick="takeShipment('${x.id}')">Take</button>
+      <strong>${x.client || "No customer"}</strong>
+      <small>${x.shipment_type || "Shipment"} · ${x.origin || ""} → ${x.destination || ""}</small><br>
+      <button class="primary-btn" style="height:36px; margin-top:8px;" onclick="takeShipment('${x.id}')">Take</button>
     </div>
   `).join("");
 }
 
-async function takeShipment(id){
-  await sb.from("shipments")
-    .update({assigned_to:user.email})
-    .eq("id",id);
+async function takeShipment(id) {
+  const { error } = await sb
+    .from("shipments")
+    .update({ assigned_to: user.email })
+    .eq("id", id);
 
-  loadShipments();
+  if (error) {
+    alert("Could not take shipment: " + error.message);
+    return;
+  }
+
+  await loadShipments();
+  statusMsg.textContent = "Shipment assigned to you ✔";
 }
 
-// ---------- TABLE ----------
-function renderRows(){
-  const data=getVisible();
+function renderRows() {
+  const data = getVisible();
+  const allVisible = baseVisible();
 
-  rows.innerHTML=data.map(x=>`
-    <tr>
-      <td>${x.shipment_ref||""}</td>
-      <td>${x.client||""}</td>
-      <td>${x.shipment_type||""}</td>
-      <td>${x.origin} → ${x.destination}</td>
-      <td>${x.status||""}</td>
-      <td>${x.pickup_date||"-"}</td>
-      <td>${x.etd||"-"}</td>
-      <td>${x.eta||"-"}</td>
-      <td>${x.assigned_to||"-"}</td>
-      <td>
-        <button onclick="editShipment('${x.id}')">✏️</button>
-        <button onclick="takeShipment('${x.id}')">👤</button>
-        <button onclick="deleteShipment('${x.id}')">🗑️</button>
-      </td>
-    </tr>
-  `).join("");
+  if (!data.length) {
+    rows.innerHTML = `<tr><td colspan="10">No shipments found.</td></tr>`;
+  } else {
+    rows.innerHTML = data.map(x => {
+      const risk = riskLabel(x);
 
+      return `
+      <tr style="
+        ${risk === "Overdue" ? "background:#fff3f3;" : ""}
+        ${risk === "At Risk" ? "background:#fff9f0;" : ""}
+      ">
+        <td>${x.shipment_ref || ""}</td>
+        <td>${x.client || ""}</td>
+        <td><span class="pill pickup">${x.shipment_type || "Not set"}</span></td>
+        <td>${x.origin || ""} → ${x.destination || ""}</td>
+        <td>
+          <span class="pill ${statusClass(x.status)}">${x.status || "Pending"}</span>
+          ${risk ? `<span class="pill ${risk === "Overdue" ? "delayed" : "pending"}">${risk}</span>` : ""}
+        </td>
+        <td>${eventDateValue(x, "pickup") || "-"}</td>
+        <td>${eventDateValue(x, "etd") || "-"}</td>
+        <td>${eventDateValue(x, "eta") || "-"}</td>
+        <td>${x.assigned_to || "-"}</td>
+        <td>
+          <button class="action-btn" onclick="editShipment('${x.id}')">✏️</button>
+          <button class="action-btn" onclick="setStatus('${x.id}','In Transit')">🚚</button>
+          <button class="action-btn" onclick="setStatus('${x.id}','Delivered')">✅</button>
+          <button class="action-btn" onclick="deleteShipment('${x.id}')">🗑️</button>
+        </td>
+      </tr>`;
+    }).join("");
+  }
+
+  document.getElementById("totalStat").textContent = data.length;
+  document.getElementById("transitStat").textContent = data.filter(x => x.status === "In Transit").length;
+  document.getElementById("delayedStat").textContent = data.filter(x => x.status === "Delayed" || riskLabel(x)).length;
+
+  document.getElementById("alertAll").textContent = allVisible.length;
+  document.getElementById("alertOverdue").textContent = allVisible.filter(x => riskLabel(x) === "Overdue").length;
+  document.getElementById("alertRisk").textContent = allVisible.filter(x => riskLabel(x) === "At Risk").length;
+
+  renderTimeline(data);
+  renderMap(data);
   renderUnassigned();
+
+  statusMsg.textContent =
+    (typeFilter !== "All" ? typeFilter + " · " : "") +
+    (showMine ? "Showing my shipments: " + data.length : "Loaded " + data.length + " shipment(s)");
 }
 
-// ---------- CRUD ----------
-function editShipment(id){
-  const x=shipments.find(s=>s.id===id);
-  editingId=id;
+function editShipment(id) {
+  const x = shipments.find(s => s.id === id);
+  if (!x) return;
 
-  document.getElementById("client").value=x.client||"";
-  document.getElementById("origin").value=x.origin||"";
-  document.getElementById("destination").value=x.destination||"";
-  document.getElementById("assigned").value=x.assigned_to||"";
-  document.getElementById("shipmentType").value=x.shipment_type||"";
-  document.getElementById("pickupDate").value=x.pickup_date||"";
-  document.getElementById("etdDate").value=x.etd||"";
-  document.getElementById("eta").value=x.eta||"";
+  editingId = id;
+  document.getElementById("modalTitle").textContent = "Edit Shipment";
+
+  document.getElementById("client").value = x.client || "";
+  document.getElementById("origin").value = x.origin || "";
+  document.getElementById("destination").value = x.destination || "";
+  document.getElementById("assigned").value = x.assigned_to || "";
+  document.getElementById("shipmentType").value = x.shipment_type || "Air Import";
+  document.getElementById("pickupDate").value = x.pickup_date || "";
+  document.getElementById("etdDate").value = x.etd || "";
+  document.getElementById("eta").value = x.eta || "";
+  document.getElementById("status").value = x.status || "Pending";
 
   modal.classList.add("show");
 }
 
-async function deleteShipment(id){
-  if(!confirm("Delete?")) return;
-  await sb.from("shipments").delete().eq("id",id);
-  loadShipments();
-}
+async function setStatus(id, status) {
+  const { error } = await sb
+    .from("shipments")
+    .update({ status })
+    .eq("id", id);
 
-// ---------- SAVE ----------
-document.getElementById("saveBtn").onclick = async ()=>{
-  const payload={
-    client:getVal("client"),
-    origin:getVal("origin"),
-    destination:getVal("destination"),
-    assigned_to:getVal("assigned")||null,
-    shipment_type:getVal("shipmentType"),
-    pickup_date:getVal("pickupDate")||null,
-    etd:getVal("etdDate")||null,
-    eta:getVal("eta")||null,
-    status:getVal("status")
-  };
-
-  if(editingId){
-    await sb.from("shipments").update(payload).eq("id",editingId);
-  }else{
-    await sb.from("shipments").insert([{
-      ...payload,
-      shipment_ref:"SHP"+Date.now()
-    }]);
+  if (error) {
+    alert("Update failed: " + error.message);
+    return;
   }
 
-  editingId=null;
-  modal.classList.remove("show");
-  loadShipments();
-};
+  await loadShipments();
+  statusMsg.textContent = "Shipment updated ✔";
+}
 
-// ---------- LOAD ----------
-async function loadShipments(){
-  const {data}=await sb.from("shipments").select("*");
-  shipments=data||[];
+async function deleteShipment(id) {
+  if (!confirm("Delete this shipment?")) return;
+
+  const { error } = await sb
+    .from("shipments")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    alert("Delete failed: " + error.message);
+    return;
+  }
+
+  await loadShipments();
+  statusMsg.textContent = "Shipment deleted ✔";
+}
+
+function clearForm() {
+  editingId = null;
+  document.getElementById("modalTitle").textContent = "Add Shipment";
+
+  ["client", "origin", "destination", "pickupDate", "etdDate", "eta"].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+
+  document.getElementById("assigned").value = "";
+  document.getElementById("shipmentType").value = "Air Import";
+  document.getElementById("status").value = "Pending";
+}
+
+async function loadShipments() {
+  statusMsg.textContent = "Loading...";
+
+  const { data, error } = await sb
+    .from("shipments")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    statusMsg.textContent = "LOAD ERROR: " + error.message;
+    return;
+  }
+
+  shipments = data || [];
   renderRows();
 }
 
-// ---------- INIT ----------
-function init(){
-  renderUserDropdown();
-  renderTypeFilters();
+document.getElementById("saveBtn").onclick = async () => {
+  const payload = {
+    client: getVal("client"),
+    origin: getVal("origin"),
+    destination: getVal("destination"),
+    assigned_to: getVal("assigned") || null,
+    shipment_type: getVal("shipmentType") || "Air Import",
+    pickup_date: getVal("pickupDate") || null,
+    etd: getVal("etdDate") || null,
+    eta: getVal("eta") || null,
+    status: getVal("status") || "Pending"
+  };
+
+  if (!payload.client || !payload.origin || !payload.destination) {
+    alert("Fill Customer, Origin and Destination.");
+    return;
+  }
+
+  let error;
+
+  if (editingId) {
+    const res = await sb
+      .from("shipments")
+      .update(payload)
+      .eq("id", editingId);
+
+    error = res.error;
+  } else {
+    const res = await sb
+      .from("shipments")
+      .insert([{
+        ...payload,
+        shipment_ref: "SHP" + Date.now(),
+        priority: "Medium",
+        created_by_email: user?.email || null,
+        source: "manual"
+      }]);
+
+    error = res.error;
+  }
+
+  if (error) {
+    alert("SAVE ERROR: " + error.message);
+    return;
+  }
+
+  clearForm();
+  modal.classList.remove("show");
+  await loadShipments();
+  statusMsg.textContent = "Saved ✔";
+};
+
+function extractFirst(text, patterns) {
+  for (const p of patterns) {
+    const m = text.match(p);
+    if (m && m[1]) return m[1].trim().replace(/\s+/g, " ").slice(0, 120);
+  }
+  return "";
 }
 
-document.getElementById("loginBtn").onclick=login;
-document.getElementById("openBtn").onclick=()=>modal.classList.add("show");
-document.getElementById("cancelBtn").onclick=()=>modal.classList.remove("show");
+function parseCustomsText(text) {
+  const clean = text.replace(/\r/g, "\n");
+
+  const customer = extractFirst(clean, [
+    /(?:consignee|customer|importer|client|buyer)[:\s]+([^\n]+)/i,
+    /(?:ship to|deliver to)[:\s]+([^\n]+)/i
+  ]);
+
+  const origin = extractFirst(clean, [
+    /(?:origin|country of origin|from)[:\s]+([^\n]+)/i,
+    /(?:port of loading|pol)[:\s]+([^\n]+)/i
+  ]);
+
+  const destination = extractFirst(clean, [
+    /(?:destination|delivery address|to)[:\s]+([^\n]+)/i,
+    /(?:port of discharge|pod)[:\s]+([^\n]+)/i
+  ]);
+
+  const etaRaw = extractFirst(clean, [
+    /(?:eta|arrival date|date of arrival)[:\s]+([0-9]{1,2}[\/\-.][0-9]{1,2}[\/\-.][0-9]{2,4})/i,
+    /(?:eta|arrival date|date of arrival)[:\s]+([0-9]{4}-[0-9]{2}-[0-9]{2})/i
+  ]);
+
+  const invoice = extractFirst(clean, [
+    /(?:invoice no|invoice number|commercial invoice)[:\s#]+([A-Z0-9\-\/]+)/i
+  ]);
+
+  const goods = extractFirst(clean, [
+    /(?:goods description|description of goods|commodity|description)[:\s]+([^\n]+)/i
+  ]);
+
+  return {
+    customer: customer || "Customs Customer",
+    origin: origin || "TBC",
+    destination: destination || "TBC",
+    eta: normaliseDate(etaRaw),
+    notes: [
+      invoice ? "Invoice: " + invoice : "",
+      goods ? "Goods: " + goods : ""
+    ].filter(Boolean).join(" | ")
+  };
+}
+
+function normaliseDate(value) {
+  if (!value) return null;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+
+  const parts = value.split(/[\/\-.]/);
+  if (parts.length !== 3) return null;
+
+  let [d, m, y] = parts;
+  if (y.length === 2) y = "20" + y;
+
+  return `${y.padStart(4, "0")}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+}
+
+async function readPdfFile(file) {
+  const buffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+  let text = "";
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(item => item.str).join(" ") + "\n";
+  }
+
+  return text;
+}
+
+async function handleCustomsFile(file) {
+  parserResult.textContent = "Reading document...";
+
+  let text = "";
+
+  try {
+    if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+      text = await readPdfFile(file);
+    } else {
+      text = await file.text();
+    }
+
+    const parsed = parseCustomsText(text);
+
+    const payload = {
+      shipment_ref: "SHP" + Date.now(),
+      client: parsed.customer,
+      origin: parsed.origin,
+      destination: parsed.destination,
+      assigned_to: null,
+      shipment_type: "Customs Clearance",
+      pickup_date: null,
+      etd: null,
+      eta: parsed.eta,
+      status: "Pending",
+      priority: "Medium",
+      created_by_email: user?.email || null,
+      source: "customs_parser",
+      bd_notes: parsed.notes || text.slice(0, 500)
+    };
+
+    const { error } = await sb.from("shipments").insert([payload]);
+
+    if (error) {
+      parserResult.textContent = "Parser save error: " + error.message;
+      return;
+    }
+
+    parserResult.textContent =
+      "Customs Clearance created and placed into Unassigned.\n\n" +
+      "Customer: " + payload.client + "\n" +
+      "Origin: " + payload.origin + "\n" +
+      "Destination: " + payload.destination + "\n" +
+      "ETA: " + (payload.eta || "Not found");
+
+    await loadShipments();
+  } catch (err) {
+    parserResult.textContent = "Could not parse this document. If it is scanned, OCR will be needed later.\n\n" + err.message;
+  }
+}
+
+document.getElementById("customsFile").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (file) handleCustomsFile(file);
+});
+
+document.getElementById("loginBtn").onclick = login;
+document.getElementById("logoutBtn").onclick = logout;
+
+myBtn.onclick = () => {
+  showMine = !showMine;
+  myBtn.classList.toggle("active", showMine);
+  renderRows();
+};
+
+document.getElementById("openBtn").onclick = () => {
+  clearForm();
+  modal.classList.add("show");
+};
+
+document.getElementById("cancelBtn").onclick = () => {
+  clearForm();
+  modal.classList.remove("show");
+};
+
+modal.onclick = e => {
+  if (e.target === modal) {
+    clearForm();
+    modal.classList.remove("show");
+  }
+};
+
+async function init() {
+  renderUserDropdown();
+  renderTypeFilters();
+
+  const { data } = await sb.auth.getSession();
+
+  if (data.session?.user) {
+    user = data.session.user;
+    document.getElementById("userEmail").textContent = user.email;
+    document.getElementById("avatar").textContent = initials(user.email);
+
+    loginScreen.style.display = "none";
+    app.style.display = "grid";
+
+    initMap();
+    await loadShipments();
+  } else {
+    loginScreen.style.display = "flex";
+    app.style.display = "none";
+  }
+}
 
 init();
 </script>
