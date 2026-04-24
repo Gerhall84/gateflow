@@ -36,6 +36,16 @@
 
     button { font-family:inherit; cursor:pointer; }
 
+    input, select {
+      width:100%;
+      height:46px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:0 12px;
+      margin-bottom:10px;
+      background:white;
+    }
+
     .login-screen {
       min-height:100vh;
       display:flex;
@@ -70,16 +80,6 @@
       text-align:center;
       margin:0 0 24px;
       color:var(--muted);
-    }
-
-    input, select {
-      width:100%;
-      height:46px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:0 12px;
-      margin-bottom:10px;
-      background:white;
     }
 
     .login-error {
@@ -130,6 +130,7 @@
       font-weight:700;
       margin-bottom:8px;
       text-decoration:none;
+      cursor:pointer;
     }
 
     .nav a.active,
@@ -164,7 +165,8 @@
       background:rgba(6,183,165,.18);
       color:#8efff1;
     }
-        .sidebar-footer {
+
+    .sidebar-footer {
       margin-top:auto;
       padding-top:18px;
       border-top:1px solid rgba(255,255,255,.08);
@@ -263,8 +265,7 @@
       color:var(--brand-dark);
       border-color:var(--brand);
     }
-
-    .stats {
+        .stats {
       display:grid;
       grid-template-columns:repeat(4,1fr);
       gap:16px;
@@ -304,6 +305,9 @@
     .section-head {
       padding:20px 20px 12px;
       border-bottom:1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
     }
 
     .section-head h2 {
@@ -334,11 +338,6 @@
       font-size:12px;
     }
 
-    .timeline-day strong {
-      display:block;
-      margin-bottom:8px;
-    }
-
     .timeline-item {
       margin-top:8px;
       padding:8px;
@@ -347,24 +346,36 @@
       border-radius:8px;
     }
 
-  tr.row-risk {
-  background:#fff4e0;
-  border-left:6px solid #f0a227;
-}
+    .timeline-item.risk {
+      border-left-color:#f0a227;
+      background:#fff4e0;
+    }
 
     .timeline-item.overdue {
-  border-left-color:#ef5c5c;
-  background:#ffecec;
-  font-weight:700;
-}
+      border-left-color:#ef5c5c;
+      background:#ffecec;
+      font-weight:700;
+    }
 
-.timeline-item.risk {
-  border-left-color:#f0a227;
-  background:#fff4e0;
-}
-{
-      border-left-color:var(--danger);
-      background:#fff3f3;
+    .calendar-grid {
+      padding:16px;
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:10px;
+    }
+
+    .calendar-cell {
+      min-height:120px;
+      background:#f8fbfc;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:8px;
+      font-size:12px;
+    }
+
+    .calendar-date {
+      font-weight:900;
+      margin-bottom:6px;
     }
 
     table {
@@ -375,124 +386,54 @@
     th, td {
       padding:12px;
       border-bottom:1px solid var(--line);
-      vertical-align:top;
-      text-align:left;
       font-size:13px;
     }
 
     th { background:#f6f9fb; }
 
     tr.row-risk {
-      background:#fff9f0;
+      background:#fff4e0;
+      border-left:6px solid #f0a227;
     }
 
     tr.row-overdue {
-  background:#ffe4e4;
-  border-left:6px solid #ef5c5c;
-  font-weight:700;
-}
-
-tr.row-risk {
-  background:#fff4e0;
-  border-left:6px solid #f0a227;
-}{
-      background:#fff3f3;
+      background:#ffe4e4;
+      border-left:6px solid #ef5c5c;
+      font-weight:700;
     }
 
     .pill {
-      display:inline-flex;
       padding:6px 10px;
       border-radius:999px;
       font-size:12px;
       font-weight:800;
-      margin:0 4px 4px 0;
     }
 
-    .pending { background:#fff1da; color:#d88d10; }
-    .transit { background:#dff7f3; color:#069788; }
-    .delivered { background:#dff5eb; color:#18a66e; }
-    .delayed { background:#ffe4e4; color:#ef5c5c; }
-    .type-pill { background:#e4f0ff; color:#2d79ff; }
-    .risk-pill { background:#fff1da; color:#d88d10; }
-    .overdue-pill { background:#ffe4e4; color:#ef5c5c; }
+    .pending { background:#fff1da; }
+    .transit { background:#dff7f3; }
+    .delivered { background:#dff5eb; }
+    .delayed { background:#ffe4e4; }
 
-    .action-btn {
-      border:0;
-      border-radius:12px;
-      padding:9px 11px;
-      margin:2px;
-      background:#f4f7f8;
-    }
+    .screen { display:none; }
+    .screen.active { display:block; }
 
-    .unassigned-card {
-      border-bottom:1px solid var(--line);
-      padding:12px 16px;
-      font-size:13px;
-    }
-
-    .doc-link {
-      color:var(--brand-dark);
-      font-weight:800;
-      text-decoration:none;
-      display:block;
-      margin-bottom:4px;
-    }
-        .modal {
+    .modal {
       display:none;
       position:fixed;
       inset:0;
-      background:rgba(3,12,28,.6);
+      background:rgba(0,0,0,.5);
       align-items:center;
       justify-content:center;
-      z-index:1000;
-      padding:20px;
     }
 
     .modal.show { display:flex; }
 
     .modal-box {
-      width:min(760px,100%);
       background:white;
-      border-radius:22px;
-      padding:24px;
-      box-shadow:0 30px 80px rgba(2,17,39,.28);
-      max-height:90vh;
-      overflow:auto;
-    }
-
-    .modal-grid {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
-
-    .doc-upload-box {
-      border:2px dashed var(--line);
-      border-radius:18px;
-      padding:16px;
-      margin-bottom:14px;
-      background:#fbfdfd;
-      text-align:center;
-    }
-
-    .doc-list {
-      font-size:13px;
-      color:var(--muted);
-      margin-bottom:12px;
-    }
-
-    .modal-actions {
-      display:flex;
-      justify-content:flex-end;
-      gap:10px;
-      margin-top:10px;
-    }
-
-    @media(max-width:900px){
-      .app { grid-template-columns:1fr; }
-      .sidebar { display:none; }
-      .grid,.stats,.timeline,.modal-grid { grid-template-columns:1fr; }
-      .main { padding:16px; }
+      padding:20px;
+      border-radius:16px;
+      width:90%;
+      max-width:600px;
     }
   </style>
 </head>
@@ -501,85 +442,38 @@ tr.row-risk {
 
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
-    <img src="logo.png">
     <h1>GateKeeper</h1>
-    <p>Operations Control</p>
     <select id="loginUserSelect"></select>
-    <input id="loginEmail" placeholder="Email">
+    <input id="loginEmail" style="display:none;">
     <input id="loginPassword" type="password" placeholder="Password">
-    <button class="primary-btn" id="loginBtn">Login</button>
-    <div id="loginError" class="login-error"></div>
+    <button id="loginBtn">Login</button>
   </div>
 </div>
 
 <div class="app" id="app">
+
   <aside class="sidebar">
-    <div class="brand">
-      <img src="logo.png">
-      <strong>Operations</strong>
-    </div>
-
-    <div class="side-label">Shipment Types</div>
-    <div class="type-nav" id="sideTypeFilters"></div>
-
-    <div class="sidebar-footer">
-      <div class="avatar" id="avatar">GK</div>
-      <div id="userEmail"></div>
-    </div>
+    <nav class="nav">
+      <a onclick="showScreen('dashboard')">Dashboard</a>
+      <a onclick="showScreen('shipments')">Shipments</a>
+      <a onclick="showScreen('calendar')">Calendar</a>
+    </nav>
   </aside>
 
   <main class="main">
 
-    <div class="topbar">
-      <div class="topbar-left">
-        <button class="primary-btn" id="openBtn">+ Add Shipment</button>
-        <button class="secondary-btn" id="myBtn">My Shipments</button>
-      </div>
-      <div class="topbar-right">
-        <button class="secondary-btn" id="logoutBtn">Logout</button>
-      </div>
+    <div id="screenDashboard" class="screen active">
+      <h2>Dashboard</h2>
+      <div id="map"></div>
+      <div id="unassigned"></div>
+      <table>
+        <tbody id="dashboardRows"></tbody>
+      </table>
     </div>
-
-    <div id="typeFilters" class="type-filter-bar"></div>
-
-    <section class="stats">
-      <div class="card stat-card">
-        <div class="stat-label">Total</div>
-        <div class="stat-value" id="totalStat">0</div>
+        <div id="screenShipments" class="screen">
+      <div class="section-head">
+        <h2>All Shipments</h2>
       </div>
-      <div class="card stat-card">
-        <div class="stat-label">In Transit</div>
-        <div class="stat-value" id="transitStat">0</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-label">At Risk</div>
-        <div class="stat-value" id="riskStat">0</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-label">Overdue</div>
-        <div class="stat-value" id="overdueStat">0</div>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="section-head"><h2>Weekly Timeline</h2></div>
-      <div class="timeline" id="timeline"></div>
-    </section>
-
-    <section class="grid">
-      <div class="card">
-        <div class="section-head"><h2>Live Map</h2></div>
-        <div id="map"></div>
-      </div>
-
-      <div class="card">
-        <div class="section-head"><h2>Unassigned</h2></div>
-        <div id="unassigned"></div>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="section-head"><h2>Shipments</h2></div>
       <table>
         <thead>
           <tr>
@@ -594,39 +488,50 @@ tr.row-risk {
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody id="rows"></tbody>
+        <tbody id="shipmentRows"></tbody>
       </table>
-    </section>
+    </div>
+
+    <div id="screenCalendar" class="screen">
+      <div class="section-head">
+        <h2>Monthly Calendar</h2>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <div class="topbar">
+      <button class="primary-btn" id="openBtn">+ Add Shipment</button>
+      <button class="secondary-btn" id="myBtn">My Shipments</button>
+      <button class="secondary-btn" id="logoutBtn">Logout</button>
+    </div>
 
   </main>
 </div>
 
 <div class="modal" id="modal">
   <div class="modal-box">
-    <h2>Add Shipment</h2>
+    <h2 id="modalTitle">Add Shipment</h2>
 
     <div class="doc-upload-box">
       <input id="docUpload" type="file" multiple>
-      <div id="docList" class="doc-list">No documents</div>
+      <div id="docList">No documents</div>
     </div>
 
-    <div class="modal-grid">
-      <input id="client" placeholder="Customer">
-      <input id="origin" placeholder="Origin">
-      <input id="destination" placeholder="Destination">
-      <input id="awb" placeholder="AWB">
-      <input id="carrier" placeholder="Carrier">
-      <input id="pieces" placeholder="Pieces">
-      <input id="weight" placeholder="Weight">
-      <input id="shipper" placeholder="Shipper">
-      <input id="consignee" placeholder="Consignee">
-      <input id="eta" type="date">
-      <select id="assigned"></select>
-      <select id="shipmentType"></select>
-    </div>
+    <input id="client" placeholder="Customer">
+    <input id="origin" placeholder="Origin">
+    <input id="destination" placeholder="Destination">
+    <input id="awb" placeholder="AWB / Waybill">
+    <input id="carrier" placeholder="Carrier">
+    <input id="pieces" placeholder="Pieces">
+    <input id="weight" placeholder="Weight">
+    <input id="shipper" placeholder="Shipper">
+    <input id="consignee" placeholder="Consignee">
+    <input id="eta" type="date">
+
+    <select id="assigned"></select>
+    <select id="shipmentType"></select>
 
     <div class="modal-actions">
-      <button class="secondary-btn" id="autoCreateBtn">Auto Create</button>
       <button class="secondary-btn" id="cancelBtn">Cancel</button>
       <button class="primary-btn" id="saveBtn">Save</button>
     </div>
@@ -635,215 +540,216 @@ tr.row-risk {
 <script>
 const sb = window.supabase.createClient(
   "https://edxgkwkdgvsajfmkejbk.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYXNlIiwicmVmIjoiZWR4Z2t3a2RndnNhamZta2VqYmsiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc3NjcxMjMzMiwiZXhwIjoyMDkyMjg4MzMyfQ.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
 );
-
-const BUCKET = "shipment-documents";
-
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-
-const shipmentTypes = [
-  "All",
-  "Air Import","Air Export",
-  "Ocean Import","Ocean Export",
-  "Road Import","Road Export",
-  "Road Domestic","Customs Clearance"
-];
 
 const users = [
   { name:"Gerard Hall", email:"gerard.hall@mauriceward.com" },
-  { name:"Balazs Bekes", email:"balazs.bekes@mauriceward.com" }
+  { name:"Balazs Bekes", email:"balazs.bekes@mauriceward.com" },
+  { name:"Ashley Nason", email:"ashley.nason@mauriceward.com" },
+  { name:"Lisa O'Neill", email:"lisa.oneill@mauriceward.com" },
+  { name:"Damian Halpin", email:"damian.halpin@mauriceward.com" },
+  { name:"Jason O'Neill", email:"jason.o.neill@mauriceward.com" },
+  { name:"Ciara Burns", email:"ciara.burns@mauriceward.com" },
+  { name:"Dominic Martins", email:"dominic.martins@mauriceward.com" },
+  { name:"Roisin Hogan", email:"roisin.hogan@mauriceward.com" },
+  { name:"Lee Hodges", email:"lee.hodges@mauriceward.com" },
+  { name:"Allanah O'Brien", email:"allanah.obrien@mauriceward.com" },
+  { name:"Darragh O Neill", email:"darragh.oneill@mauriceward.com" },
+  { name:"Tea Pitanti-Ivanac", email:"tea.pitanti-ivanac@mauriceward.com" },
+  { name:"Gary Mc Gettrick", email:"gary.mcgettrick@mauriceward.com" },
+  { name:"Eoin Ryan", email:"eoin.ryan@mauriceward.com" },
+  { name:"Natacha Martins", email:"natacha.martins@mauriceward.com" }
+];
+
+const shipmentTypes = [
+  "Air Import","Air Export","Ocean Import","Ocean Export",
+  "Road Import","Road Export","Road Domestic","Customs Clearance"
 ];
 
 let user = null;
 let shipments = [];
-let selectedDocs = [];
 let editingId = null;
+let selectedDocs = [];
 let existingDocs = [];
-let showMine = false;
-let typeFilter = "All";
+let currentScreen = "dashboard";
 
-const getVal = id => document.getElementById(id)?.value || "";
-const setVal = (id,val)=>{ if(val && !getVal(id)) document.getElementById(id).value = val; };
+const getVal = id => document.getElementById(id)?.value?.trim() || "";
+const localDateOnly = d => d ? String(d).slice(0,10) : "";
 
-function localDateOnly(d){ return d ? d.slice(0,10) : ""; }
-
-// ---------------- RISK ENGINE ----------------
-function getRiskLevel(shipment){
-  if(!shipment.eta) return "none";
-
-  const today = new Date();
-  today.setHours(0,0,0,0);
-
-  const eta = new Date(shipment.eta);
-  eta.setHours(0,0,0,0);
-
-  const diff = (eta - today) / (1000*60*60*24);
-
-  if(diff < 0 && shipment.status !== "Delivered"){
-    if(shipment.status !== "Delayed"){
-      autoMarkDelayed(shipment.id);
-    }
-    return "overdue";
-  }
-
+function getRiskLevel(x){
+  if(!x.eta || x.status === "Delivered") return "none";
+  const today = new Date(); today.setHours(0,0,0,0);
+  const eta = new Date(x.eta); eta.setHours(0,0,0,0);
+  const diff = (eta - today) / 86400000;
+  if(diff < 0) return "overdue";
   if(diff <= 2) return "risk";
   return "none";
 }
-// ---------------- LOGIN ----------------
-document.getElementById("loginBtn").onclick = async () => {
-  const { data,error } = await sb.auth.signInWithPassword({
-    email:getVal("loginEmail"),
-    password:getVal("loginPassword")
+
+function showScreen(name){
+  currentScreen = name;
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("screen" + name[0].toUpperCase() + name.slice(1)).classList.add("active");
+  render();
+}
+
+function initDropdowns(){
+  document.getElementById("loginUserSelect").innerHTML =
+    `<option value="">Select your name</option>` +
+    users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
+
+  document.getElementById("loginUserSelect").onchange = e => {
+    document.getElementById("loginEmail").value = e.target.value;
+  };
+
+  document.getElementById("assigned").innerHTML =
+    `<option value="">Unassigned</option>` +
+    users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
+
+  document.getElementById("shipmentType").innerHTML =
+    shipmentTypes.map(t => `<option>${t}</option>`).join("");
+}
+
+async function login(){
+  const { data, error } = await sb.auth.signInWithPassword({
+    email: getVal("loginEmail"),
+    password: getVal("loginPassword")
   });
-  if(error) return alert(error.message);
+
+  if(error){
+    alert(error.message);
+    return;
+  }
 
   user = data.user;
-  document.getElementById("loginScreen").style.display="none";
-  document.getElementById("app").style.display="grid";
-  document.getElementById("userEmail").textContent=user.email;
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("app").style.display = "grid";
+  await loadShipments();
+}
 
-  loadShipments();
-};
-
-// ---------------- LOAD ----------------
 async function loadShipments(){
-  const { data } = await sb.from("shipments").select("*");
+  const { data, error } = await sb
+    .from("shipments")
+    .select("*")
+    .order("created_at", { ascending:false });
+
+  if(error){
+    alert("Load error: " + error.message);
+    return;
+  }
+
   shipments = data || [];
   render();
 }
 
-// ---------------- FILTERS ----------------
-function renderTypeFilters(){
-  document.getElementById("typeFilters").innerHTML =
-    shipmentTypes.map(t => `
-      <button class="secondary-btn ${typeFilter===t?"active":""}"
-        onclick="setTypeFilter('${t}')">${t}</button>
-    `).join("");
-}
-
-function setTypeFilter(t){
-  typeFilter = t;
-  renderTypeFilters();
-  render();
-}
-function filteredShipments(){
-  let data = [...shipments];
-
-  if(showMine){
-    data = data.filter(x => x.assigned_to === user?.email);
-  }
-
-  if(typeFilter !== "All"){
-    data = data.filter(x => x.shipment_type === typeFilter);
-  }
-
-  return data;
+function dashboardData(){
+  return shipments.filter(x =>
+    !x.assigned_to || x.assigned_to === user?.email
+  );
 }
 
 function render(){
-  const data = filteredShipments();
-
-  document.getElementById("totalStat").textContent = data.length;
-  document.getElementById("transitStat").textContent = data.filter(x => x.status === "In Transit").length;
-  document.getElementById("riskStat").textContent = data.filter(x => getRiskLevel(x) === "risk").length;
-  document.getElementById("overdueStat").textContent = data.filter(x => getRiskLevel(x) === "overdue").length;
-
-  document.getElementById("rows").innerHTML = data.map(x => {
-    const risk = getRiskLevel(x);
-    const docs = Array.isArray(x.document_urls) ? x.document_urls : [];
-
-    return `
-      <tr class="${risk === "overdue" ? "row-overdue" : risk === "risk" ? "row-risk" : ""}">
-        <td>${x.shipment_ref || ""}</td>
-        <td>${x.client || ""}<br><small>${x.awb_number || ""}</small></td>
-        <td><span class="pill type-pill">${x.shipment_type || ""}</span></td>
-        <td>${x.origin || ""} → ${x.destination || ""}</td>
-        <td>
-          <span class="pill ${x.status === "In Transit" ? "transit" : x.status === "Delivered" ? "delivered" : x.status === "Delayed" ? "delayed" : "pending"}">
-            ${x.status || "Pending"}
-          </span>
-          ${risk === "risk" ? `<span class="pill risk-pill">At Risk</span>` : ""}
-        ${risk === "overdue" ? `<span class="pill overdue-pill">⚠ OVERDUE</span>` : ""}
-${risk === "risk" ? `<span class="pill risk-pill">⚠ AT RISK</span>` : ""}
-        </td>
-        <td>${localDateOnly(x.eta) || "-"}</td>
-        <td>${docs.length ? docs.map((u,i)=>`<a class="doc-link" href="${u}" target="_blank">Doc ${i+1}</a>`).join("") : "-"}</td>
-        <td>${x.assigned_to || "Unassigned"}</td>
-        <td>
-          <button class="action-btn" onclick="editShipment('${x.id}')">✏️</button>
-          <button class="action-btn" onclick="setStatus('${x.id}','In Transit')">🚚</button>
-          <button class="action-btn" onclick="setStatus('${x.id}','Delivered')">✅</button>
-          <button class="action-btn" onclick="deleteShipment('${x.id}')">🗑️</button>
-        </td>
-      </tr>
-    `;
-  }).join("");
-
-  renderTimeline(data);
+  renderDashboard();
+  renderShipments();
+  renderCalendar();
   renderUnassigned();
 }
-async function autoMarkDelayed(id){
-  await sb
-    .from("shipments")
-    .update({ status: "Delayed" })
-    .eq("id", id);
+
+function rowHtml(x){
+  const risk = getRiskLevel(x);
+  const docs = Array.isArray(x.document_urls) ? x.document_urls : [];
+
+  return `
+    <tr class="${risk === "overdue" ? "row-overdue" : risk === "risk" ? "row-risk" : ""}">
+      <td>${x.shipment_ref || ""}</td>
+      <td>${x.client || ""}<br><small>${x.awb_number || ""}</small></td>
+      <td>${x.shipment_type || ""}</td>
+      <td>${x.origin || ""} → ${x.destination || ""}</td>
+      <td>
+        <span class="pill ${x.status === "Delivered" ? "delivered" : x.status === "In Transit" ? "transit" : x.status === "Delayed" ? "delayed" : "pending"}">${x.status || "Pending"}</span>
+        ${risk === "overdue" ? `<span class="pill overdue-pill">⚠ OVERDUE</span>` : ""}
+        ${risk === "risk" ? `<span class="pill risk-pill">⚠ AT RISK</span>` : ""}
+      </td>
+      <td>${localDateOnly(x.eta) || "-"}</td>
+      <td>${docs.length ? docs.map((u,i)=>`<a class="doc-link" href="${u}" target="_blank">Doc ${i+1}</a>`).join("") : "-"}</td>
+      <td>${x.assigned_to || "Unassigned"}</td>
+      <td>
+        <button class="action-btn" onclick="editShipment('${x.id}')">✏️</button>
+        <button class="action-btn" onclick="setStatus('${x.id}','In Transit')">🚚</button>
+        <button class="action-btn" onclick="setStatus('${x.id}','Delivered')">✅</button>
+        <button class="action-btn" onclick="deleteShipment('${x.id}')">🗑️</button>
+      </td>
+    </tr>
+  `;
 }
-function renderTimeline(data){
-  const box = document.getElementById("timeline");
-  const today = new Date();
-  today.setHours(0,0,0,0);
 
-  const days = Array.from({length:7},(_,i)=>{
-    const d = new Date(today);
-    d.setDate(today.getDate()+i);
-    return d;
-  });
+function renderDashboard(){
+  const data = dashboardData();
+  document.getElementById("dashboardRows").innerHTML = data.map(rowHtml).join("");
+}
 
-  box.innerHTML = days.map(day => {
-    const key = day.getFullYear()+"-"+String(day.getMonth()+1).padStart(2,"0")+"-"+String(day.getDate()).padStart(2,"0");
-
-    const events = data.filter(x => localDateOnly(x.eta) === key);
-
-    return `
-      <div class="timeline-day">
-        <strong>${day.toLocaleDateString("en-GB",{weekday:"short",day:"2-digit",month:"short"})}</strong>
-        ${events.length ? events.map(x => {
-          const risk = getRiskLevel(x);
-          return `
-            <div class="timeline-item ${risk === "overdue" ? "overdue" : risk === "risk" ? "risk" : ""}">
-              <b>${x.client || "No customer"}</b><br>
-              <small>${x.shipment_ref || ""}</small><br>
-              <small>${x.origin || ""} → ${x.destination || ""}</small>
-            </div>
-          `;
-        }).join("") : `<small>No events</small>`}
-      </div>
-    `;
-  }).join("");
+function renderShipments(){
+  document.getElementById("shipmentRows").innerHTML = shipments.map(rowHtml).join("");
 }
 
 function renderUnassigned(){
-  const box = document.getElementById("unassigned");
   const list = shipments.filter(x => !x.assigned_to);
+  document.getElementById("unassigned").innerHTML = list.length
+    ? list.map(x => `
+      <div class="unassigned-card">
+        <strong>${x.client || "No customer"}</strong><br>
+        ${x.origin || ""} → ${x.destination || ""}<br>
+        <button class="primary-btn" style="height:34px;margin-top:8px;" onclick="takeShipment('${x.id}')">Take</button>
+      </div>
+    `).join("")
+    : `<div style="padding:16px;color:#6f7d93;">No unassigned shipments</div>`;
+}
 
-  box.innerHTML = list.length ? list.map(x => `
-    <div class="unassigned-card">
-      <strong>${x.client || "No customer"}</strong><br>
-      ${x.origin || ""} → ${x.destination || ""}<br>
-      <button class="primary-btn" style="height:34px;margin-top:8px;" onclick="takeShipment('${x.id}')">Take</button>
-    </div>
-  `).join("") : `<div style="padding:16px;color:#6f7d93;">No unassigned shipments</div>`;
+function renderCalendar(){
+  const box = document.getElementById("calendarGrid");
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const first = new Date(year, month, 1);
+  const start = new Date(first);
+  start.setDate(first.getDate() - first.getDay());
+
+  let html = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
+    .map(d => `<div class="calendar-day-name">${d}</div>`).join("");
+
+  for(let i=0;i<42;i++){
+    const d = new Date(start);
+    d.setDate(start.getDate()+i);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    const events = shipments.filter(x => localDateOnly(x.eta) === key);
+
+    html += `
+      <div class="calendar-cell ${d.getMonth() !== month ? "muted" : ""}">
+        <div class="calendar-date">${d.getDate()}</div>
+        ${events.map(x => {
+          const risk = getRiskLevel(x);
+          return `
+            <div class="calendar-item ${risk}">
+              <strong>${x.client || ""}</strong><br>
+              <small>${x.shipment_ref || ""}</small>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+  }
+
+  box.innerHTML = html;
 }
 
 async function takeShipment(id){
-  await sb.from("shipments").update({assigned_to:user.email}).eq("id",id);
+  await sb.from("shipments").update({ assigned_to:user.email }).eq("id",id);
   await loadShipments();
 }
 
 async function setStatus(id,status){
-  await sb.from("shipments").update({status}).eq("id",id);
+  await sb.from("shipments").update({ status }).eq("id",id);
   await loadShipments();
 }
 
@@ -860,6 +766,7 @@ function editShipment(id){
   editingId = id;
   existingDocs = Array.isArray(x.document_urls) ? x.document_urls : [];
 
+  document.getElementById("modalTitle").textContent = "Edit Shipment";
   document.getElementById("client").value = x.client || "";
   document.getElementById("origin").value = x.origin || "";
   document.getElementById("destination").value = x.destination || "";
@@ -882,8 +789,8 @@ async function uploadDocs(){
   for(const file of selectedDocs){
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
     const path = Date.now() + "_" + safeName;
-
     const { error } = await sb.storage.from("shipment-documents").upload(path,file);
+
     if(error){
       alert("Upload failed: " + error.message);
       return urls;
@@ -950,16 +857,18 @@ async function saveShipment(){
   await loadShipments();
 }
 
+document.getElementById("loginBtn").onclick = login;
 document.getElementById("saveBtn").onclick = saveShipment;
 document.getElementById("cancelBtn").onclick = () => document.getElementById("modal").classList.remove("show");
-document.getElementById("openBtn").onclick = () => document.getElementById("modal").classList.add("show");
-document.getElementById("logoutBtn").onclick = async () => { await sb.auth.signOut(); location.reload(); };
-
-document.getElementById("myBtn").onclick = () => {
-  showMine = !showMine;
-  document.getElementById("myBtn").classList.toggle("active", showMine);
-  render();
+document.getElementById("openBtn").onclick = () => {
+  editingId = null;
+  existingDocs = [];
+  selectedDocs = [];
+  document.getElementById("modalTitle").textContent = "Add Shipment";
+  document.getElementById("modal").classList.add("show");
 };
+document.getElementById("logoutBtn").onclick = async () => { await sb.auth.signOut(); location.reload(); };
+document.getElementById("myBtn").onclick = () => showScreen("dashboard");
 
 document.getElementById("docUpload").onchange = e => {
   selectedDocs = Array.from(e.target.files || []);
@@ -968,24 +877,7 @@ document.getElementById("docUpload").onchange = e => {
     : "No documents";
 };
 
-document.getElementById("assigned").innerHTML =
-  `<option value="">Unassigned</option>` +
-  users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
-
-document.getElementById("shipmentType").innerHTML =
-  shipmentTypes.filter(t => t !== "All").map(t => `<option>${t}</option>`).join("");
-
-document.getElementById("loginUserSelect").innerHTML =
-  `<option value="">Select user</option>` +
-  users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
-
-document.getElementById("loginUserSelect").onchange = e => {
-  document.getElementById("loginEmail").value = e.target.value;
-};
-
-renderTypeFilters();
+initDropdowns();
 </script>
 </body>
 </html>
-
-    
