@@ -198,12 +198,11 @@
       margin:0 0 18px;
       color:var(--muted);
     }
-
-    .topbar {
+        .topbar {
       display:flex;
       justify-content:space-between;
       gap:12px;
-      margin-bottom:20px;
+      margin-bottom:14px;
       flex-wrap:wrap;
     }
 
@@ -241,6 +240,25 @@
       border-color:var(--brand);
     }
 
+    .search-row {
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+      align-items:center;
+    }
+
+    .search-row input {
+      max-width:360px;
+      margin-bottom:0;
+    }
+
+    .quick-filters {
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
     .type-filter-bar {
       display:flex;
       gap:10px;
@@ -265,7 +283,8 @@
       color:var(--brand-dark);
       border-color:var(--brand);
     }
-        .stats {
+
+    .stats {
       display:grid;
       grid-template-columns:repeat(4,1fr);
       gap:16px;
@@ -308,6 +327,7 @@
       display:flex;
       justify-content:space-between;
       align-items:center;
+      gap:12px;
     }
 
     .section-head h2 {
@@ -347,12 +367,12 @@
     }
 
     .timeline-item.risk {
-      border-left-color:#f0a227;
+      border-left-color:var(--warning);
       background:#fff4e0;
     }
 
     .timeline-item.overdue {
-      border-left-color:#ef5c5c;
+      border-left-color:var(--danger);
       background:#ffecec;
       font-weight:700;
     }
@@ -364,8 +384,16 @@
       gap:10px;
     }
 
+    .calendar-day-name {
+      color:var(--muted);
+      font-size:12px;
+      font-weight:900;
+      text-align:center;
+      text-transform:uppercase;
+    }
+
     .calendar-cell {
-      min-height:120px;
+      min-height:125px;
       background:#f8fbfc;
       border:1px solid var(--line);
       border-radius:14px;
@@ -373,9 +401,32 @@
       font-size:12px;
     }
 
+    .calendar-cell.muted {
+      opacity:.35;
+    }
+
     .calendar-date {
       font-weight:900;
       margin-bottom:6px;
+    }
+
+    .calendar-item {
+      background:white;
+      border-left:4px solid var(--brand);
+      border-radius:8px;
+      padding:6px;
+      margin-top:6px;
+      line-height:1.25;
+    }
+
+    .calendar-item.overdue {
+      border-left-color:var(--danger);
+      background:#ffecec;
+    }
+
+    .calendar-item.risk {
+      border-left-color:var(--warning);
+      background:#fff4e0;
     }
 
     table {
@@ -386,6 +437,8 @@
     th, td {
       padding:12px;
       border-bottom:1px solid var(--line);
+      vertical-align:top;
+      text-align:left;
       font-size:13px;
     }
 
@@ -393,26 +446,53 @@
 
     tr.row-risk {
       background:#fff4e0;
-      border-left:6px solid #f0a227;
+      border-left:6px solid var(--warning);
     }
 
     tr.row-overdue {
       background:#ffe4e4;
-      border-left:6px solid #ef5c5c;
+      border-left:6px solid var(--danger);
       font-weight:700;
     }
 
     .pill {
+      display:inline-flex;
       padding:6px 10px;
       border-radius:999px;
       font-size:12px;
       font-weight:800;
+      margin:0 4px 4px 0;
     }
 
-    .pending { background:#fff1da; }
-    .transit { background:#dff7f3; }
-    .delivered { background:#dff5eb; }
-    .delayed { background:#ffe4e4; }
+    .pending { background:#fff1da; color:#d88d10; }
+    .transit { background:#dff7f3; color:#069788; }
+    .delivered { background:#dff5eb; color:#18a66e; }
+    .delayed { background:#ffe4e4; color:#ef5c5c; }
+    .type-pill { background:#e4f0ff; color:#2d79ff; }
+    .risk-pill { background:#fff1da; color:#d88d10; }
+    .overdue-pill { background:#ffe4e4; color:#ef5c5c; }
+
+    .action-btn {
+      border:0;
+      border-radius:12px;
+      padding:9px 11px;
+      margin:2px;
+      background:#f4f7f8;
+    }
+
+    .unassigned-card {
+      border-bottom:1px solid var(--line);
+      padding:12px 16px;
+      font-size:13px;
+    }
+
+    .doc-link {
+      color:var(--brand-dark);
+      font-weight:800;
+      text-decoration:none;
+      display:block;
+      margin-bottom:4px;
+    }
 
     .screen { display:none; }
     .screen.active { display:block; }
@@ -421,59 +501,137 @@
       display:none;
       position:fixed;
       inset:0;
-      background:rgba(0,0,0,.5);
+      background:rgba(3,12,28,.6);
       align-items:center;
       justify-content:center;
+      z-index:1000;
+      padding:20px;
     }
 
     .modal.show { display:flex; }
 
     .modal-box {
+      width:min(760px,100%);
       background:white;
-      padding:20px;
-      border-radius:16px;
-      width:90%;
-      max-width:600px;
+      border-radius:22px;
+      padding:24px;
+      box-shadow:0 30px 80px rgba(2,17,39,.28);
+      max-height:90vh;
+      overflow:auto;
+    }
+
+    .modal-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .doc-upload-box {
+      border:2px dashed var(--line);
+      border-radius:18px;
+      padding:16px;
+      margin-bottom:14px;
+      background:#fbfdfd;
+      text-align:center;
+    }
+
+    .doc-list {
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:12px;
+    }
+
+    .modal-actions {
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+
+    @media(max-width:900px){
+      .app { grid-template-columns:1fr; }
+      .sidebar { display:none; }
+      .grid,.stats,.timeline,.calendar-grid,.modal-grid { grid-template-columns:1fr; }
+      .main { padding:16px; }
     }
   </style>
 </head>
-
 <body>
 
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
+    <img src="logo.png" alt="Logo">
     <h1>GateKeeper</h1>
+    <p>Select your name</p>
     <select id="loginUserSelect"></select>
     <input id="loginEmail" style="display:none;">
     <input id="loginPassword" type="password" placeholder="Password">
-    <button id="loginBtn">Login</button>
+    <button class="primary-btn" id="loginBtn">Login</button>
   </div>
 </div>
 
 <div class="app" id="app">
 
   <aside class="sidebar">
+    <div class="brand">
+      <img src="logo.png" alt="Logo">
+      <strong>Operations</strong>
+    </div>
+
     <nav class="nav">
-      <a onclick="showScreen('dashboard')">Dashboard</a>
+      <a class="active" onclick="showScreen('dashboard')">Dashboard</a>
       <a onclick="showScreen('shipments')">Shipments</a>
       <a onclick="showScreen('calendar')">Calendar</a>
     </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar" id="avatar">GK</div>
+      <div id="userEmail"></div>
+    </div>
   </aside>
 
   <main class="main">
 
-    <div id="screenDashboard" class="screen active">
-      <h2>Dashboard</h2>
-      <div id="map"></div>
-      <div id="unassigned"></div>
-      <table>
-        <tbody id="dashboardRows"></tbody>
-      </table>
-    </div>
-        <div id="screenShipments" class="screen">
-      <div class="section-head">
-        <h2>All Shipments</h2>
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="primary-btn" id="openBtn">+ Add Shipment</button>
+        <button class="secondary-btn" id="logoutBtn">Logout</button>
       </div>
+    </div>
+
+    <!-- SEARCH + FILTERS -->
+    <div class="search-row">
+      <input id="searchInput" placeholder="Search client, AWB, route...">
+
+      <div class="quick-filters">
+        <button class="secondary-btn" onclick="setQuick('all')">All</button>
+        <button class="secondary-btn" onclick="setQuick('mine')">My</button>
+        <button class="secondary-btn" onclick="setQuick('unassigned')">Unassigned</button>
+        <button class="secondary-btn" onclick="setQuick('risk')">At Risk</button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <section id="screenDashboard" class="screen active">
+
+      <section class="card">
+        <div class="section-head"><h2>Live Map</h2></div>
+        <div id="map"></div>
+      </section>
+
+      <section class="card">
+        <div class="section-head"><h2>My + Unassigned</h2></div>
+        <table>
+          <tbody id="dashboardRows"></tbody>
+        </table>
+      </section>
+
+    </section>
+
+    <!-- SHIPMENTS -->
+    <section id="screenShipments" class="screen">
+      <div class="section-head"><h2>All Shipments</h2></div>
       <table>
         <thead>
           <tr>
@@ -490,37 +648,25 @@
         </thead>
         <tbody id="shipmentRows"></tbody>
       </table>
-    </div>
+    </section>
 
-    <div id="screenCalendar" class="screen">
-      <div class="section-head">
-        <h2>Monthly Calendar</h2>
-      </div>
-      <div class="calendar-grid" id="calendarGrid"></div>
-    </div>
-
-    <div class="topbar">
-      <button class="primary-btn" id="openBtn">+ Add Shipment</button>
-      <button class="secondary-btn" id="myBtn">My Shipments</button>
-      <button class="secondary-btn" id="logoutBtn">Logout</button>
-    </div>
+    <!-- CALENDAR -->
+    <section id="screenCalendar" class="screen">
+      <div class="section-head"><h2>Monthly Calendar</h2></div>
+      <div id="calendarGrid" class="calendar-grid"></div>
+    </section>
 
   </main>
 </div>
 
 <div class="modal" id="modal">
   <div class="modal-box">
-    <h2 id="modalTitle">Add Shipment</h2>
-
-    <div class="doc-upload-box">
-      <input id="docUpload" type="file" multiple>
-      <div id="docList">No documents</div>
-    </div>
+    <h2>Add Shipment</h2>
 
     <input id="client" placeholder="Customer">
     <input id="origin" placeholder="Origin">
     <input id="destination" placeholder="Destination">
-    <input id="awb" placeholder="AWB / Waybill">
+    <input id="awb" placeholder="AWB">
     <input id="carrier" placeholder="Carrier">
     <input id="pieces" placeholder="Pieces">
     <input id="weight" placeholder="Weight">
@@ -570,9 +716,10 @@ const shipmentTypes = [
 let user = null;
 let shipments = [];
 let editingId = null;
-let selectedDocs = [];
-let existingDocs = [];
-let currentScreen = "dashboard";
+let searchTerm = "";
+let quickFilter = "all";
+let map = null;
+let mapLayer = null;
 
 const getVal = id => document.getElementById(id)?.value?.trim() || "";
 const localDateOnly = d => d ? String(d).slice(0,10) : "";
@@ -587,44 +734,33 @@ function getRiskLevel(x){
   return "none";
 }
 
-function showScreen(name){
-  currentScreen = name;
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  document.getElementById("screen" + name[0].toUpperCase() + name.slice(1)).classList.add("active");
-  render();
-}
-
 function initDropdowns(){
-  document.getElementById("loginUserSelect").innerHTML =
-    `<option value="">Select your name</option>` +
+  loginUserSelect.innerHTML = `<option value="">Select your name</option>` +
     users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
 
-  document.getElementById("loginUserSelect").onchange = e => {
-    document.getElementById("loginEmail").value = e.target.value;
-  };
+  loginUserSelect.onchange = e => loginEmail.value = e.target.value;
 
-  document.getElementById("assigned").innerHTML =
-    `<option value="">Unassigned</option>` +
+  assigned.innerHTML = `<option value="">Unassigned</option>` +
     users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
 
-  document.getElementById("shipmentType").innerHTML =
-    shipmentTypes.map(t => `<option>${t}</option>`).join("");
+  shipmentType.innerHTML = shipmentTypes.map(t => `<option>${t}</option>`).join("");
 }
 
 async function login(){
   const { data, error } = await sb.auth.signInWithPassword({
-    email: getVal("loginEmail"),
-    password: getVal("loginPassword")
+    email:getVal("loginEmail"),
+    password:getVal("loginPassword")
   });
 
-  if(error){
-    alert(error.message);
-    return;
-  }
+  if(error){ alert(error.message); return; }
 
   user = data.user;
-  document.getElementById("loginScreen").style.display = "none";
-  document.getElementById("app").style.display = "grid";
+  loginScreen.style.display = "none";
+  app.style.display = "grid";
+  userEmail.textContent = user.email;
+  avatar.textContent = user.email.slice(0,2).toUpperCase();
+
+  initMap();
   await loadShipments();
 }
 
@@ -634,26 +770,48 @@ async function loadShipments(){
     .select("*")
     .order("created_at", { ascending:false });
 
-  if(error){
-    alert("Load error: " + error.message);
-    return;
-  }
+  if(error){ alert("Load error: " + error.message); return; }
 
   shipments = data || [];
   render();
 }
 
-function dashboardData(){
-  return shipments.filter(x =>
-    !x.assigned_to || x.assigned_to === user?.email
-  );
+function showScreen(name){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("screen" + name[0].toUpperCase() + name.slice(1)).classList.add("active");
+
+  document.querySelectorAll(".nav a").forEach(a => a.classList.remove("active"));
+  [...document.querySelectorAll(".nav a")].find(a => a.textContent.toLowerCase() === name)?.classList.add("active");
+
+  setTimeout(() => { if(map) map.invalidateSize(); }, 200);
+  render();
 }
 
-function render(){
-  renderDashboard();
-  renderShipments();
-  renderCalendar();
-  renderUnassigned();
+function setQuick(type){
+  quickFilter = type;
+  render();
+}
+
+function filteredAll(){
+  let data = [...shipments];
+
+  if(searchTerm){
+    data = data.filter(x =>
+      (x.client || "").toLowerCase().includes(searchTerm) ||
+      (x.awb_number || "").toLowerCase().includes(searchTerm) ||
+      ((x.origin || "") + " " + (x.destination || "")).toLowerCase().includes(searchTerm)
+    );
+  }
+
+  if(quickFilter === "mine") data = data.filter(x => x.assigned_to === user?.email);
+  if(quickFilter === "unassigned") data = data.filter(x => !x.assigned_to);
+  if(quickFilter === "risk") data = data.filter(x => getRiskLevel(x) !== "none");
+
+  return data;
+}
+
+function dashboardData(){
+  return filteredAll().filter(x => !x.assigned_to || x.assigned_to === user?.email);
 }
 
 function rowHtml(x){
@@ -680,34 +838,18 @@ function rowHtml(x){
         <button class="action-btn" onclick="setStatus('${x.id}','Delivered')">✅</button>
         <button class="action-btn" onclick="deleteShipment('${x.id}')">🗑️</button>
       </td>
-    </tr>
-  `;
+    </tr>`;
 }
 
-function renderDashboard(){
-  const data = dashboardData();
-  document.getElementById("dashboardRows").innerHTML = data.map(rowHtml).join("");
-}
-
-function renderShipments(){
-  document.getElementById("shipmentRows").innerHTML = shipments.map(rowHtml).join("");
-}
-
-function renderUnassigned(){
-  const list = shipments.filter(x => !x.assigned_to);
-  document.getElementById("unassigned").innerHTML = list.length
-    ? list.map(x => `
-      <div class="unassigned-card">
-        <strong>${x.client || "No customer"}</strong><br>
-        ${x.origin || ""} → ${x.destination || ""}<br>
-        <button class="primary-btn" style="height:34px;margin-top:8px;" onclick="takeShipment('${x.id}')">Take</button>
-      </div>
-    `).join("")
-    : `<div style="padding:16px;color:#6f7d93;">No unassigned shipments</div>`;
+function render(){
+  dashboardRows.innerHTML = dashboardData().map(rowHtml).join("");
+  shipmentRows.innerHTML = filteredAll().map(rowHtml).join("");
+  renderCalendar();
+  renderMap(dashboardData());
 }
 
 function renderCalendar(){
-  const box = document.getElementById("calendarGrid");
+  const box = calendarGrid;
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth();
@@ -722,34 +864,61 @@ function renderCalendar(){
     const d = new Date(start);
     d.setDate(start.getDate()+i);
     const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-    const events = shipments.filter(x => localDateOnly(x.eta) === key);
+    const events = filteredAll().filter(x => localDateOnly(x.eta) === key);
 
     html += `
       <div class="calendar-cell ${d.getMonth() !== month ? "muted" : ""}">
         <div class="calendar-date">${d.getDate()}</div>
         ${events.map(x => {
           const risk = getRiskLevel(x);
-          return `
-            <div class="calendar-item ${risk}">
-              <strong>${x.client || ""}</strong><br>
-              <small>${x.shipment_ref || ""}</small>
-            </div>
-          `;
+          return `<div class="calendar-item ${risk}">
+            <strong>${x.client || ""}</strong><br>
+            <small>${x.shipment_ref || ""}</small>
+          </div>`;
         }).join("")}
-      </div>
-    `;
+      </div>`;
   }
 
   box.innerHTML = html;
 }
 
-async function takeShipment(id){
-  await sb.from("shipments").update({ assigned_to:user.email }).eq("id",id);
-  await loadShipments();
+function initMap(){
+  if(map) return;
+  map = L.map("map").setView([53.3498,-6.2603], 4);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+  mapLayer = L.layerGroup().addTo(map);
+}
+
+async function geocode(place){
+  if(!place) return [53.3498,-6.2603];
+  try{
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(place)}`);
+    const data = await res.json();
+    if(data[0]) return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+  }catch(e){}
+  return [53.3498,-6.2603];
+}
+
+async function renderMap(data){
+  if(!mapLayer) return;
+  mapLayer.clearLayers();
+
+  const bounds = [];
+  for(const x of data.slice(0,8)){
+    const o = await geocode(x.origin);
+    const d = await geocode(x.destination);
+    bounds.push(o,d);
+
+    L.marker(o).addTo(mapLayer).bindPopup(`${x.client || ""}<br>${x.origin || ""}`);
+    L.marker(d).addTo(mapLayer).bindPopup(`${x.client || ""}<br>${x.destination || ""}`);
+    L.polyline([o,d], { color:getRiskLevel(x)==="overdue" ? "red" : "#06b7a5", weight:4 }).addTo(mapLayer);
+  }
+
+  if(bounds.length) map.fitBounds(bounds, { padding:[30,30], maxZoom:6 });
 }
 
 async function setStatus(id,status){
-  await sb.from("shipments").update({ status }).eq("id",id);
+  await sb.from("shipments").update({status}).eq("id",id);
   await loadShipments();
 }
 
@@ -764,49 +933,23 @@ function editShipment(id){
   if(!x) return;
 
   editingId = id;
-  existingDocs = Array.isArray(x.document_urls) ? x.document_urls : [];
+  modal.classList.add("show");
 
-  document.getElementById("modalTitle").textContent = "Edit Shipment";
-  document.getElementById("client").value = x.client || "";
-  document.getElementById("origin").value = x.origin || "";
-  document.getElementById("destination").value = x.destination || "";
-  document.getElementById("awb").value = x.awb_number || "";
-  document.getElementById("carrier").value = x.carrier || "";
-  document.getElementById("pieces").value = x.pieces || "";
-  document.getElementById("weight").value = x.weight || "";
-  document.getElementById("shipper").value = x.shipper || "";
-  document.getElementById("consignee").value = x.consignee || "";
-  document.getElementById("eta").value = localDateOnly(x.eta);
-  document.getElementById("assigned").value = x.assigned_to || "";
-  document.getElementById("shipmentType").value = x.shipment_type || "Air Import";
-
-  document.getElementById("modal").classList.add("show");
-}
-
-async function uploadDocs(){
-  const urls = [];
-
-  for(const file of selectedDocs){
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
-    const path = Date.now() + "_" + safeName;
-    const { error } = await sb.storage.from("shipment-documents").upload(path,file);
-
-    if(error){
-      alert("Upload failed: " + error.message);
-      return urls;
-    }
-
-    const { data } = sb.storage.from("shipment-documents").getPublicUrl(path);
-    urls.push(data.publicUrl);
-  }
-
-  return urls;
+  client.value = x.client || "";
+  origin.value = x.origin || "";
+  destination.value = x.destination || "";
+  awb.value = x.awb_number || "";
+  carrier.value = x.carrier || "";
+  pieces.value = x.pieces || "";
+  weight.value = x.weight || "";
+  shipper.value = x.shipper || "";
+  consignee.value = x.consignee || "";
+  eta.value = localDateOnly(x.eta);
+  assigned.value = x.assigned_to || "";
+  shipmentType.value = x.shipment_type || "Air Import";
 }
 
 async function saveShipment(){
-  const newDocs = await uploadDocs();
-  const docs = [...existingDocs, ...newDocs];
-
   const payload = {
     client:getVal("client"),
     origin:getVal("origin"),
@@ -820,8 +963,7 @@ async function saveShipment(){
     eta:getVal("eta") || null,
     assigned_to:getVal("assigned") || null,
     shipment_type:getVal("shipmentType") || "Air Import",
-    status:"Pending",
-    document_urls:docs
+    status:"Pending"
   };
 
   if(!payload.client || !payload.origin || !payload.destination){
@@ -830,51 +972,30 @@ async function saveShipment(){
   }
 
   let error;
-
   if(editingId){
     const res = await sb.from("shipments").update(payload).eq("id",editingId);
     error = res.error;
   } else {
-    const res = await sb.from("shipments").insert([{
-      ...payload,
-      shipment_ref:"SHP"+Date.now(),
-      created_by_email:user?.email || null,
-      source:"manual"
-    }]);
+    const res = await sb.from("shipments").insert([{...payload, shipment_ref:"SHP"+Date.now()}]);
     error = res.error;
   }
 
-  if(error){
-    alert("Save error: " + error.message);
-    return;
-  }
+  if(error){ alert("Save error: " + error.message); return; }
 
   editingId = null;
-  existingDocs = [];
-  selectedDocs = [];
-
-  document.getElementById("modal").classList.remove("show");
+  modal.classList.remove("show");
   await loadShipments();
 }
 
-document.getElementById("loginBtn").onclick = login;
-document.getElementById("saveBtn").onclick = saveShipment;
-document.getElementById("cancelBtn").onclick = () => document.getElementById("modal").classList.remove("show");
-document.getElementById("openBtn").onclick = () => {
-  editingId = null;
-  existingDocs = [];
-  selectedDocs = [];
-  document.getElementById("modalTitle").textContent = "Add Shipment";
-  document.getElementById("modal").classList.add("show");
-};
-document.getElementById("logoutBtn").onclick = async () => { await sb.auth.signOut(); location.reload(); };
-document.getElementById("myBtn").onclick = () => showScreen("dashboard");
+loginBtn.onclick = login;
+saveBtn.onclick = saveShipment;
+cancelBtn.onclick = () => modal.classList.remove("show");
+openBtn.onclick = () => { editingId = null; modal.classList.add("show"); };
+logoutBtn.onclick = async () => { await sb.auth.signOut(); location.reload(); };
 
-document.getElementById("docUpload").onchange = e => {
-  selectedDocs = Array.from(e.target.files || []);
-  document.getElementById("docList").innerHTML = selectedDocs.length
-    ? selectedDocs.map(f => "📄 " + f.name).join("<br>")
-    : "No documents";
+searchInput.oninput = e => {
+  searchTerm = e.target.value.toLowerCase();
+  render();
 };
 
 initDropdowns();
