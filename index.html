@@ -689,6 +689,7 @@
   </div>
 </div>
 <script>
+<script>
 const sb = window.supabase.createClient(
   "https://edxgkwkdgvsajfmkejbk.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
@@ -728,6 +729,11 @@ let mapLayer = null;
 
 const getVal = id => document.getElementById(id)?.value?.trim() || "";
 const localDateOnly = d => d ? String(d).slice(0,10) : "";
+
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+}
 
 function getRiskLevel(x){
   if(!x.eta || x.status === "Delivered") return "none";
@@ -953,161 +959,7 @@ function editShipment(id){
   assigned.value = x.assigned_to || "";
   shipmentType.value = x.shipment_type || "Air Import";
 }
-if (window.pdfjsLib) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-}
 
-async function readDocText(file) {
-  if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
-    const buffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
-    let text = "";
-
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      text += content.items.map(item => item.str).join(" ") + "\n";
-    }
-
-    return text;
-  }
-
-  return await file.text();
-}
-
-function findField(text, patterns) {
-  for (const p of patterns) {
-    const m = text.match(p);
-    if (m && m[1]) return m[1].trim().replace(/\s+/g, " ");
-  }
-  return "";
-}
-
-function setIfBlank(id, value) {
-  const el = document.getElementById(id);
-  if (el && value && !el.value) el.value = value;
-}
-
-function guessShipmentType(text) {
-  const t = text.toLowerCase();
-
-  if (t.includes("customs") || t.includes("commercial invoice") || t.includes("tariff")) {
-    return "Customs Clearance";
-  }
-
-  if (t.includes("awb") || t.includes("air waybill") || /\b\d{3}-\d{8}\b/.test(text)) {
-    return "Air Import";
-  }
-
-  if (t.includes("bill of lading") || t.includes("container") || t.includes("vessel")) {
-    return "Ocean Import";
-  }
-
-  if (t.includes("cmr") || t.includes("road") || t.includes("truck")) {
-    return "Road Import";
-  }
-
-  return "";
-}
-
-function normaliseParsedDate(value) {
-  if (!value) return "";
-
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
-
-  const parts = value.split(/[\/.-]/);
-  if (parts.length !== 3) return "";
-
-  let [d, m, y] = parts;
-  if (y.length === 2) y = "20" + y;
-
-  return `${y.padStart(4, "0")}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-}
-
-function parseShipmentText(text) {
-  const clean = text.replace(/\r/g, "\n");
-  const flat = clean.replace(/\s+/g, " ");
-
-  const awb = findField(flat, [
-    /\b(\d{3}[-\s]?\d{8})\b/i,
-    /(?:AWB|Air Waybill|Waybill|HAWB|MAWB|Tracking|Consignment)(?: No| Number| Ref)?[:\s#-]+([A-Z0-9-]{6,})/i
-  ]).replace(/\s/g, "-");
-
-  const carrier = findField(flat, [
-    /(?:Carrier|Courier|Airline|Forwarder|Transporter|Service)[:\s-]+([A-Z0-9 .&-]{3,40})/i,
-    /\b(DHL|UPS|FEDEX|TNT|MAERSK|MSC|CMA CGM|QATAR AIRWAYS|EMIRATES|LUFTHANSA|KLM|AER LINGUS)\b/i
-  ]);
-
-  const etaRaw = findField(flat, [
-    /(?:ETA|Arrival|Arrives|Delivery Date|Expected Delivery|Date of Arrival)[^\d]{0,20}(\d{4}-\d{2}-\d{2})/i,
-    /(?:ETA|Arrival|Arrives|Delivery Date|Expected Delivery|Date of Arrival)[^\d]{0,20}(\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4})/i
-  ]);
-
-  const pieces = findField(flat, [
-    /(?:Pieces|PCS|Pkgs?|Packages|No\.?\s*of\s*Pieces|Quantity)[^\d]{0,10}(\d+)/i
-  ]);
-
-  const weight = findField(flat, [
-    /(?:Gross Weight|Chargeable Weight|Weight|Total Weight)[^\d]{0,10}([0-9.,]+\s?(?:KG|KGS|LB|LBS|KILOS)?)/i
-  ]);
-
-  const shipper = findField(clean, [
-    /(?:Shipper|Sender|Exporter|Collection From|From)[:\s-]+([^\n]{3,80})/i
-  ]);
-
-  const consignee = findField(clean, [
-    /(?:Consignee|Receiver|Importer|Deliver To|Delivery To|Ship To)[:\s-]+([^\n]{3,80})/i
-  ]);
-
-  const origin = findField(clean, [
-    /(?:Origin|From|POL|Port of Loading|Collection Address)[:\s-]+([^\n]{3,80})/i
-  ]);
-
-  const destination = findField(clean, [
-    /(?:Destination|To|POD|Port of Discharge|Delivery Address)[:\s-]+([^\n]{3,80})/i
-  ]);
-
-  document.getElementById("awb").value = awb || getVal("awb");
-  document.getElementById("carrier").value = carrier || getVal("carrier");
-  document.getElementById("eta").value = normaliseParsedDate(etaRaw) || getVal("eta");
-  document.getElementById("pieces").value = pieces || getVal("pieces");
-  document.getElementById("weight").value = weight || getVal("weight");
-  document.getElementById("shipper").value = shipper || getVal("shipper");
-  document.getElementById("consignee").value = consignee || getVal("consignee");
-  document.getElementById("client").value = consignee || shipper || getVal("client");
-  document.getElementById("origin").value = origin || getVal("origin");
-  document.getElementById("destination").value = destination || getVal("destination");
-
-  const guessedType = guessShipmentType(flat);
-  if (guessedType) document.getElementById("shipmentType").value = guessedType;
-
-  console.log("Parsed:", { awb, carrier, etaRaw, pieces, weight, shipper, consignee, origin, destination });
-}
-}
-
-function initSmartParser() {
-  const input = document.getElementById("docUpload");
-  const list = document.getElementById("docList");
-  if (!input || !list) return;
-
-  input.onchange = async e => {
-    const files = Array.from(e.target.files || []);
-
-    list.innerHTML = files.length
-      ? files.map(f => "📄 " + f.name).join("<br>")
-      : "No documents selected.";
-
-    for (const file of files) {
-      try {
-        const text = await readDocText(file);
-        parseShipmentText(text);
-      } catch (err) {
-        console.warn("Parser failed:", file.name, err);
-      }
-    }
-  };
-}
 async function saveShipment(){
   const payload = {
     client:getVal("client"),
@@ -1146,6 +998,136 @@ async function saveShipment(){
   await loadShipments();
 }
 
+async function readDocText(file) {
+  if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+    const buffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+    let text = "";
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      text += content.items.map(item => item.str).join(" ") + "\n";
+    }
+
+    return text;
+  }
+
+  return await file.text();
+}
+
+function findField(text, patterns) {
+  for (const p of patterns) {
+    const m = text.match(p);
+    if (m && m[1]) return m[1].trim().replace(/\s+/g, " ");
+  }
+  return "";
+}
+
+function normaliseParsedDate(value) {
+  if (!value) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+
+  const parts = value.split(/[\/.-]/);
+  if (parts.length !== 3) return "";
+
+  let [d, m, y] = parts;
+  if (y.length === 2) y = "20" + y;
+
+  return `${y.padStart(4, "0")}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+}
+
+function guessShipmentType(text) {
+  const t = text.toLowerCase();
+
+  if (t.includes("customs") || t.includes("commercial invoice") || t.includes("tariff")) return "Customs Clearance";
+  if (t.includes("awb") || t.includes("air waybill") || /\b\d{3}[-\s]?\d{8}\b/.test(text)) return "Air Import";
+  if (t.includes("bill of lading") || t.includes("container") || t.includes("vessel")) return "Ocean Import";
+  if (t.includes("cmr") || t.includes("road") || t.includes("truck")) return "Road Import";
+
+  return "";
+}
+
+function parseShipmentText(text) {
+  const clean = text.replace(/\r/g, "\n");
+  const flat = clean.replace(/\s+/g, " ");
+
+  const awb = findField(flat, [
+    /\b(\d{3}[-\s]?\d{8})\b/i,
+    /(?:AWB|Air Waybill|Waybill|HAWB|MAWB|Tracking|Consignment)(?: No| Number| Ref)?[:\s#-]+([A-Z0-9-]{6,})/i
+  ]).replace(/\s/g, "-");
+
+  const carrier = findField(flat, [
+    /(?:Carrier|Courier|Airline|Forwarder|Transporter|Service)[:\s-]+([A-Z0-9 .&-]{3,40})/i,
+    /\b(DHL|UPS|FEDEX|TNT|MAERSK|MSC|CMA CGM|QATAR AIRWAYS|EMIRATES|LUFTHANSA|KLM|AER LINGUS)\b/i
+  ]);
+
+  const etaRaw = findField(flat, [
+    /(?:ETA|Arrival|Arrives|Delivery Date|Expected Delivery|Date of Arrival)[^\d]{0,20}(\d{4}-\d{2}-\d{2})/i,
+    /(?:ETA|Arrival|Arrives|Delivery Date|Expected Delivery|Date of Arrival)[^\d]{0,20}(\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4})/i
+  ]);
+
+  const pieces = findField(flat, [
+    /(?:Pieces|PCS|Pkgs?|Packages|No\.?\s*of\s*Pieces|Quantity)[^\d]{0,10}(\d+)/i
+  ]);
+
+  const weight = findField(flat, [
+    /(?:Gross Weight|Chargeable Weight|Weight|Total Weight)[^\d]{0,10}([0-9.,]+\s?(?:KG|KGS|LB|LBS|KILOS)?)/i
+  ]);
+
+  const shipper = findField(clean, [
+    /(?:Shipper|Sender|Exporter|Collection From|From)[:\s-]+([^\n]{3,80})/i
+  ]);
+
+  const consignee = findField(clean, [
+    /(?:Consignee|Receiver|Importer|Deliver To|Delivery To|Ship To)[:\s-]+([^\n]{3,80})/i
+  ]);
+
+  const originFound = findField(clean, [
+    /(?:Origin|From|POL|Port of Loading|Collection Address)[:\s-]+([^\n]{3,80})/i
+  ]);
+
+  const destinationFound = findField(clean, [
+    /(?:Destination|To|POD|Port of Discharge|Delivery Address)[:\s-]+([^\n]{3,80})/i
+  ]);
+
+  awb && (document.getElementById("awb").value = awb);
+  carrier && (document.getElementById("carrier").value = carrier);
+  normaliseParsedDate(etaRaw) && (document.getElementById("eta").value = normaliseParsedDate(etaRaw));
+  pieces && (document.getElementById("pieces").value = pieces);
+  weight && (document.getElementById("weight").value = weight);
+  shipper && (document.getElementById("shipper").value = shipper);
+  consignee && (document.getElementById("consignee").value = consignee);
+  (consignee || shipper) && (document.getElementById("client").value = consignee || shipper);
+  originFound && (document.getElementById("origin").value = originFound);
+  destinationFound && (document.getElementById("destination").value = destinationFound);
+
+  const guessedType = guessShipmentType(flat);
+  if (guessedType) document.getElementById("shipmentType").value = guessedType;
+
+  console.log("Parsed:", { awb, carrier, etaRaw, pieces, weight, shipper, consignee, originFound, destinationFound });
+}
+
+async function handleDocUpload(e) {
+  const files = Array.from(e.target.files || []);
+  const list = document.getElementById("docList");
+
+  if (list) {
+    list.innerHTML = files.length
+      ? files.map(f => "📄 " + f.name).join("<br>")
+      : "No documents selected.";
+  }
+
+  for (const file of files) {
+    try {
+      const text = await readDocText(file);
+      parseShipmentText(text);
+    } catch (err) {
+      console.warn("Parser failed:", file.name, err);
+    }
+  }
+}
+
 loginBtn.onclick = login;
 saveBtn.onclick = saveShipment;
 cancelBtn.onclick = () => modal.classList.remove("show");
@@ -1157,8 +1139,10 @@ searchInput.oninput = e => {
   render();
 };
 
+const docInput = document.getElementById("docUpload");
+if (docInput) docInput.onchange = handleDocUpload;
+
 initDropdowns();
-initSmartParser();
 </script>
 </body>
 </html>
