@@ -29,8 +29,10 @@
     .nav a.active,.nav a:hover{background:rgba(6,183,165,.18);color:#8efff1}
     .main{padding:20px}
     .topbar{display:flex;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+    .topbar-left,.topbar-right{display:flex;gap:10px;flex-wrap:wrap}
     .primary-btn{height:46px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;padding:0 20px;font-weight:800;cursor:pointer;box-shadow:0 12px 24px rgba(6,183,165,.24)}
     .secondary-btn{height:46px;border:1px solid var(--line);border-radius:12px;background:white;color:var(--text);padding:0 20px;font-weight:800;cursor:pointer}
+    .secondary-btn.active{background:#dff7f3;color:#069788;border-color:#06b7a5}
     .action-btn{border:0;border-radius:10px;padding:8px 10px;margin-right:6px;cursor:pointer;background:#f4f7f8}
     .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
     .card{background:white;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
@@ -52,7 +54,7 @@
     #statusMsg{padding:14px 18px;color:var(--muted);font-size:13px}
     .modal{display:none;position:fixed;inset:0;background:rgba(3,12,28,.55);align-items:center;justify-content:center;z-index:1000;padding:20px}
     .modal.show{display:flex}
-    .modal-box{width:min(520px,100%);background:white;border-radius:20px;padding:22px;box-shadow:0 30px 80px rgba(2,17,39,.28)}
+    .modal-box{width:min(560px,100%);background:white;border-radius:20px;padding:22px;box-shadow:0 30px 80px rgba(2,17,39,.28)}
     .modal-box input,.modal-box select{width:100%;height:44px;border:1px solid var(--line);border-radius:12px;padding:0 12px;margin-bottom:12px}
     .modal-actions{display:flex;justify-content:flex-end;gap:10px}
     @media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.grid,.stats{grid-template-columns:1fr}}
@@ -87,8 +89,13 @@
 
     <main class="main">
       <div class="topbar">
-        <button class="primary-btn" id="openBtn">+ Add Shipment</button>
-        <button class="secondary-btn" id="logoutBtn">Logout</button>
+        <div class="topbar-left">
+          <button class="primary-btn" id="openBtn">+ Add Shipment</button>
+          <button class="secondary-btn" id="myBtn">My Shipments</button>
+        </div>
+        <div class="topbar-right">
+          <button class="secondary-btn" id="logoutBtn">Logout</button>
+        </div>
       </div>
 
       <section class="stats">
@@ -114,7 +121,7 @@
           <table>
             <thead>
               <tr>
-                <th>ID</th><th>Client</th><th>Route</th><th>Status</th><th>ETA</th><th>Actions</th>
+                <th>ID</th><th>Client</th><th>Route</th><th>Status</th><th>ETA</th><th>Assigned</th><th>Actions</th>
               </tr>
             </thead>
             <tbody id="rows"></tbody>
@@ -130,6 +137,7 @@
       <input id="client" placeholder="Client">
       <input id="origin" placeholder="Origin">
       <input id="destination" placeholder="Destination">
+      <input id="assigned" placeholder="Assign to email">
       <input id="eta" type="date" placeholder="ETA">
       <select id="shipmentType">
         <option>Road</option><option>Air</option><option>Sea</option>
@@ -154,6 +162,7 @@
     let shipments = [];
     let map;
     let mapLayer;
+    let showMine = false;
     const geoCache = {};
 
     const loginScreen = document.getElementById("loginScreen");
@@ -161,6 +170,7 @@
     const modal = document.getElementById("modal");
     const rows = document.getElementById("rows");
     const statusMsg = document.getElementById("statusMsg");
+    const myBtn = document.getElementById("myBtn");
 
     function getVal(id) {
       return document.getElementById(id).value.trim();
@@ -282,11 +292,18 @@
       return "";
     }
 
+    function getVisibleShipments() {
+      if (!showMine) return shipments;
+      return shipments.filter(x => String(x.assigned_to || "").toLowerCase() === String(user?.email || "").toLowerCase());
+    }
+
     function renderRows(data) {
-      if (!data.length) {
-        rows.innerHTML = `<tr><td colspan="6">No shipments yet.</td></tr>`;
+      const visible = getVisibleShipments();
+
+      if (!visible.length) {
+        rows.innerHTML = `<tr><td colspan="7">No shipments found.</td></tr>`;
       } else {
-        rows.innerHTML = data.map(x => {
+        rows.innerHTML = visible.map(x => {
           const risk = riskLabel(x);
           return `
             <tr>
@@ -298,6 +315,7 @@
                 ${risk ? `<span class="pill ${risk === "Overdue" ? "delayed" : "pending"}">${risk}</span>` : ""}
               </td>
               <td>${x.eta || "-"}</td>
+              <td>${x.assigned_to || "-"}</td>
               <td>
                 <button class="action-btn" onclick="setStatus('${x.id}', 'In Transit')">🚚</button>
                 <button class="action-btn" onclick="setStatus('${x.id}', 'Delivered')">✅</button>
@@ -307,11 +325,14 @@
         }).join("");
       }
 
-      document.getElementById("totalStat").textContent = data.length;
-      document.getElementById("transitStat").textContent = data.filter(x => x.status === "In Transit").length;
-      document.getElementById("delayedStat").textContent = data.filter(x => x.status === "Delayed" || riskLabel(x)).length;
+      document.getElementById("totalStat").textContent = visible.length;
+      document.getElementById("transitStat").textContent = visible.filter(x => x.status === "In Transit").length;
+      document.getElementById("delayedStat").textContent = visible.filter(x => x.status === "Delayed" || riskLabel(x)).length;
 
-      renderMap(data);
+      renderMap(visible);
+      statusMsg.textContent = showMine
+        ? "Showing my shipments: " + visible.length
+        : "Loaded " + visible.length + " shipment(s)";
     }
 
     async function setStatus(id, newStatus) {
@@ -325,8 +346,8 @@
         return;
       }
 
-      statusMsg.textContent = "Shipment updated ✔";
       await loadShipments();
+      statusMsg.textContent = "Shipment updated ✔";
     }
 
     async function loadShipments() {
@@ -344,11 +365,16 @@
 
       shipments = data || [];
       renderRows(shipments);
-      statusMsg.textContent = "Loaded " + shipments.length + " shipment(s)";
     }
 
     document.getElementById("loginBtn").onclick = login;
     document.getElementById("logoutBtn").onclick = logout;
+
+    myBtn.onclick = () => {
+      showMine = !showMine;
+      myBtn.classList.toggle("active", showMine);
+      renderRows(shipments);
+    };
 
     document.getElementById("openBtn").onclick = () => {
       modal.classList.add("show");
@@ -368,6 +394,7 @@
         client: getVal("client"),
         origin: getVal("origin"),
         destination: getVal("destination"),
+        assigned_to: getVal("assigned") || null,
         eta: getVal("eta") || null,
         shipment_type: getVal("shipmentType") || "Road",
         status: getVal("status") || "Pending",
@@ -392,6 +419,7 @@
       document.getElementById("client").value = "";
       document.getElementById("origin").value = "";
       document.getElementById("destination").value = "";
+      document.getElementById("assigned").value = "";
       document.getElementById("eta").value = "";
 
       modal.classList.remove("show");
