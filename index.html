@@ -13,7 +13,7 @@
     :root {
       --bg:#f4f7f8;
       --nav:#04142e;
-      --nav2:#071c3e;
+      --nav2:#021127;
       --text:#11213d;
       --muted:#6f7d93;
       --brand:#06b7a5;
@@ -22,7 +22,7 @@
       --danger:#ef5c5c;
       --success:#18a66e;
       --warning:#f0a227;
-      --shadow:0 20px 50px rgba(6,20,46,0.08);
+      --shadow:0 25px 60px rgba(6,20,46,0.08);
     }
 
     * { box-sizing:border-box; }
@@ -33,6 +33,8 @@
       background:linear-gradient(180deg,#f4f7f8 0%,#eef4f5 100%);
       color:var(--text);
     }
+
+    button { font-family:inherit; }
 
     .login-screen {
       min-height:100vh;
@@ -50,26 +52,26 @@
       border-radius:24px;
       padding:32px;
       box-shadow:0 30px 80px rgba(0,0,0,.28);
-      border:1px solid rgba(255,255,255,.18);
     }
 
     .login-card img {
       display:block;
       max-width:190px;
       margin:0 auto 20px;
+      filter:drop-shadow(0 10px 30px rgba(6,183,165,0.35));
     }
 
     .login-card h1 {
+      text-align:center;
       margin:0 0 8px;
       color:var(--nav);
-      text-align:center;
       font-size:28px;
     }
 
     .login-card p {
+      text-align:center;
       margin:0 0 24px;
       color:var(--muted);
-      text-align:center;
     }
 
     .login-card input {
@@ -102,12 +104,13 @@
     }
 
     .sidebar {
-      background:linear-gradient(180deg,var(--nav),#021127);
+      background:linear-gradient(180deg,#04142e,#021127);
       color:white;
-      padding:24px 16px;
+      padding:26px 16px;
       display:flex;
       flex-direction:column;
       min-height:100vh;
+      box-shadow:4px 0 30px rgba(0,0,0,0.25);
     }
 
     .brand {
@@ -118,9 +121,14 @@
     }
 
     .brand img {
-      max-width:175px;
+      max-width:180px;
       margin-bottom:12px;
-      filter:drop-shadow(0 6px 20px rgba(6,183,165,.18));
+      filter:drop-shadow(0 10px 30px rgba(6,183,165,0.35));
+      transition:.3s;
+    }
+
+    .brand img:hover {
+      transform:scale(1.05);
     }
 
     .brand strong {
@@ -172,24 +180,7 @@
     }
 
     .main {
-      padding:22px;
-    }
-
-    .topbar {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      margin-bottom:20px;
-      flex-wrap:wrap;
-    }
-
-    .topbar-left,
-    .topbar-right {
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
+      padding:28px;
     }
 
     .welcome {
@@ -208,7 +199,23 @@
       font-size:16px;
     }
 
-    .primary-btn {
+    .topbar {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:20px;
+      flex-wrap:wrap;
+    }
+
+    .topbar-left,
+    .topbar-right {
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+        .primary-btn {
       height:46px;
       border:0;
       border-radius:14px;
@@ -259,7 +266,8 @@
       transform:translateY(-1px);
       background:#e8f4f2;
     }
-        .stats {
+
+    .stats {
       display:grid;
       grid-template-columns:repeat(3,1fr);
       gap:16px;
@@ -268,20 +276,32 @@
 
     .card {
       background:white;
-      border-radius:20px;
-      box-shadow:var(--shadow);
-      border:1px solid rgba(0,0,0,0.04);
-      transition:.25s ease;
+      border-radius:22px;
+      box-shadow:0 25px 60px rgba(6,20,46,0.08);
+      border:1px solid rgba(0,0,0,0.03);
+      transition:all .25s ease;
       overflow:hidden;
     }
 
     .card:hover {
-      transform:translateY(-3px);
-      box-shadow:0 30px 70px rgba(6,20,46,0.12);
+      transform:translateY(-4px);
+      box-shadow:0 35px 80px rgba(6,20,46,0.12);
     }
 
     .stat-card {
       padding:22px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .stat-card::after {
+      content:"";
+      position:absolute;
+      right:-20px;
+      bottom:-20px;
+      width:120px;
+      height:120px;
+      background:radial-gradient(circle, rgba(6,183,165,0.15), transparent);
     }
 
     .stat-label {
@@ -316,15 +336,17 @@
 
     #map {
       height:430px;
-      border-radius:16px;
+      border-radius:18px;
       overflow:hidden;
       margin:0 16px 16px;
       border:1px solid var(--line);
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,0.03);
     }
 
     table {
       width:100%;
-      border-collapse:collapse;
+      border-collapse:separate;
+      border-spacing:0;
       font-size:14px;
     }
 
@@ -340,7 +362,7 @@
     }
 
     tbody tr {
-      transition:.15s ease;
+      transition:all .15s ease;
     }
 
     tbody tr:hover {
@@ -417,7 +439,7 @@
 
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
-    <img src="https://gerhall84.github.io/gateflow/logo.png">
+    <img src="https://gerhall84.github.io/gateflow/logo.png" alt="Logo">
     <h1>GateKeeper</h1>
     <p>Log in to manage shipments</p>
     <input id="loginEmail" placeholder="Email">
@@ -430,7 +452,7 @@
 <div class="app" id="app">
   <aside class="sidebar">
     <div class="brand">
-      <img src="https://gerhall84.github.io/gateflow/logo.png">
+      <img src="https://gerhall84.github.io/gateflow/logo.png" alt="Logo">
       <strong>Operations</strong>
     </div>
 
@@ -538,7 +560,7 @@
 <script>
   const sb = window.supabase.createClient(
     "https://edxgkwkdgvsajfmkejbk.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
   );
 
   let user = null;
@@ -560,14 +582,14 @@
   }
 
   function initials(email) {
-    return String(email || "GK").slice(0, 2).toUpperCase();
+    return String(email || "GK").slice(0,2).toUpperCase();
   }
 
   async function login() {
-    const email = getVal("loginEmail");
-    const password = getVal("loginPassword");
-
-    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    const { data, error } = await sb.auth.signInWithPassword({
+      email: getVal("loginEmail"),
+      password: getVal("loginPassword")
+    });
 
     if (error) {
       document.getElementById("loginError").textContent = error.message;
@@ -575,294 +597,177 @@
     }
 
     user = data.user;
-    showApp();
+    document.getElementById("userEmail").textContent = user.email;
+    document.getElementById("avatar").textContent = initials(user.email);
+
+    loginScreen.style.display = "none";
+    app.style.display = "grid";
+
+    setTimeout(initMap, 200);
     await loadShipments();
   }
 
   async function logout() {
     await sb.auth.signOut();
-    user = null;
-    app.style.display = "none";
-    loginScreen.style.display = "flex";
-  }
-
-  function showApp() {
-    loginScreen.style.display = "none";
-    app.style.display = "grid";
-
-    document.getElementById("userEmail").textContent = user?.email || "";
-    document.getElementById("avatar").textContent = initials(user?.email);
-
-    setTimeout(initMap, 200);
+    location.reload();
   }
 
   function initMap() {
-    if (map) {
-      map.invalidateSize();
-      return;
-    }
+    if (map) return;
 
-    map = L.map("map").setView([53.3498, -6.2603], 4);
+    map = L.map("map").setView([53.3498,-6.2603],4);
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap"
-    }).addTo(map);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
+      .addTo(map);
 
     mapLayer = L.layerGroup().addTo(map);
   }
 
   async function geocode(place) {
-    if (!place) return [53.3498, -6.2603];
+    if (!place) return [53.3,-6.2];
 
-    const key = place.toLowerCase();
-
-    if (geoCache[key]) return geoCache[key];
+    if (geoCache[place]) return geoCache[place];
 
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(place)}`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place)}`
       );
-
       const data = await res.json();
 
       if (data[0]) {
         const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-        geoCache[key] = coords;
+        geoCache[place] = coords;
         return coords;
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch {}
 
-    return [53.3498, -6.2603];
+    return [53.3,-6.2];
   }
 
-  async function renderMap(data) {
-    if (!mapLayer) return;
-
-    mapLayer.clearLayers();
-
-    const bounds = [];
-
-    for (const x of data.slice(0, 10)) {
-      const origin = await geocode(x.origin);
-      const destination = await geocode(x.destination);
-
-      bounds.push(origin, destination);
-
-      const color =
-        riskLabel(x) === "Overdue" || x.status === "Delayed"
-          ? "red"
-          : x.status === "Delivered"
-            ? "green"
-            : "#06b7a5";
-
-      L.marker(origin)
-        .addTo(mapLayer)
-        .bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>Origin: ${x.origin || ""}`);
-
-      L.marker(destination)
-        .addTo(mapLayer)
-        .bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>Destination: ${x.destination || ""}`);
-
-      L.polyline([origin, destination], {
-        color,
-        weight: 4,
-        opacity: 0.85,
-        dashArray: x.status === "In Transit" ? "8,8" : null
-      }).addTo(mapLayer);
-    }
-
-    if (bounds.length) {
-      map.fitBounds(bounds, { padding: [30, 30], maxZoom: 6 });
-    }
-
-    setTimeout(() => map.invalidateSize(), 200);
-  }
-
-  function statusClass(status) {
-    if (status === "In Transit") return "transit";
-    if (status === "Delivered") return "delivered";
-    if (status === "Delayed") return "delayed";
+  function statusClass(s) {
+    if (s === "In Transit") return "transit";
+    if (s === "Delivered") return "delivered";
+    if (s === "Delayed") return "delayed";
     return "pending";
   }
 
   function riskLabel(x) {
-    if (x.status === "Delivered") return "";
-    if (!x.eta) return "";
+    if (!x.eta || x.status === "Delivered") return "";
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
     const eta = new Date(x.eta);
-    eta.setHours(0, 0, 0, 0);
 
-    const diffDays = Math.ceil((eta - today) / (1000 * 60 * 60 * 24));
+    const diff = Math.ceil((eta - today) / 86400000);
 
-    if (diffDays < 0) return "Overdue";
-    if (diffDays <= 2) return "At Risk";
+    if (diff < 0) return "Overdue";
+    if (diff <= 2) return "At Risk";
     return "";
   }
 
-  function getVisibleShipments() {
-    if (!showMine) return shipments;
+  function getVisible() {
+    return showMine
+      ? shipments.filter(x => x.assigned_to === user.email)
+      : shipments;
+  }
 
-    return shipments.filter(
-      x => String(x.assigned_to || "").toLowerCase() === String(user?.email || "").toLowerCase()
-    );
+  async function renderMap(data) {
+    mapLayer.clearLayers();
+
+    for (const x of data.slice(0,10)) {
+      const o = await geocode(x.origin);
+      const d = await geocode(x.destination);
+
+      const color =
+        riskLabel(x)==="Overdue" ? "red" :
+        x.status==="Delivered" ? "green" :
+        "#06b7a5";
+
+      L.polyline([o,d],{color,weight:4}).addTo(mapLayer);
+      L.marker(o).addTo(mapLayer);
+      L.marker(d).addTo(mapLayer);
+    }
   }
 
   function renderRows() {
-    const visible = getVisibleShipments();
+    const data = getVisible();
 
-    if (!visible.length) {
-      rows.innerHTML = `<tr><td colspan="7">No shipments found.</td></tr>`;
-    } else {
-      rows.innerHTML = visible.map(x => {
-        const risk = riskLabel(x);
+    rows.innerHTML = data.map(x=>{
+      const risk = riskLabel(x);
 
-        return `
-          <tr style="${risk === "Overdue" ? "background:#fff5f5;" : ""}">
-            <td>${x.shipment_ref || ""}</td>
-            <td>${x.client || ""}</td>
-            <td>${x.origin || ""} → ${x.destination || ""}</td>
-            <td>
-              <span class="pill ${statusClass(x.status)}">${x.status || "Pending"}</span>
-              ${risk ? `<span class="pill ${risk === "Overdue" ? "delayed" : "pending"}">${risk}</span>` : ""}
-            </td>
-            <td>${x.eta || "-"}</td>
-            <td>${x.assigned_to || "-"}</td>
-            <td>
-              <button class="action-btn" onclick="setStatus('${x.id}', 'In Transit')">🚚</button>
-              <button class="action-btn" onclick="setStatus('${x.id}', 'Delivered')">✅</button>
-            </td>
-          </tr>
-        `;
-      }).join("");
-    }
+      return `
+      <tr style="
+        ${risk==="Overdue" ? "background:#fff3f3;" : ""}
+        ${risk==="At Risk" ? "background:#fff9f0;" : ""}
+      ">
+        <td>${x.shipment_ref}</td>
+        <td>${x.client}</td>
+        <td>${x.origin} → ${x.destination}</td>
+        <td>
+          <span class="pill ${statusClass(x.status)}">${x.status}</span>
+          ${risk ? `<span class="pill ${risk==="Overdue"?"delayed":"pending"}">${risk}</span>`:""}
+        </td>
+        <td>${x.eta||"-"}</td>
+        <td>${x.assigned_to||"-"}</td>
+        <td>
+          <button class="action-btn" onclick="setStatus('${x.id}','In Transit')">🚚</button>
+          <button class="action-btn" onclick="setStatus('${x.id}','Delivered')">✅</button>
+        </td>
+      </tr>`;
+    }).join("");
 
-    document.getElementById("totalStat").textContent = visible.length;
+    document.getElementById("totalStat").textContent = data.length;
     document.getElementById("transitStat").textContent =
-      visible.filter(x => x.status === "In Transit").length;
+      data.filter(x=>x.status==="In Transit").length;
     document.getElementById("delayedStat").textContent =
-      visible.filter(x => x.status === "Delayed" || riskLabel(x)).length;
+      data.filter(x=>x.status==="Delayed"||riskLabel(x)).length;
 
-    renderMap(visible);
-
-    statusMsg.textContent = showMine
-      ? "Showing my shipments: " + visible.length
-      : "Loaded " + visible.length + " shipment(s)";
+    renderMap(data);
   }
 
-  async function setStatus(id, newStatus) {
-    const { error } = await sb
-      .from("shipments")
-      .update({ status: newStatus })
-      .eq("id", id);
-
-    if (error) {
-      alert("Update failed: " + error.message);
-      return;
-    }
-
+  async function setStatus(id,status) {
+    await sb.from("shipments").update({status}).eq("id",id);
     await loadShipments();
-    statusMsg.textContent = "Shipment updated ✔";
   }
 
   async function loadShipments() {
-    statusMsg.textContent = "Loading shipments...";
+    statusMsg.textContent = "Loading...";
 
-    const { data, error } = await sb
-      .from("shipments")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      statusMsg.textContent = "LOAD ERROR: " + error.message;
-      return;
-    }
+    const { data } = await sb.from("shipments").select("*");
 
     shipments = data || [];
     renderRows();
+
+    statusMsg.textContent = "Loaded " + shipments.length;
   }
 
   document.getElementById("loginBtn").onclick = login;
   document.getElementById("logoutBtn").onclick = logout;
 
-  myBtn.onclick = () => {
+  myBtn.onclick = ()=>{
     showMine = !showMine;
-    myBtn.classList.toggle("active", showMine);
+    myBtn.classList.toggle("active");
     renderRows();
   };
 
-  document.getElementById("openBtn").onclick = () => {
-    modal.classList.add("show");
-  };
+  document.getElementById("openBtn").onclick = ()=> modal.classList.add("show");
+  document.getElementById("cancelBtn").onclick = ()=> modal.classList.remove("show");
 
-  document.getElementById("cancelBtn").onclick = () => {
-    modal.classList.remove("show");
-  };
-
-  modal.onclick = e => {
-    if (e.target === modal) modal.classList.remove("show");
-  };
-
-  document.getElementById("saveBtn").onclick = async () => {
+  document.getElementById("saveBtn").onclick = async ()=>{
     const payload = {
-      shipment_ref: "SHP" + Date.now(),
-      client: getVal("client"),
-      origin: getVal("origin"),
-      destination: getVal("destination"),
-      assigned_to: getVal("assigned") || null,
-      eta: getVal("eta") || null,
-      shipment_type: "Road",
-      status: getVal("status") || "Pending",
-      priority: "Medium",
-      created_by_email: user?.email || null,
-      source: "manual"
+      shipment_ref: "SHP"+Date.now(),
+      client:getVal("client"),
+      origin:getVal("origin"),
+      destination:getVal("destination"),
+      assigned_to:getVal("assigned"),
+      eta:getVal("eta"),
+      status:getVal("status")
     };
 
-    if (!payload.client || !payload.origin || !payload.destination) {
-      alert("Fill Client, Origin and Destination.");
-      return;
-    }
-
-    const { data, error } = await sb
-      .from("shipments")
-      .insert([payload])
-      .select();
-
-    if (error || !data) {
-      alert("SAVE ERROR: " + (error?.message || "No data returned"));
-      statusMsg.textContent = "SAVE ERROR: " + (error?.message || "No data returned");
-      return;
-    }
-
-    document.getElementById("client").value = "";
-    document.getElementById("origin").value = "";
-    document.getElementById("destination").value = "";
-    document.getElementById("assigned").value = "";
-    document.getElementById("eta").value = "";
+    await sb.from("shipments").insert([payload]);
 
     modal.classList.remove("show");
     await loadShipments();
-    statusMsg.textContent = "Shipment saved ✔";
   };
-
-  async function init() {
-    const { data } = await sb.auth.getSession();
-
-    if (data.session?.user) {
-      user = data.session.user;
-      showApp();
-      await loadShipments();
-    } else {
-      loginScreen.style.display = "flex";
-      app.style.display = "none";
-    }
-  }
-
-  init();
 </script>
 </body>
 </html>
