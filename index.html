@@ -47,7 +47,7 @@
 
     .login-card {
       width:100%;
-      max-width:420px;
+      max-width:430px;
       background:white;
       border-radius:24px;
       padding:32px;
@@ -56,7 +56,7 @@
 
     .login-card img {
       display:block;
-      max-width:190px;
+      max-width:200px;
       margin:0 auto 20px;
       filter:drop-shadow(0 10px 30px rgba(6,183,165,.35));
     }
@@ -73,7 +73,8 @@
       color:var(--muted);
     }
 
-    .login-card input {
+    .login-card input,
+    .login-card select {
       width:100%;
       height:48px;
       margin-bottom:12px;
@@ -81,6 +82,7 @@
       border-radius:14px;
       padding:0 14px;
       font-size:15px;
+      background:white;
     }
 
     .login-error {
@@ -475,6 +477,29 @@
       margin-bottom:16px;
     }
 
+    .doc-upload-box {
+      border:2px dashed var(--line);
+      border-radius:18px;
+      padding:16px;
+      margin-bottom:14px;
+      background:#fbfdfd;
+      text-align:center;
+    }
+
+    .doc-list {
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:12px;
+    }
+
+    .doc-link {
+      color:var(--brand-dark);
+      font-weight:800;
+      text-decoration:none;
+      display:block;
+      margin-bottom:4px;
+    }
+
     .modal {
       display:none;
       position:fixed;
@@ -532,7 +557,8 @@
   <div class="login-card">
     <img src="https://gerhall84.github.io/gateflow/logo.png" alt="Logo">
     <h1>GateKeeper</h1>
-    <p>Log in to manage shipments</p>
+    <p>Choose your user, then log in</p>
+    <select id="loginUserSelect"></select>
     <input id="loginEmail" placeholder="Email">
     <input id="loginPassword" type="password" placeholder="Password">
     <button class="primary-btn" id="loginBtn">Login</button>
@@ -630,9 +656,8 @@
             <th>Type</th>
             <th>Route</th>
             <th>Status</th>
-            <th>Pickup</th>
-            <th>ETD</th>
             <th>ETA</th>
+            <th>Docs</th>
             <th>Assigned</th>
             <th>Actions</th>
           </tr>
@@ -646,14 +671,14 @@
 <div class="modal" id="modal">
   <div class="modal-box">
     <h2 id="modalTitle">Add Shipment</h2>
-    <div style="border:2px dashed #e4ebed; border-radius:18px; padding:16px; margin-bottom:14px; background:#fbfdfd; text-align:center;">
-  <strong>Shipment Documents</strong><br>
-  <small>Upload PDFs or files for this shipment</small><br><br>
-  <input id="docUpload" type="file" multiple>
-</div>
-<div id="docList" style="font-size:13px; color:#6f7d93; margin-bottom:12px;">
-  No documents selected.
-</div>
+
+    <div class="doc-upload-box">
+      <strong>Shipment Documents</strong><br>
+      <small>Upload PDFs or files for this shipment</small><br><br>
+      <input id="docUpload" type="file" multiple>
+    </div>
+    <div id="docList" class="doc-list">No documents selected.</div>
+
     <input id="client" placeholder="Customer name">
     <input id="origin" placeholder="Origin">
     <input id="destination" placeholder="Destination">
@@ -683,6 +708,8 @@ const sb = window.supabase.createClient(
   "https://edxgkwkdgvsajfmkejbk.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
 );
+
+const BUCKET = "shipment-documents";
 
 const users = [
   { name:"Gerard Hall", email:"gerard.hall@mauriceward.com", admin:true },
@@ -719,6 +746,8 @@ let showMine = false;
 let alertFilter = "all";
 let typeFilter = "All";
 let editingId = null;
+let selectedDocs = [];
+let existingDocs = [];
 const geoCache = {};
 
 const loginScreen = document.getElementById("loginScreen");
@@ -742,6 +771,16 @@ function currentUserRecord() {
 
 function isAdminUser() {
   return !!currentUserRecord()?.admin;
+}
+
+function renderLoginUsers() {
+  const select = document.getElementById("loginUserSelect");
+  select.innerHTML = `<option value="">Select user</option>` +
+    users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
+
+  select.onchange = () => {
+    document.getElementById("loginEmail").value = select.value;
+  };
 }
 
 function renderUserDropdown() {
@@ -772,17 +811,74 @@ function setTypeFilter(type) {
   renderRows();
 }
 
+function updateDocList() {
+  const docList = document.getElementById("docList");
+
+  const existingHtml = existingDocs.length
+    ? existingDocs.map((u, i) => `<a class="doc-link" href="${u}" target="_blank">Existing document ${i + 1}</a>`).join("")
+    : "";
+
+  const selectedHtml = selectedDocs.length
+    ? selectedDocs.map(f => `📄 ${f.name}`).join("<br>")
+    : "";
+
+  docList.innerHTML = existingHtml || selectedHtml
+    ? `${existingHtml}${selectedHtml ? "<div>" + selectedHtml + "</div>" : ""}`
+    : "No documents selected.";
+}
+
+function initDocUpload() {
+  const input = document.getElementById("docUpload");
+  if (!input) return;
+
+  input.addEventListener("change", e => {
+    selectedDocs = Array.from(e.target.files || []);
+    updateDocList();
+  });
+}
+
+async function uploadSelectedDocs() {
+  const urls = [...existingDocs];
+
+  for (const file of selectedDocs) {
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const path = `${Date.now()}_${safeName}`;
+
+    const { error } = await sb.storage
+      .from(BUCKET)
+      .upload(path, file);
+
+    if (error) {
+      alert("Document upload failed: " + error.message);
+      return urls;
+    }
+
+    const { data } = sb.storage
+      .from(BUCKET)
+      .getPublicUrl(path);
+
+    urls.push(data.publicUrl);
+  }
+
+  return urls;
+}
+
 function clearForm() {
   editingId = null;
+  selectedDocs = [];
+  existingDocs = [];
+
   document.getElementById("modalTitle").textContent = "Add Shipment";
 
   ["client", "origin", "destination", "pickupDate", "etdDate", "eta"].forEach(id => {
     document.getElementById(id).value = "";
   });
 
+  document.getElementById("docUpload").value = "";
   document.getElementById("assigned").value = "";
   document.getElementById("shipmentType").value = "Air Import";
   document.getElementById("status").value = "Pending";
+  updateDocList();
 }
 
 async function login() {
@@ -1035,10 +1131,11 @@ function renderRows() {
   const allVisible = baseVisible();
 
   if (!data.length) {
-    rows.innerHTML = `<tr><td colspan="10">No shipments found.</td></tr>`;
+    rows.innerHTML = `<tr><td colspan="9">No shipments found.</td></tr>`;
   } else {
     rows.innerHTML = data.map(x => {
       const risk = riskLabel(x);
+      const docs = Array.isArray(x.document_urls) ? x.document_urls : [];
 
       return `
       <tr style="
@@ -1053,9 +1150,8 @@ function renderRows() {
           <span class="pill ${statusClass(x.status)}">${x.status || "Pending"}</span>
           ${risk ? `<span class="pill ${risk === "Overdue" ? "delayed" : "pending"}">${risk}</span>` : ""}
         </td>
-        <td>${eventDateValue(x, "pickup") || "-"}</td>
-        <td>${eventDateValue(x, "etd") || "-"}</td>
         <td>${eventDateValue(x, "eta") || "-"}</td>
+        <td>${docs.length ? docs.map((u, i) => `<a class="doc-link" href="${u}" target="_blank">Doc ${i + 1}</a>`).join("") : "-"}</td>
         <td>${x.assigned_to || "-"}</td>
         <td>
           <button class="action-btn" onclick="editShipment('${x.id}')">✏️</button>
@@ -1089,6 +1185,9 @@ function editShipment(id) {
   if (!x) return;
 
   editingId = id;
+  selectedDocs = [];
+  existingDocs = Array.isArray(x.document_urls) ? x.document_urls : [];
+
   document.getElementById("modalTitle").textContent = "Edit Shipment";
 
   document.getElementById("client").value = x.client || "";
@@ -1101,6 +1200,7 @@ function editShipment(id) {
   document.getElementById("eta").value = x.eta || "";
   document.getElementById("status").value = x.status || "Pending";
 
+  updateDocList();
   modal.classList.add("show");
 }
 
@@ -1136,19 +1236,6 @@ async function deleteShipment(id) {
   statusMsg.textContent = "Shipment deleted ✔";
 }
 
-function clearForm() {
-  editingId = null;
-  document.getElementById("modalTitle").textContent = "Add Shipment";
-
-  ["client", "origin", "destination", "pickupDate", "etdDate", "eta"].forEach(id => {
-    document.getElementById(id).value = "";
-  });
-
-  document.getElementById("assigned").value = "";
-  document.getElementById("shipmentType").value = "Air Import";
-  document.getElementById("status").value = "Pending";
-}
-
 async function loadShipments() {
   statusMsg.textContent = "Loading...";
 
@@ -1167,6 +1254,8 @@ async function loadShipments() {
 }
 
 document.getElementById("saveBtn").onclick = async () => {
+  const documentUrls = await uploadSelectedDocs();
+
   const payload = {
     client: getVal("client"),
     origin: getVal("origin"),
@@ -1176,7 +1265,8 @@ document.getElementById("saveBtn").onclick = async () => {
     pickup_date: getVal("pickupDate") || null,
     etd: getVal("etdDate") || null,
     eta: getVal("eta") || null,
-    status: getVal("status") || "Pending"
+    status: getVal("status") || "Pending",
+    document_urls: documentUrls
   };
 
   if (!payload.client || !payload.origin || !payload.destination) {
@@ -1245,17 +1335,10 @@ modal.onclick = e => {
 };
 
 async function init() {
-  let selectedDocs = [];
-
-document.getElementById("docUpload").addEventListener("change", e => {
-  selectedDocs = Array.from(e.target.files || []);
-
-  document.getElementById("docList").innerHTML = selectedDocs.length
-    ? selectedDocs.map(f => "📄 " + f.name).join("<br>")
-    : "No documents selected.";
-});
+  renderLoginUsers();
   renderUserDropdown();
   renderTypeFilters();
+  initDocUpload();
 
   const { data } = await sb.auth.getSession();
 
