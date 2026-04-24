@@ -353,6 +353,15 @@
     }
 
     .timeline-item.overdue {
+  border-left-color:#ef5c5c;
+  background:#ffecec;
+  font-weight:700;
+}
+
+.timeline-item.risk {
+  border-left-color:#f0a227;
+  background:#fff4e0;
+}{
       border-left-color:var(--danger);
       background:#fff3f3;
     }
@@ -377,6 +386,15 @@
     }
 
     tr.row-overdue {
+  background:#ffe4e4;
+  border-left:6px solid #ef5c5c;
+  font-weight:700;
+}
+
+tr.row-risk {
+  background:#fff4e0;
+  border-left:6px solid #f0a227;
+}{
       background:#fff3f3;
     }
 
@@ -652,6 +670,27 @@ function localDateOnly(d){ return d ? d.slice(0,10) : ""; }
 
 // ---------------- RISK ENGINE ----------------
 function getRiskLevel(shipment){
+  if(!shipment.eta) return "none";
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const eta = new Date(shipment.eta);
+  eta.setHours(0,0,0,0);
+
+  const diff = (eta - today) / (1000*60*60*24);
+
+  // 🔥 AUTO UPDATE TO DELAYED
+  if(diff < 0 && shipment.status !== "Delivered"){
+    if(shipment.status !== "Delayed"){
+      autoMarkDelayed(shipment.id);
+    }
+    return "overdue";
+  }
+
+  if(diff <= 2) return "risk";
+  return "none";
+}
   if(!shipment.eta || shipment.status === "Delivered") return "none";
 
   const today = new Date();
@@ -738,7 +777,8 @@ function render(){
             ${x.status || "Pending"}
           </span>
           ${risk === "risk" ? `<span class="pill risk-pill">At Risk</span>` : ""}
-          ${risk === "overdue" ? `<span class="pill overdue-pill">Overdue</span>` : ""}
+        ${risk === "overdue" ? `<span class="pill overdue-pill">⚠ OVERDUE</span>` : ""}
+${risk === "risk" ? `<span class="pill risk-pill">⚠ AT RISK</span>` : ""}
         </td>
         <td>${localDateOnly(x.eta) || "-"}</td>
         <td>${docs.length ? docs.map((u,i)=>`<a class="doc-link" href="${u}" target="_blank">Doc ${i+1}</a>`).join("") : "-"}</td>
@@ -756,7 +796,12 @@ function render(){
   renderTimeline(data);
   renderUnassigned();
 }
-
+async function autoMarkDelayed(id){
+  await sb
+    .from("shipments")
+    .update({ status: "Delayed" })
+    .eq("id", id);
+}
 function renderTimeline(data){
   const box = document.getElementById("timeline");
   const today = new Date();
