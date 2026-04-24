@@ -1,708 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GateKeeper Pro</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <style>
-    :root {
-      --bg:#f4f7f8;
-      --nav:#04142e;
-      --text:#11213d;
-      --muted:#6f7d93;
-      --brand:#06b7a5;
-      --brand-dark:#069788;
-      --line:#e4ebed;
-      --danger:#ef5c5c;
-      --success:#18a66e;
-      --warning:#f0a227;
-      --blue:#2d79ff;
-      --shadow:0 25px 60px rgba(6,20,46,0.08);
-    }
-
-    * { box-sizing:border-box; }
-
-    body {
-      margin:0;
-      font-family:Arial, sans-serif;
-      background:linear-gradient(180deg,#f4f7f8 0%,#eef4f5 100%);
-      color:var(--text);
-    }
-
-    button { font-family:inherit; }
-
-    .login-screen {
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:linear-gradient(135deg,#04142e,#063b63);
-      padding:20px;
-    }
-
-    .login-card {
-      width:100%;
-      max-width:430px;
-      background:white;
-      border-radius:24px;
-      padding:32px;
-      box-shadow:0 30px 80px rgba(0,0,0,.28);
-    }
-
-    .login-card img {
-      display:block;
-      max-width:200px;
-      margin:0 auto 20px;
-      filter:drop-shadow(0 10px 30px rgba(6,183,165,.35));
-    }
-
-    .login-card h1 {
-      text-align:center;
-      margin:0 0 8px;
-      color:var(--nav);
-    }
-
-    .login-card p {
-      text-align:center;
-      margin:0 0 24px;
-      color:var(--muted);
-    }
-
-    .login-card input,
-    .login-card select {
-      width:100%;
-      height:48px;
-      margin-bottom:12px;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:0 14px;
-      font-size:15px;
-      background:white;
-    }
-
-    .login-error {
-      color:var(--danger);
-      font-size:13px;
-      margin-top:12px;
-      text-align:center;
-    }
-
-    .app {
-      display:none;
-      min-height:100vh;
-      grid-template-columns:250px 1fr;
-    }
-
-    .sidebar {
-      background:linear-gradient(180deg,#04142e,#021127);
-      color:white;
-      padding:26px 16px;
-      display:flex;
-      flex-direction:column;
-      min-height:100vh;
-      box-shadow:4px 0 30px rgba(0,0,0,.25);
-    }
-
-    .brand {
-      text-align:center;
-      padding:10px 8px 22px;
-      border-bottom:1px solid rgba(255,255,255,.08);
-      margin-bottom:18px;
-    }
-
-    .brand img {
-      max-width:180px;
-      margin-bottom:12px;
-      filter:drop-shadow(0 10px 30px rgba(6,183,165,.35));
-    }
-
-    .brand strong {
-      display:block;
-      color:#3f73e8;
-      font-size:14px;
-    }
-
-    .nav a {
-      display:flex;
-      color:white;
-      padding:14px;
-      border-radius:16px;
-      font-weight:700;
-      margin-bottom:8px;
-      text-decoration:none;
-      cursor:pointer;
-    }
-
-    .nav a.active,
-    .nav a:hover {
-      background:rgba(6,183,165,.18);
-      color:#8efff1;
-    }
-
-    .side-label {
-      color:rgba(255,255,255,.45);
-      font-size:11px;
-      font-weight:900;
-      letter-spacing:.8px;
-      text-transform:uppercase;
-      margin:18px 12px 10px;
-    }
-        .type-nav button {
-      width:100%;
-      text-align:left;
-      background:transparent;
-      color:white;
-      border:0;
-      padding:11px 14px;
-      border-radius:14px;
-      font-weight:800;
-      cursor:pointer;
-      margin-bottom:5px;
-    }
-
-    .type-nav button:hover,
-    .type-nav button.active {
-      background:rgba(6,183,165,.18);
-      color:#8efff1;
-    }
-
-    .sidebar-footer {
-      margin-top:auto;
-      padding-top:18px;
-      border-top:1px solid rgba(255,255,255,.08);
-      display:flex;
-      gap:12px;
-      align-items:center;
-    }
-
-    .avatar {
-      width:42px;
-      height:42px;
-      border-radius:50%;
-      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:900;
-      color:white;
-    }
-
-    .main { padding:28px; }
-
-    .welcome { margin-bottom:18px; }
-
-    .welcome h1 {
-      margin:0 0 8px;
-      font-size:28px;
-    }
-
-    .welcome p {
-      margin:0;
-      color:var(--muted);
-    }
-
-    .topbar {
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:20px;
-      flex-wrap:wrap;
-    }
-
-    .topbar-left,
-    .topbar-right {
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .primary-btn {
-      height:46px;
-      border:0;
-      border-radius:14px;
-      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
-      color:white;
-      padding:0 22px;
-      font-weight:900;
-      cursor:pointer;
-      box-shadow:0 12px 30px rgba(6,183,165,.3);
-    }
-
-    .secondary-btn {
-      height:46px;
-      border:1px solid var(--line);
-      border-radius:14px;
-      background:white;
-      color:var(--text);
-      padding:0 20px;
-      font-weight:800;
-      cursor:pointer;
-    }
-
-    .secondary-btn.active {
-      background:#dff7f3;
-      color:var(--brand-dark);
-      border-color:var(--brand);
-    }
-
-    .type-filter-bar {
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-bottom:16px;
-    }
-
-    .type-chip {
-      height:40px;
-      border:1px solid var(--line);
-      background:white;
-      border-radius:999px;
-      padding:0 14px;
-      font-weight:900;
-      cursor:pointer;
-      color:var(--text);
-      box-shadow:0 10px 25px rgba(6,20,46,.04);
-    }
-
-    .type-chip.active,
-    .type-chip:hover {
-      background:#dff7f3;
-      color:var(--brand-dark);
-      border-color:var(--brand);
-    }
-
-    .action-btn {
-      border:0;
-      border-radius:12px;
-      padding:9px 11px;
-      margin-right:6px;
-      cursor:pointer;
-      background:#f4f7f8;
-    }
-
-    .stats {
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:16px;
-      margin-bottom:16px;
-    }
-
-    .card {
-      background:white;
-      border-radius:22px;
-      box-shadow:var(--shadow);
-      border:1px solid rgba(0,0,0,.03);
-      overflow:hidden;
-    }
-
-    .stat-card {
-      padding:22px;
-    }
-
-    .stat-label {
-      color:var(--muted);
-      font-size:13px;
-      font-weight:700;
-      margin-bottom:6px;
-    }
-
-    .stat-value {
-      font-size:30px;
-      font-weight:900;
-    }
-
-    .grid {
-      display:grid;
-      grid-template-columns:1.4fr 1fr;
-      gap:16px;
-      margin-bottom:16px;
-    }
-
-    .section-head {
-      padding:20px 20px 12px;
-      border-bottom:1px solid var(--line);
-    }
-
-    .section-head h2 {
-      margin:0;
-      color:var(--brand-dark);
-      font-size:18px;
-    }
-
-    #map {
-      height:430px;
-      border-radius:18px;
-      overflow:hidden;
-      margin:0 16px 16px;
-      border:1px solid var(--line);
-    }
-
-    table {
-      width:100%;
-      border-collapse:separate;
-      border-spacing:0;
-      font-size:14px;
-    }
-
-    th, td {
-      padding:14px 18px;
-      border-top:1px solid var(--line);
-      text-align:left;
-      vertical-align:top;
-    }
-
-    th {
-      background:#f6f9fb;
-      font-size:13px;
-    }
-
-    .pill {
-      display:inline-flex;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:800;
-      margin-right:4px;
-      white-space:nowrap;
-    }
-
-    .pending { background:#fff1da; color:#d88d10; }
-    .transit { background:#dff7f3; color:#069788; }
-    .delivered { background:#dff5eb; color:#18a66e; }
-    .delayed { background:#ffe4e4; color:#ef5c5c; }
-    .pickup { background:#e4f0ff; color:#2d79ff; }
-
-    #statusMsg {
-      padding:16px 18px;
-      color:var(--muted);
-      font-size:13px;
-    }
-
-    .unassigned-list {
-      padding:16px;
-    }
-
-    .unassigned-card {
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:12px;
-      margin-bottom:10px;
-      background:#fbfdfd;
-    }
-
-    .unassigned-card strong {
-      display:block;
-      margin-bottom:4px;
-    }
-
-    .unassigned-card small {
-      color:var(--muted);
-    }
-
-    .alert-panel {
-      margin-bottom:16px;
-      padding:18px;
-      display:flex;
-      gap:14px;
-      flex-wrap:wrap;
-    }
-
-    .timeline-grid {
-      display:grid;
-      grid-template-columns:repeat(7,1fr);
-      gap:12px;
-      padding:18px;
-    }
-
-    .timeline-day {
-      min-height:170px;
-      border:1px solid var(--line);
-      border-radius:18px;
-      background:#fbfdfd;
-      padding:12px;
-    }
-
-    .timeline-day h3 {
-      margin:0 0 10px;
-      font-size:13px;
-      color:var(--muted);
-    }
-
-    .timeline-item {
-      padding:9px;
-      border-radius:12px;
-      margin-bottom:8px;
-      font-size:12px;
-      background:#f4f7f8;
-      border-left:4px solid var(--brand);
-    }
-
-    .timeline-item strong {
-      display:block;
-      margin-bottom:3px;
-    }
-
-    .timeline-customer {
-      font-weight:900;
-      color:var(--text);
-    }
-
-    .timeline-route {
-      color:var(--muted);
-      font-size:11px;
-      margin-top:3px;
-    }
-
-    .timeline-item.overdue {
-      background:#fff3f3;
-      border-left-color:var(--danger);
-    }
-
-    .timeline-item.risk {
-      background:#fff9f0;
-      border-left-color:var(--warning);
-    }
-
-    .timeline-item.delivered {
-      background:#f0fbf5;
-      border-left-color:var(--success);
-    }
-
-    .calendar-panel {
-      margin-bottom:16px;
-    }
-
-    .doc-upload-box {
-      border:2px dashed var(--line);
-      border-radius:18px;
-      padding:16px;
-      margin-bottom:14px;
-      background:#fbfdfd;
-      text-align:center;
-    }
-
-    .doc-list {
-      font-size:13px;
-      color:var(--muted);
-      margin-bottom:12px;
-    }
-
-    .doc-link {
-      color:var(--brand-dark);
-      font-weight:800;
-      text-decoration:none;
-      display:block;
-      margin-bottom:4px;
-    }
-
-    .modal {
-      display:none;
-      position:fixed;
-      inset:0;
-      background:rgba(3,12,28,.6);
-      align-items:center;
-      justify-content:center;
-      z-index:1000;
-      padding:20px;
-    }
-
-    .modal.show { display:flex; }
-
-    .modal-box {
-      width:min(620px,100%);
-      background:white;
-      border-radius:22px;
-      padding:24px;
-      box-shadow:0 30px 80px rgba(2,17,39,.28);
-      max-height:90vh;
-      overflow:auto;
-    }
-
-    .modal-box input,
-    .modal-box select {
-      width:100%;
-      height:46px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:0 12px;
-      margin-bottom:12px;
-    }
-
-    .modal-actions {
-      display:flex;
-      justify-content:flex-end;
-      gap:10px;
-    }
-
-    @media(max-width:1100px){
-      .timeline-grid{grid-template-columns:1fr 1fr}
-    }
-
-    @media(max-width:900px){
-      .app{grid-template-columns:1fr}
-      .sidebar{display:none}
-      .grid,.stats,.timeline-grid{grid-template-columns:1fr}
-    }
-  </style>
-</head>
-
-<body>
-
-<div class="login-screen" id="loginScreen">
-  <div class="login-card">
-    <img src="https://gerhall84.github.io/gateflow/logo.png" alt="Logo">
-    <h1>GateKeeper</h1>
-    <p>Choose your user, then log in</p>
-    <select id="loginUserSelect"></select>
-    <input id="loginEmail" placeholder="Email">
-    <input id="loginPassword" type="password" placeholder="Password">
-    <button class="primary-btn" id="loginBtn">Login</button>
-    <div id="loginError" class="login-error"></div>
-  </div>
-</div>
-
-<div class="app" id="app">
-  <aside class="sidebar">
-    <div class="brand">
-      <img src="https://gerhall84.github.io/gateflow/logo.png" alt="Logo">
-      <strong>Operations</strong>
-    </div>
-
-    <nav class="nav">
-      <a class="active">Dashboard</a>
-      <a>Shipments</a>
-      <a>Calendar</a>
-      <a>Map</a>
-    </nav>
-
-    <div class="side-label">Shipment Types</div>
-    <div class="type-nav" id="sideTypeFilters"></div>
-
-    <div class="sidebar-footer">
-      <div class="avatar" id="avatar">GK</div>
-      <div><strong id="userEmail"></strong></div>
-    </div>
-  </aside>
-
-  <main class="main">
-    <div class="welcome">
-      <h1>Operations Dashboard</h1>
-      <p>Live shipment visibility, risk alerts and weekly planning</p>
-    </div>
-
-    <div class="topbar">
-      <div class="topbar-left">
-        <button class="primary-btn" id="openBtn">+ Add Shipment</button>
-        <button class="secondary-btn" id="myBtn">My Shipments</button>
-      </div>
-      <div class="topbar-right">
-        <button class="secondary-btn" id="logoutBtn">Logout</button>
-      </div>
-    </div>
-
-    <div class="type-filter-bar" id="topTypeFilters"></div>
-
-    <section class="stats">
-      <div class="card stat-card">
-        <div class="stat-label">Total</div>
-        <div class="stat-value" id="totalStat">0</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-label">In Transit</div>
-        <div class="stat-value" id="transitStat">0</div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-label">Delayed / Risk</div>
-        <div class="stat-value" id="delayedStat">0</div>
-      </div>
-    </section>
-
-    <section class="card alert-panel">
-      <button class="secondary-btn" onclick="setAlertFilter('all')">All: <strong id="alertAll">0</strong></button>
-      <button class="secondary-btn" onclick="setAlertFilter('overdue')">🔴 Overdue: <strong id="alertOverdue">0</strong></button>
-      <button class="secondary-btn" onclick="setAlertFilter('risk')">🟠 At Risk: <strong id="alertRisk">0</strong></button>
-    </section>
-
-    <section class="card calendar-panel">
-      <div class="section-head"><h2>Weekly Timeline</h2></div>
-      <div class="timeline-grid" id="timelineGrid"></div>
-    </section>
-
-    <section class="grid">
-      <div class="card">
-        <div class="section-head"><h2>Live Map</h2></div>
-        <div id="map"></div>
-      </div>
-
-      <div class="card">
-        <div class="section-head"><h2>Unassigned Shipments</h2></div>
-        <div class="unassigned-list" id="unassignedBox"></div>
-        <div id="statusMsg">Loading...</div>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="section-head"><h2>Shipments</h2></div>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Customer</th>
-            <th>Type</th>
-            <th>Route</th>
-            <th>Status</th>
-            <th>ETA</th>
-            <th>Docs</th>
-            <th>Assigned</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="rows"></tbody>
-      </table>
-    </section>
-  </main>
-</div>
-
-<div class="modal" id="modal">
-  <div class="modal-box">
-    <h2 id="modalTitle">Add Shipment</h2>
-
-    <div class="doc-upload-box">
-      <strong>Shipment Documents</strong><br>
-      <small>Upload PDFs or files for this shipment</small><br><br>
-      <input id="docUpload" type="file" multiple>
-    </div>
-    <div id="docList" class="doc-list">No documents selected.</div>
-
-    <input id="client" placeholder="Customer name">
-    <input id="origin" placeholder="Origin">
-    <input id="destination" placeholder="Destination">
-
-    <select id="assigned"></select>
-    <select id="shipmentType"></select>
-
-    <input id="pickupDate" type="date">
-    <input id="etdDate" type="date">
-    <input id="eta" type="date">
-
-    <select id="status">
-      <option>Pending</option>
-      <option>In Transit</option>
-      <option>Delivered</option>
-      <option>Delayed</option>
-    </select>
-
-    <div class="modal-actions">
-      <button class="secondary-btn" id="cancelBtn">Cancel</button>
-      <button class="primary-btn" id="saveBtn">Save</button>
-    </div>
-  </div>
-</div>
 <script>
 const sb = window.supabase.createClient(
   "https://edxgkwkdgvsajfmkejbk.supabase.co",
@@ -710,6 +5,11 @@ const sb = window.supabase.createClient(
 );
 
 const BUCKET = "shipment-documents";
+
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+}
 
 const users = [
   { name:"Gerard Hall", email:"gerard.hall@mauriceward.com", admin:true },
@@ -827,6 +127,108 @@ function updateDocList() {
     : "No documents selected.";
 }
 
+function extractFirst(text, patterns) {
+  for (const p of patterns) {
+    const match = text.match(p);
+    if (match && match[1]) return match[1].trim().replace(/\s+/g, " ");
+  }
+  return "";
+}
+
+function fillIfEmpty(id, value) {
+  if (!value) return;
+  const el = document.getElementById(id);
+  if (el && !el.value) el.value = value;
+}
+
+function normaliseDate(value) {
+  if (!value) return "";
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+
+  const parts = value.split(/[\/.-]/);
+  if (parts.length !== 3) return "";
+
+  let [d, m, y] = parts;
+  if (y.length === 2) y = "20" + y;
+
+  return `${y.padStart(4, "0")}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+}
+
+async function readDocText(file) {
+  if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+    const buffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+    let text = "";
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      text += content.items.map(item => item.str).join(" ") + "\n";
+    }
+
+    return text;
+  }
+
+  return await file.text();
+}
+
+function parseShipmentText(text) {
+  const clean = text.replace(/\r/g, "\n");
+
+  const awb = extractFirst(clean, [
+    /(?:AWB|Waybill|Waybill No|Waybill Number|Tracking No|Tracking Number)[:\s#-]+([A-Z0-9\-]+)/i
+  ]);
+
+  const carrier = extractFirst(clean, [
+    /(?:Carrier|Courier|Airline|Forwarder)[:\s]+([^\n]+)/i
+  ]);
+
+  const etaRaw = extractFirst(clean, [
+    /(?:ETA|Arrival Date|Date of Arrival)[:\s]+([0-9]{4}-[0-9]{2}-[0-9]{2})/i,
+    /(?:ETA|Arrival Date|Date of Arrival)[:\s]+([0-9]{1,2}[\/.-][0-9]{1,2}[\/.-][0-9]{2,4})/i
+  ]);
+
+  const pieces = extractFirst(clean, [
+    /(?:Pieces|PCS|Packages|No\. of Pieces|Number of Pieces)[:\s]+([0-9]+)/i
+  ]);
+
+  const weight = extractFirst(clean, [
+    /(?:Weight|Gross Weight|Chargeable Weight)[:\s]+([0-9.,]+\s?(?:KG|KGS|LB|LBS)?)/i
+  ]);
+
+  const shipper = extractFirst(clean, [
+    /(?:Shipper|Sender|Exporter)[:\s]+([^\n]+)/i
+  ]);
+
+  const consignee = extractFirst(clean, [
+    /(?:Consignee|Receiver|Importer)[:\s]+([^\n]+)/i
+  ]);
+
+  const origin = extractFirst(clean, [
+    /(?:Origin|From|POL|Port of Loading)[:\s]+([^\n]+)/i
+  ]);
+
+  const destination = extractFirst(clean, [
+    /(?:Destination|To|POD|Port of Discharge)[:\s]+([^\n]+)/i
+  ]);
+
+  fillIfEmpty("client", consignee || shipper);
+  fillIfEmpty("origin", origin);
+  fillIfEmpty("destination", destination);
+  fillIfEmpty("eta", normaliseDate(etaRaw));
+
+  console.log("Parsed document:", {
+    awb,
+    carrier,
+    eta: normaliseDate(etaRaw),
+    pieces,
+    weight,
+    shipper,
+    consignee
+  });
+}
+
 function initDocUpload() {
   const input = document.getElementById("docUpload");
   if (!input) return;
@@ -834,6 +236,15 @@ function initDocUpload() {
   input.addEventListener("change", e => {
     selectedDocs = Array.from(e.target.files || []);
     updateDocList();
+
+    selectedDocs.forEach(async file => {
+      try {
+        const text = await readDocText(file);
+        parseShipmentText(text);
+      } catch (err) {
+        console.warn("Could not parse file:", file.name, err);
+      }
+    });
   });
 }
 
