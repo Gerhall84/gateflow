@@ -512,6 +512,24 @@
     }
 
     function statusClass(status) {
+      function riskLabel(x) {
+  if (x.status === "Delivered") return "";
+
+  if (!x.eta) return "";
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  const eta = new Date(x.eta);
+  eta.setHours(0,0,0,0);
+
+  const diffDays = Math.ceil((eta - today) / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 0) return "Overdue";
+  if (diffDays <= 2) return "At Risk";
+
+  return "";
+}
       if (status === "In Transit") return "transit";
       if (status === "Delivered") return "delivered";
       if (status === "Delayed") return "delayed";
@@ -527,7 +545,14 @@
             <td>${x.shipment_ref || ""}</td>
             <td>${x.client || ""}</td>
             <td>${x.origin || ""} → ${x.destination || ""}</td>
-            <td><span class="pill ${statusClass(x.status)}">${x.status || "Pending"}</span></td>
+            <<td>
+  <span class="pill ${statusClass(x.status)}">${x.status || "Pending"}</span>
+  ${
+    riskLabel(x)
+      ? `<span class="pill ${riskLabel(x) === "Overdue" ? "delayed" : "pending"}" style="margin-left:6px;">${riskLabel(x)}</span>`
+      : ""
+  }
+</td>
           </tr>
         `).join("");
       }
