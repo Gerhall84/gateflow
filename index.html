@@ -821,9 +821,11 @@
           <td>${eventDateValue(x, "eta") || "-"}</td>
           <td>${x.assigned_to || "-"}</td>
           <td>
-            <button class="action-btn" onclick="setStatus('${x.id}','In Transit')">🚚</button>
-            <button class="action-btn" onclick="setStatus('${x.id}','Delivered')">✅</button>
-          </td>
+  <button class="action-btn" onclick="editShipment('${x.id}')">✏️</button>
+  <button class="action-btn" onclick="setStatus('${x.id}','In Transit')">🚚</button>
+  <button class="action-btn" onclick="setStatus('${x.id}','Delivered')">✅</button>
+  <button class="action-btn" onclick="deleteShipment('${x.id}')">🗑️</button>
+</td>
         </tr>`;
       }).join("");
     }
