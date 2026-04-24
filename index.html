@@ -1156,7 +1156,9 @@ searchInput.oninput = e => {
 const docInput = document.getElementById("docUpload");
 if (docInput) docInput.onchange = handleDocUpload;
 
-initDropdowns();
+window.onload = () => {
+  initDropdowns();
+};
 </script>
 </body>
 </html>
