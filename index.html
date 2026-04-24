@@ -12,579 +12,92 @@
 
   <style>
     :root {
-      --nav:#04142e;
-      --text:#11213d;
-      --muted:#6f7d93;
-      --brand:#06b7a5;
-      --brand-dark:#069788;
-      --line:#e4ebed;
-      --danger:#ef5c5c;
-      --success:#18a66e;
-      --warning:#f0a227;
-      --blue:#2d79ff;
-      --shadow:0 25px 60px rgba(6,20,46,0.08);
-    }
-
-    * { box-sizing:border-box; }
-
-    body {
-      margin:0;
-      font-family:Arial, sans-serif;
-      background:linear-gradient(180deg,#f4f7f8,#eef4f5);
-      color:var(--text);
-    }
-
-    button { font-family:inherit; cursor:pointer; }
-
-    input, select {
-      width:100%;
-      height:46px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:0 12px;
-      margin-bottom:10px;
-      background:white;
-    }
-
-    .login-screen {
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:linear-gradient(135deg,#04142e,#063b63);
-      padding:20px;
-    }
-
-    .login-card {
-      width:100%;
-      max-width:430px;
-      background:white;
-      border-radius:24px;
-      padding:32px;
-      box-shadow:0 30px 80px rgba(0,0,0,.28);
-    }
-
-    .login-card img {
-      display:block;
-      max-width:200px;
-      margin:0 auto 20px;
-    }
-
-    .login-card h1 {
-      text-align:center;
-      margin:0 0 8px;
-      color:var(--nav);
-    }
-
-    .login-card p {
-      text-align:center;
-      margin:0 0 24px;
-      color:var(--muted);
-    }
-
-    .login-error {
-      color:var(--danger);
-      font-size:13px;
-      text-align:center;
-      margin-top:10px;
-    }
-
-    .app {
-      display:none;
-      min-height:100vh;
-      grid-template-columns:250px 1fr;
-    }
-
-    .sidebar {
-      background:linear-gradient(180deg,#04142e,#021127);
-      color:white;
-      padding:26px 16px;
-      display:flex;
-      flex-direction:column;
-      min-height:100vh;
-      box-shadow:4px 0 30px rgba(0,0,0,.25);
-    }
-
-    .brand {
-      text-align:center;
-      padding:10px 8px 22px;
-      border-bottom:1px solid rgba(255,255,255,.08);
-      margin-bottom:18px;
-    }
-
-    .brand img {
-      max-width:180px;
-      margin-bottom:12px;
-    }
-
-    .brand strong {
-      color:#3f73e8;
-      font-size:14px;
-    }
-
-    .nav a {
-      display:flex;
-      color:white;
-      padding:14px;
-      border-radius:16px;
-      font-weight:700;
-      margin-bottom:8px;
-      text-decoration:none;
-      cursor:pointer;
-    }
-
-    .nav a.active,
-    .nav a:hover {
-      background:rgba(6,183,165,.18);
-      color:#8efff1;
-    }
-
-    .side-label {
-      color:rgba(255,255,255,.45);
-      font-size:11px;
-      font-weight:900;
-      letter-spacing:.8px;
-      text-transform:uppercase;
-      margin:18px 12px 10px;
-    }
-
-    .type-nav button {
-      width:100%;
-      text-align:left;
-      background:transparent;
-      color:white;
-      border:0;
-      padding:11px 14px;
-      border-radius:14px;
-      font-weight:800;
-      margin-bottom:5px;
-    }
-
-    .type-nav button:hover,
-    .type-nav button.active {
-      background:rgba(6,183,165,.18);
-      color:#8efff1;
-    }
-
-    .sidebar-footer {
-      margin-top:auto;
-      padding-top:18px;
-      border-top:1px solid rgba(255,255,255,.08);
-      display:flex;
-      gap:12px;
-      align-items:center;
-      font-size:12px;
-    }
-
-    .avatar {
-      width:42px;
-      height:42px;
-      border-radius:50%;
-      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:900;
-    }
-
-    .main { padding:28px; }
-
-    .welcome h1 {
-      margin:0 0 8px;
-      font-size:28px;
-    }
-
-    .welcome p {
-      margin:0 0 18px;
-      color:var(--muted);
-    }
-        .topbar {
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:14px;
-      flex-wrap:wrap;
-    }
-
-    .topbar-left,
-    .topbar-right {
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .primary-btn {
-      height:46px;
-      border:0;
-      border-radius:14px;
-      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
-      color:white;
-      padding:0 22px;
-      font-weight:900;
-      box-shadow:0 12px 30px rgba(6,183,165,.3);
-    }
-
-    .secondary-btn {
-      height:46px;
-      border:1px solid var(--line);
-      border-radius:14px;
-      background:white;
-      color:var(--text);
-      padding:0 20px;
-      font-weight:800;
-    }
-
-    .secondary-btn.active {
-      background:#dff7f3;
-      color:var(--brand-dark);
-      border-color:var(--brand);
-    }
-
-    .search-row {
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-bottom:16px;
-      align-items:center;
-    }
-
-    .search-row input {
-      max-width:360px;
-      margin-bottom:0;
-    }
-
-    .quick-filters {
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-
-    .type-filter-bar {
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-bottom:16px;
-    }
-
-    .type-chip {
-      height:40px;
-      border:1px solid var(--line);
-      background:white;
-      border-radius:999px;
-      padding:0 14px;
-      font-weight:900;
-      color:var(--text);
-      box-shadow:0 10px 25px rgba(6,20,46,.04);
-    }
-
-    .type-chip.active,
-    .type-chip:hover {
-      background:#dff7f3;
-      color:var(--brand-dark);
-      border-color:var(--brand);
-    }
-
-    .stats {
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:16px;
-      margin-bottom:16px;
-    }
-
-    .card {
-      background:white;
-      border-radius:22px;
-      box-shadow:var(--shadow);
-      border:1px solid rgba(0,0,0,.03);
-      overflow:hidden;
-      margin-bottom:16px;
-    }
-
-    .stat-card { padding:22px; }
-
-    .stat-label {
-      color:var(--muted);
-      font-size:13px;
-      font-weight:700;
-      margin-bottom:6px;
-    }
-
-    .stat-value {
-      font-size:30px;
-      font-weight:900;
-    }
-
-    .grid {
-      display:grid;
-      grid-template-columns:1.4fr 1fr;
-      gap:16px;
-      margin-bottom:16px;
-    }
-
-    .section-head {
-      padding:20px 20px 12px;
-      border-bottom:1px solid var(--line);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-    }
-
-    .section-head h2 {
-      margin:0;
-      color:var(--brand-dark);
-      font-size:18px;
-    }
-
-    #map {
-      height:420px;
-      border-radius:18px;
-      margin:16px;
-    }
-
-    .timeline {
-      padding:16px;
-      display:grid;
-      grid-template-columns:repeat(7,1fr);
-      gap:10px;
-    }
-
-    .timeline-day {
-      background:#f8fbfc;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:10px;
-      min-height:140px;
-      font-size:12px;
-    }
-
-    .timeline-item {
-      margin-top:8px;
-      padding:8px;
-      border-left:4px solid var(--brand);
-      background:white;
-      border-radius:8px;
-    }
-
-    .timeline-item.risk {
-      border-left-color:var(--warning);
-      background:#fff4e0;
-    }
-
-    .timeline-item.overdue {
-      border-left-color:var(--danger);
-      background:#ffecec;
-      font-weight:700;
-    }
-
-    .calendar-grid {
-      padding:16px;
-      display:grid;
-      grid-template-columns:repeat(7,1fr);
-      gap:10px;
-    }
-
-    .calendar-day-name {
-      color:var(--muted);
-      font-size:12px;
-      font-weight:900;
-      text-align:center;
-      text-transform:uppercase;
-    }
-
-    .calendar-cell {
-      min-height:125px;
-      background:#f8fbfc;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:8px;
-      font-size:12px;
-    }
-
-    .calendar-cell.muted {
-      opacity:.35;
-    }
-
-    .calendar-date {
-      font-weight:900;
-      margin-bottom:6px;
-    }
-
-    .calendar-item {
-      background:white;
-      border-left:4px solid var(--brand);
-      border-radius:8px;
-      padding:6px;
-      margin-top:6px;
-      line-height:1.25;
-    }
-
-    .calendar-item.overdue {
-      border-left-color:var(--danger);
-      background:#ffecec;
-    }
-
-    .calendar-item.risk {
-      border-left-color:var(--warning);
-      background:#fff4e0;
-    }
-
-    table {
-      width:100%;
-      border-collapse:collapse;
-    }
-
-    th, td {
-      padding:12px;
-      border-bottom:1px solid var(--line);
-      vertical-align:top;
-      text-align:left;
-      font-size:13px;
-    }
-
-    th { background:#f6f9fb; }
-
-    tr.row-risk {
-      background:#fff4e0;
-      border-left:6px solid var(--warning);
-    }
-
-    tr.row-overdue {
-      background:#ffe4e4;
-      border-left:6px solid var(--danger);
-      font-weight:700;
-    }
-
-    .pill {
-      display:inline-flex;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:800;
-      margin:0 4px 4px 0;
-    }
-
-    .pending { background:#fff1da; color:#d88d10; }
-    .transit { background:#dff7f3; color:#069788; }
-    .delivered { background:#dff5eb; color:#18a66e; }
-    .delayed { background:#ffe4e4; color:#ef5c5c; }
-    .type-pill { background:#e4f0ff; color:#2d79ff; }
-    .risk-pill { background:#fff1da; color:#d88d10; }
-    .overdue-pill { background:#ffe4e4; color:#ef5c5c; }
-
-    .action-btn {
-      border:0;
-      border-radius:12px;
-      padding:9px 11px;
-      margin:2px;
-      background:#f4f7f8;
-    }
-
-    .unassigned-card {
-      border-bottom:1px solid var(--line);
-      padding:12px 16px;
-      font-size:13px;
-    }
-
-    .doc-link {
-      color:var(--brand-dark);
-      font-weight:800;
-      text-decoration:none;
-      display:block;
-      margin-bottom:4px;
-    }
-
-    .screen { display:none; }
-    .screen.active { display:block; }
-
-    .modal {
-      display:none;
-      position:fixed;
-      inset:0;
-      background:rgba(3,12,28,.6);
-      align-items:center;
-      justify-content:center;
-      z-index:1000;
-      padding:20px;
-    }
-
-    .modal.show { display:flex; }
-
-    .modal-box {
-      width:min(760px,100%);
-      background:white;
-      border-radius:22px;
-      padding:24px;
-      box-shadow:0 30px 80px rgba(2,17,39,.28);
-      max-height:90vh;
-      overflow:auto;
-    }
-
-    .modal-grid {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
-
-    .doc-upload-box {
-      border:2px dashed var(--line);
-      border-radius:18px;
-      padding:16px;
-      margin-bottom:14px;
-      background:#fbfdfd;
-      text-align:center;
-    }
-
-    .doc-list {
-      font-size:13px;
-      color:var(--muted);
-      margin-bottom:12px;
-    }
-
-    .modal-actions {
-      display:flex;
-      justify-content:flex-end;
-      gap:10px;
-      margin-top:10px;
-      flex-wrap:wrap;
-    }
-
-    @media(max-width:900px){
-      .app { grid-template-columns:1fr; }
-      .sidebar { display:none; }
-      .grid,.stats,.timeline,.calendar-grid,.modal-grid { grid-template-columns:1fr; }
-      .main { padding:16px; }
-    }
+      --nav:#04142e; --text:#11213d; --muted:#6f7d93; --brand:#06b7a5;
+      --brand-dark:#069788; --line:#e4ebed; --danger:#ef5c5c;
+      --success:#18a66e; --warning:#f0a227; --shadow:0 25px 60px rgba(6,20,46,.08);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(180deg,#f4f7f8,#eef4f5);color:var(--text)}
+    button{font-family:inherit;cursor:pointer}
+    input,select{width:100%;height:46px;border:1px solid var(--line);border-radius:12px;padding:0 12px;margin-bottom:10px;background:white}
+    .login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#04142e,#063b63);padding:20px}
+    .login-card{width:100%;max-width:430px;background:white;border-radius:24px;padding:32px;box-shadow:0 30px 80px rgba(0,0,0,.28)}
+    .login-card img{display:block;max-width:200px;margin:0 auto 20px}
+    .login-card h1{text-align:center;margin:0 0 8px;color:var(--nav)}
+    .login-card p{text-align:center;margin:0 0 24px;color:var(--muted)}
+    .app{display:none;min-height:100vh;grid-template-columns:250px 1fr}
+    .sidebar{background:linear-gradient(180deg,#04142e,#021127);color:white;padding:26px 16px;display:flex;flex-direction:column;min-height:100vh;box-shadow:4px 0 30px rgba(0,0,0,.25)}
+    .brand{text-align:center;padding:10px 8px 22px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:18px}
+    .brand img{max-width:180px;margin-bottom:12px}
+    .brand strong{color:#3f73e8;font-size:14px}
+    .nav a{display:flex;color:white;padding:14px;border-radius:16px;font-weight:700;margin-bottom:8px;text-decoration:none;cursor:pointer}
+    .nav a.active,.nav a:hover{background:rgba(6,183,165,.18);color:#8efff1}
+    .sidebar-footer{margin-top:auto;padding-top:18px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:12px;align-items:center;font-size:12px}
+    .avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand-dark));display:flex;align-items:center;justify-content:center;font-weight:900}
+    .main{padding:28px}
+    .topbar{display:flex;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+    .topbar-left,.topbar-right{display:flex;gap:10px;flex-wrap:wrap}
+    .primary-btn{height:46px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;padding:0 22px;font-weight:900;box-shadow:0 12px 30px rgba(6,183,165,.3)}
+    .secondary-btn{height:46px;border:1px solid var(--line);border-radius:14px;background:white;color:var(--text);padding:0 20px;font-weight:800}
+    .secondary-btn.active{background:#dff7f3;color:var(--brand-dark);border-color:var(--brand)}
+    .search-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+    .search-row input{max-width:360px;margin-bottom:0}
+    .quick-filters{display:flex;gap:8px;flex-wrap:wrap}
+    .card{background:white;border-radius:22px;box-shadow:var(--shadow);border:1px solid rgba(0,0,0,.03);overflow:hidden;margin-bottom:16px}
+    .grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px}
+    .section-head{padding:20px 20px 12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .section-head h2{margin:0;color:var(--brand-dark);font-size:18px}
+    #map{height:420px;border-radius:18px;margin:16px}
+    .calendar-grid{padding:16px;display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
+    .calendar-day-name{color:var(--muted);font-size:12px;font-weight:900;text-align:center;text-transform:uppercase}
+    .calendar-cell{min-height:125px;background:#f8fbfc;border:1px solid var(--line);border-radius:14px;padding:8px;font-size:12px}
+    .calendar-cell.muted{opacity:.35}
+    .calendar-date{font-weight:900;margin-bottom:6px}
+    .calendar-item{background:white;border-left:4px solid var(--brand);border-radius:8px;padding:6px;margin-top:6px;line-height:1.25}
+    .calendar-item.overdue{border-left-color:var(--danger);background:#ffecec}
+    .calendar-item.risk{border-left-color:var(--warning);background:#fff4e0}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left;font-size:13px}
+    th{background:#f6f9fb}
+    tr.row-risk{background:#fff4e0;border-left:6px solid var(--warning)}
+    tr.row-overdue{background:#ffe4e4;border-left:6px solid var(--danger);font-weight:700}
+    .pill{display:inline-flex;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;margin:0 4px 4px 0}
+    .pending{background:#fff1da;color:#d88d10}.transit{background:#dff7f3;color:#069788}.delivered{background:#dff5eb;color:#18a66e}.delayed{background:#ffe4e4;color:#ef5c5c}
+    .risk-pill{background:#fff1da;color:#d88d10}.overdue-pill{background:#ffe4e4;color:#ef5c5c}
+    .action-btn{border:0;border-radius:12px;padding:9px 11px;margin:2px;background:#f4f7f8}
+    .doc-link{color:var(--brand-dark);font-weight:800;text-decoration:none;display:block;margin-bottom:4px}
+    .screen{display:none}.screen.active{display:block}
+    .modal{display:none;position:fixed;inset:0;background:rgba(3,12,28,.6);align-items:center;justify-content:center;z-index:1000;padding:20px}
+    .modal.show{display:flex}
+    .modal-box{width:min(760px,100%);background:white;border-radius:22px;padding:24px;box-shadow:0 30px 80px rgba(2,17,39,.28);max-height:90vh;overflow:auto}
+    .doc-upload-box{border:2px dashed var(--line);border-radius:18px;padding:16px;margin-bottom:14px;background:#fbfdfd;text-align:center}
+    .doc-list{font-size:13px;color:var(--muted);margin-bottom:12px}
+    .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:10px;flex-wrap:wrap}
+    @media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.grid,.calendar-grid{grid-template-columns:1fr}.main{padding:16px}}
   </style>
 </head>
-<body>
 
+<body>
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
     <img src="logo.png" alt="Logo">
     <h1>GateKeeper</h1>
     <p>Select your name</p>
-   <select id="loginUserSelect"></select>
-<input id="loginEmail" style="display:none;">
+    <select id="loginUserSelect"></select>
+    <input id="loginEmail" style="display:none;">
     <input id="loginPassword" type="password" placeholder="Password">
     <button class="primary-btn" id="loginBtn">Login</button>
   </div>
 </div>
 
 <div class="app" id="app">
-
   <aside class="sidebar">
-    <div class="brand">
-      <img src="logo.png" alt="Logo">
-      <strong>Operations</strong>
-    </div>
-
+    <div class="brand"><img src="logo.png" alt="Logo"><strong>Operations</strong></div>
     <nav class="nav">
       <a class="active" onclick="showScreen('dashboard')">Dashboard</a>
       <a onclick="showScreen('shipments')">Shipments</a>
       <a onclick="showScreen('calendar')">Calendar</a>
     </nav>
-
     <div class="sidebar-footer">
       <div class="avatar" id="avatar">GK</div>
       <div id="userEmail"></div>
@@ -592,7 +105,6 @@
   </aside>
 
   <main class="main">
-
     <div class="topbar">
       <div class="topbar-left">
         <button class="primary-btn" id="openBtn">+ Add Shipment</button>
@@ -600,10 +112,8 @@
       </div>
     </div>
 
-    <!-- SEARCH + FILTERS -->
     <div class="search-row">
       <input id="searchInput" placeholder="Search client, AWB, route...">
-
       <div class="quick-filters">
         <button class="secondary-btn" onclick="setQuick('all')">All</button>
         <button class="secondary-btn" onclick="setQuick('mine')">My</button>
@@ -612,62 +122,39 @@
       </div>
     </div>
 
-    <!-- DASHBOARD -->
     <section id="screenDashboard" class="screen active">
-
-      <section class="card">
-        <div class="section-head"><h2>Live Map</h2></div>
-        <div id="map"></div>
-      </section>
-
+      <section class="card"><div class="section-head"><h2>Live Map</h2></div><div id="map"></div></section>
       <section class="card">
         <div class="section-head"><h2>My + Unassigned</h2></div>
-        <table>
-          <tbody id="dashboardRows"></tbody>
-        </table>
+        <table><tbody id="dashboardRows"></tbody></table>
       </section>
-
     </section>
 
-    <!-- SHIPMENTS -->
     <section id="screenShipments" class="screen">
       <div class="section-head"><h2>All Shipments</h2></div>
       <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Customer</th>
-            <th>Type</th>
-            <th>Route</th>
-            <th>Status</th>
-            <th>ETA</th>
-            <th>Docs</th>
-            <th>Assigned</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
+        <thead><tr><th>ID</th><th>Customer</th><th>Type</th><th>Route</th><th>Status</th><th>ETA</th><th>Docs</th><th>Assigned</th><th>Actions</th></tr></thead>
         <tbody id="shipmentRows"></tbody>
       </table>
     </section>
 
-    <!-- CALENDAR -->
     <section id="screenCalendar" class="screen">
       <div class="section-head"><h2>Monthly Calendar</h2></div>
       <div id="calendarGrid" class="calendar-grid"></div>
     </section>
-
   </main>
 </div>
 
 <div class="modal" id="modal">
   <div class="modal-box">
-    <h2>Add Shipment</h2>
-<div class="doc-upload-box">
-  <strong>Shipment Documents</strong><br>
-  <small>Upload PDF/text files. Parser will auto-fill fields.</small><br><br>
-  <input id="docUpload" type="file" multiple>
-  <div id="docList" class="doc-list">No documents selected.</div>
-</div>
+    <h2 id="modalTitle">Add Shipment</h2>
+    <div class="doc-upload-box">
+      <strong>Shipment Documents</strong><br>
+      <small>Upload PDF/text files. Parser will auto-fill fields.</small><br><br>
+      <input id="docUpload" type="file" multiple>
+      <div id="docList" class="doc-list">No documents selected.</div>
+    </div>
+
     <input id="client" placeholder="Customer">
     <input id="origin" placeholder="Origin">
     <input id="destination" placeholder="Destination">
@@ -678,7 +165,6 @@
     <input id="shipper" placeholder="Shipper">
     <input id="consignee" placeholder="Consignee">
     <input id="eta" type="date">
-
     <select id="assigned"></select>
     <select id="shipmentType"></select>
 
@@ -688,7 +174,7 @@
     </div>
   </div>
 </div>
-<script>
+
 <script>
 const sb = window.supabase.createClient(
   "https://edxgkwkdgvsajfmkejbk.supabase.co",
@@ -714,25 +200,32 @@ const users = [
   { name:"Natacha Martins", email:"natacha.martins@mauriceward.com" }
 ];
 
-const shipmentTypes = [
-  "Air Import","Air Export","Ocean Import","Ocean Export",
-  "Road Import","Road Export","Road Domestic","Customs Clearance"
-];
+const shipmentTypes = ["Air Import","Air Export","Ocean Import","Ocean Export","Road Import","Road Export","Road Domestic","Customs Clearance"];
 
-let user = null;
-let shipments = [];
-let editingId = null;
-let searchTerm = "";
-let quickFilter = "all";
-let map = null;
-let mapLayer = null;
+let user = null, shipments = [], editingId = null, searchTerm = "", quickFilter = "all";
+let map = null, mapLayer = null, selectedDocs = [], existingDocs = [];
 
 const getVal = id => document.getElementById(id)?.value?.trim() || "";
 const localDateOnly = d => d ? String(d).slice(0,10) : "";
 
 if (window.pdfjsLib) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+}
+
+function initDropdowns(){
+  const loginSelect = document.getElementById("loginUserSelect");
+  const loginEmail = document.getElementById("loginEmail");
+  loginSelect.innerHTML = `<option value="">Select your name</option>`;
+  users.forEach(u => {
+    const opt = document.createElement("option");
+    opt.value = u.email;
+    opt.textContent = u.name;
+    loginSelect.appendChild(opt);
+  });
+  loginSelect.onchange = e => loginEmail.value = e.target.value;
+
+  assigned.innerHTML = `<option value="">Unassigned</option>` + users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
+  shipmentType.innerHTML = shipmentTypes.map(t => `<option>${t}</option>`).join("");
 }
 
 function getRiskLevel(x){
@@ -745,38 +238,11 @@ function getRiskLevel(x){
   return "none";
 }
 
-console.log("Users loaded:", users.length);
-function initDropdowns(){
-  const loginSelect = document.getElementById("loginUserSelect");
-  const loginEmail = document.getElementById("loginEmail");
-
-  if(!loginSelect) return;
-
-  // 🔥 FORCE RESET (this fixes empty dropdown issue)
-  loginSelect.innerHTML = "";
-
-  // Default option
-  const defaultOpt = document.createElement("option");
-  defaultOpt.value = "";
-  defaultOpt.textContent = "Select your name";
-  loginSelect.appendChild(defaultOpt);
-
-  // Add users safely
-  users.forEach(u => {
-    const opt = document.createElement("option");
-    opt.value = u.email;
-    opt.textContent = u.name;
-    loginSelect.appendChild(opt);
+async function login(){
+  const { data, error } = await sb.auth.signInWithPassword({
+    email:getVal("loginEmail"),
+    password:getVal("loginPassword")
   });
-
-  // Sync email field
-  loginSelect.onchange = e => {
-    if(loginEmail){
-      loginEmail.value = e.target.value;
-    }
-  };
-}
-
   if(error){ alert(error.message); return; }
 
   user = data.user;
@@ -784,19 +250,13 @@ function initDropdowns(){
   app.style.display = "grid";
   userEmail.textContent = user.email;
   avatar.textContent = user.email.slice(0,2).toUpperCase();
-
   initMap();
   await loadShipments();
 }
 
 async function loadShipments(){
-  const { data, error } = await sb
-    .from("shipments")
-    .select("*")
-    .order("created_at", { ascending:false });
-
+  const { data, error } = await sb.from("shipments").select("*").order("created_at", { ascending:false });
   if(error){ alert("Load error: " + error.message); return; }
-
   shipments = data || [];
   render();
 }
@@ -804,22 +264,16 @@ async function loadShipments(){
 function showScreen(name){
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.getElementById("screen" + name[0].toUpperCase() + name.slice(1)).classList.add("active");
-
   document.querySelectorAll(".nav a").forEach(a => a.classList.remove("active"));
   [...document.querySelectorAll(".nav a")].find(a => a.textContent.toLowerCase() === name)?.classList.add("active");
-
   setTimeout(() => { if(map) map.invalidateSize(); }, 200);
   render();
 }
 
-function setQuick(type){
-  quickFilter = type;
-  render();
-}
+function setQuick(type){ quickFilter = type; render(); }
 
 function filteredAll(){
   let data = [...shipments];
-
   if(searchTerm){
     data = data.filter(x =>
       (x.client || "").toLowerCase().includes(searchTerm) ||
@@ -827,11 +281,9 @@ function filteredAll(){
       ((x.origin || "") + " " + (x.destination || "")).toLowerCase().includes(searchTerm)
     );
   }
-
   if(quickFilter === "mine") data = data.filter(x => x.assigned_to === user?.email);
   if(quickFilter === "unassigned") data = data.filter(x => !x.assigned_to);
   if(quickFilter === "risk") data = data.filter(x => getRiskLevel(x) !== "none");
-
   return data;
 }
 
@@ -842,7 +294,6 @@ function dashboardData(){
 function rowHtml(x){
   const risk = getRiskLevel(x);
   const docs = Array.isArray(x.document_urls) ? x.document_urls : [];
-
   return `
     <tr class="${risk === "overdue" ? "row-overdue" : risk === "risk" ? "row-risk" : ""}">
       <td>${x.shipment_ref || ""}</td>
@@ -874,37 +325,20 @@ function render(){
 }
 
 function renderCalendar(){
-  const box = calendarGrid;
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
+  const now = new Date(), year = now.getFullYear(), month = now.getMonth();
   const first = new Date(year, month, 1);
-  const start = new Date(first);
-  start.setDate(first.getDate() - first.getDay());
-
-  let html = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
-    .map(d => `<div class="calendar-day-name">${d}</div>`).join("");
-
+  const start = new Date(first); start.setDate(first.getDate() - first.getDay());
+  let html = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d => `<div class="calendar-day-name">${d}</div>`).join("");
   for(let i=0;i<42;i++){
-    const d = new Date(start);
-    d.setDate(start.getDate()+i);
+    const d = new Date(start); d.setDate(start.getDate()+i);
     const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
     const events = filteredAll().filter(x => localDateOnly(x.eta) === key);
-
-    html += `
-      <div class="calendar-cell ${d.getMonth() !== month ? "muted" : ""}">
-        <div class="calendar-date">${d.getDate()}</div>
-        ${events.map(x => {
-          const risk = getRiskLevel(x);
-          return `<div class="calendar-item ${risk}">
-            <strong>${x.client || ""}</strong><br>
-            <small>${x.shipment_ref || ""}</small>
-          </div>`;
-        }).join("")}
-      </div>`;
+    html += `<div class="calendar-cell ${d.getMonth() !== month ? "muted" : ""}">
+      <div class="calendar-date">${d.getDate()}</div>
+      ${events.map(x => `<div class="calendar-item ${getRiskLevel(x)}"><strong>${x.client || ""}</strong><br><small>${x.shipment_ref || ""}</small></div>`).join("")}
+    </div>`;
   }
-
-  box.innerHTML = html;
+  calendarGrid.innerHTML = html;
 }
 
 function initMap(){
@@ -927,18 +361,14 @@ async function geocode(place){
 async function renderMap(data){
   if(!mapLayer) return;
   mapLayer.clearLayers();
-
   const bounds = [];
   for(const x of data.slice(0,8)){
-    const o = await geocode(x.origin);
-    const d = await geocode(x.destination);
+    const o = await geocode(x.origin), d = await geocode(x.destination);
     bounds.push(o,d);
-
     L.marker(o).addTo(mapLayer).bindPopup(`${x.client || ""}<br>${x.origin || ""}`);
     L.marker(d).addTo(mapLayer).bindPopup(`${x.client || ""}<br>${x.destination || ""}`);
     L.polyline([o,d], { color:getRiskLevel(x)==="overdue" ? "red" : "#06b7a5", weight:4 }).addTo(mapLayer);
   }
-
   if(bounds.length) map.fitBounds(bounds, { padding:[30,30], maxZoom:6 });
 }
 
@@ -956,10 +386,9 @@ async function deleteShipment(id){
 function editShipment(id){
   const x = shipments.find(s => s.id === id);
   if(!x) return;
-
   editingId = id;
+  existingDocs = Array.isArray(x.document_urls) ? x.document_urls : [];
   modal.classList.add("show");
-
   client.value = x.client || "";
   origin.value = x.origin || "";
   destination.value = x.destination || "";
@@ -974,7 +403,21 @@ function editShipment(id){
   shipmentType.value = x.shipment_type || "Air Import";
 }
 
+async function uploadDocs(){
+  const urls = [];
+  for(const file of selectedDocs){
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+    const path = Date.now() + "_" + safeName;
+    const { error } = await sb.storage.from("shipment-documents").upload(path,file);
+    if(error){ alert("Upload failed: " + error.message); return urls; }
+    const { data } = sb.storage.from("shipment-documents").getPublicUrl(path);
+    urls.push(data.publicUrl);
+  }
+  return urls;
+}
+
 async function saveShipment(){
+  const newDocs = await uploadDocs();
   const payload = {
     client:getVal("client"),
     origin:getVal("origin"),
@@ -988,14 +431,13 @@ async function saveShipment(){
     eta:getVal("eta") || null,
     assigned_to:getVal("assigned") || null,
     shipment_type:getVal("shipmentType") || "Air Import",
-    status:"Pending"
+    status:"Pending",
+    document_urls:[...existingDocs, ...newDocs]
   };
-
   if(!payload.client || !payload.origin || !payload.destination){
     alert("Fill Customer, Origin and Destination.");
     return;
   }
-
   let error;
   if(editingId){
     const res = await sb.from("shipments").update(payload).eq("id",editingId);
@@ -1004,10 +446,8 @@ async function saveShipment(){
     const res = await sb.from("shipments").insert([{...payload, shipment_ref:"SHP"+Date.now()}]);
     error = res.error;
   }
-
   if(error){ alert("Save error: " + error.message); return; }
-
-  editingId = null;
+  editingId = null; selectedDocs = []; existingDocs = [];
   modal.classList.remove("show");
   await loadShipments();
 }
@@ -1017,16 +457,13 @@ async function readDocText(file) {
     const buffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
     let text = "";
-
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
       text += content.items.map(item => item.str).join(" ") + "\n";
     }
-
     return text;
   }
-
   return await file.text();
 }
 
@@ -1041,98 +478,60 @@ function findField(text, patterns) {
 function normaliseParsedDate(value) {
   if (!value) return "";
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
-
   const parts = value.split(/[\/.-]/);
   if (parts.length !== 3) return "";
-
   let [d, m, y] = parts;
   if (y.length === 2) y = "20" + y;
-
   return `${y.padStart(4, "0")}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
 }
 
 function guessShipmentType(text) {
   const t = text.toLowerCase();
-
-  if (t.includes("customs") || t.includes("commercial invoice") || t.includes("tariff")) return "Customs Clearance";
+  if (t.includes("customs") || t.includes("commercial invoice")) return "Customs Clearance";
   if (t.includes("awb") || t.includes("air waybill") || /\b\d{3}[-\s]?\d{8}\b/.test(text)) return "Air Import";
   if (t.includes("bill of lading") || t.includes("container") || t.includes("vessel")) return "Ocean Import";
   if (t.includes("cmr") || t.includes("road") || t.includes("truck")) return "Road Import";
-
   return "";
 }
 
 function parseShipmentText(text) {
   const clean = text.replace(/\r/g, "\n");
   const flat = clean.replace(/\s+/g, " ");
-
-  const awb = findField(flat, [
+  const awbRaw = findField(flat, [
     /\b(\d{3}[-\s]?\d{8})\b/i,
     /(?:AWB|Air Waybill|Waybill|HAWB|MAWB|Tracking|Consignment)(?: No| Number| Ref)?[:\s#-]+([A-Z0-9-]{6,})/i
-  ]).replace(/\s/g, "-");
-
-  const carrier = findField(flat, [
-    /(?:Carrier|Courier|Airline|Forwarder|Transporter|Service)[:\s-]+([A-Z0-9 .&-]{3,40})/i,
-    /\b(DHL|UPS|FEDEX|TNT|MAERSK|MSC|CMA CGM|QATAR AIRWAYS|EMIRATES|LUFTHANSA|KLM|AER LINGUS)\b/i
   ]);
-
+  const awbVal = awbRaw ? awbRaw.replace(/\s/g, "-") : "";
   const etaRaw = findField(flat, [
     /(?:ETA|Arrival|Arrives|Delivery Date|Expected Delivery|Date of Arrival)[^\d]{0,20}(\d{4}-\d{2}-\d{2})/i,
     /(?:ETA|Arrival|Arrives|Delivery Date|Expected Delivery|Date of Arrival)[^\d]{0,20}(\d{1,2}[\/.-]\d{1,2}[\/.-]\d{2,4})/i
   ]);
+  const carrierVal = findField(flat, [/(DHL|UPS|FEDEX|TNT|MAERSK|MSC|CMA CGM|QATAR AIRWAYS|EMIRATES|LUFTHANSA|KLM|AER LINGUS)/i]);
+  const piecesVal = findField(flat, [/(?:Pieces|PCS|Pkgs?|Packages|Quantity)[^\d]{0,10}(\d+)/i]);
+  const weightVal = findField(flat, [/(?:Gross Weight|Chargeable Weight|Weight|Total Weight)[^\d]{0,10}([0-9.,]+\s?(?:KG|KGS|LB|LBS|KILOS)?)/i]);
+  const shipperVal = findField(clean, [/(?:Shipper|Sender|Exporter|Collection From|From)[:\s-]+([^\n]{3,80})/i]);
+  const consigneeVal = findField(clean, [/(?:Consignee|Receiver|Importer|Deliver To|Delivery To|Ship To)[:\s-]+([^\n]{3,80})/i]);
+  const originVal = findField(clean, [/(?:Origin|From|POL|Port of Loading|Collection Address)[:\s-]+([^\n]{3,80})/i]);
+  const destVal = findField(clean, [/(?:Destination|To|POD|Port of Discharge|Delivery Address)[:\s-]+([^\n]{3,80})/i]);
 
-  const pieces = findField(flat, [
-    /(?:Pieces|PCS|Pkgs?|Packages|No\.?\s*of\s*Pieces|Quantity)[^\d]{0,10}(\d+)/i
-  ]);
-
-  const weight = findField(flat, [
-    /(?:Gross Weight|Chargeable Weight|Weight|Total Weight)[^\d]{0,10}([0-9.,]+\s?(?:KG|KGS|LB|LBS|KILOS)?)/i
-  ]);
-
-  const shipper = findField(clean, [
-    /(?:Shipper|Sender|Exporter|Collection From|From)[:\s-]+([^\n]{3,80})/i
-  ]);
-
-  const consignee = findField(clean, [
-    /(?:Consignee|Receiver|Importer|Deliver To|Delivery To|Ship To)[:\s-]+([^\n]{3,80})/i
-  ]);
-
-  const originFound = findField(clean, [
-    /(?:Origin|From|POL|Port of Loading|Collection Address)[:\s-]+([^\n]{3,80})/i
-  ]);
-
-  const destinationFound = findField(clean, [
-    /(?:Destination|To|POD|Port of Discharge|Delivery Address)[:\s-]+([^\n]{3,80})/i
-  ]);
-
-  awb && (document.getElementById("awb").value = awb);
-  carrier && (document.getElementById("carrier").value = carrier);
-  normaliseParsedDate(etaRaw) && (document.getElementById("eta").value = normaliseParsedDate(etaRaw));
-  pieces && (document.getElementById("pieces").value = pieces);
-  weight && (document.getElementById("weight").value = weight);
-  shipper && (document.getElementById("shipper").value = shipper);
-  consignee && (document.getElementById("consignee").value = consignee);
-  (consignee || shipper) && (document.getElementById("client").value = consignee || shipper);
-  originFound && (document.getElementById("origin").value = originFound);
-  destinationFound && (document.getElementById("destination").value = destinationFound);
-
+  if(awbVal) awb.value = awbVal;
+  if(carrierVal) carrier.value = carrierVal;
+  if(normaliseParsedDate(etaRaw)) eta.value = normaliseParsedDate(etaRaw);
+  if(piecesVal) pieces.value = piecesVal;
+  if(weightVal) weight.value = weightVal;
+  if(shipperVal) shipper.value = shipperVal;
+  if(consigneeVal) consignee.value = consigneeVal;
+  if(consigneeVal || shipperVal) client.value = consigneeVal || shipperVal;
+  if(originVal) origin.value = originVal;
+  if(destVal) destination.value = destVal;
   const guessedType = guessShipmentType(flat);
-  if (guessedType) document.getElementById("shipmentType").value = guessedType;
-
-  console.log("Parsed:", { awb, carrier, etaRaw, pieces, weight, shipper, consignee, originFound, destinationFound });
+  if(guessedType) shipmentType.value = guessedType;
 }
 
 async function handleDocUpload(e) {
-  const files = Array.from(e.target.files || []);
-  const list = document.getElementById("docList");
-
-  if (list) {
-    list.innerHTML = files.length
-      ? files.map(f => "📄 " + f.name).join("<br>")
-      : "No documents selected.";
-  }
-
-  for (const file of files) {
+  selectedDocs = Array.from(e.target.files || []);
+  docList.innerHTML = selectedDocs.length ? selectedDocs.map(f => "📄 " + f.name).join("<br>") : "No documents selected.";
+  for (const file of selectedDocs) {
     try {
       const text = await readDocText(file);
       parseShipmentText(text);
@@ -1145,20 +544,16 @@ async function handleDocUpload(e) {
 loginBtn.onclick = login;
 saveBtn.onclick = saveShipment;
 cancelBtn.onclick = () => modal.classList.remove("show");
-openBtn.onclick = () => { editingId = null; modal.classList.add("show"); };
+openBtn.onclick = () => {
+  editingId = null; selectedDocs = []; existingDocs = [];
+  modalTitle.textContent = "Add Shipment";
+  modal.classList.add("show");
+};
 logoutBtn.onclick = async () => { await sb.auth.signOut(); location.reload(); };
+searchInput.oninput = e => { searchTerm = e.target.value.toLowerCase(); render(); };
+docUpload.onchange = handleDocUpload;
 
-searchInput.oninput = e => {
-  searchTerm = e.target.value.toLowerCase();
-  render();
-};
-
-const docInput = document.getElementById("docUpload");
-if (docInput) docInput.onchange = handleDocUpload;
-
-window.onload = () => {
-  initDropdowns();
-};
+window.onload = initDropdowns;
 </script>
 </body>
 </html>
