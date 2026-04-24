@@ -1,3 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GateKeeper Pro</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <style>
+    :root {
+      --bg:#f4f7f8;
+      --nav:#04142e;
+      --text:#11213d;
+      --muted:#6f7d93;
+      --brand:#06b7a5;
+      --brand-dark:#069788;
+      --line:#e4ebed;
+      --danger:#ef5c5c;
+      --success:#18a66e;
+      --warning:#f0a227;
+      --blue:#2d79ff;
+      --shadow:0 25px 60px rgba(6,20,46,0.08);
+    }
+
+    * { box-sizing:border-box; }
+
+    body {
+      margin:0;
+      font-family:Arial, sans-serif;
+      background:linear-gradient(180deg,#f4f7f8 0%,#eef4f5 100%);
+      color:var(--text);
+    }
+
+    button { font-family:inherit; }
+
+    .login-screen {
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(135deg,#04142e,#063b63);
+      padding:20px;
+    }
+
+    .login-card {
+      width:100%;
+      max-width:430px;
+      background:white;
+      border-radius:24px;
+      padding:32px;
+      box-shadow:0 30px 80px rgba(0,0,0,.28);
+    }
+
+    .login-card img {
+      display:block;
+      max-width:200px;
+      margin:0 auto 20px;
+      filter:drop-shadow(0 10px 30px rgba(6,183,165,.35));
+    }
+
+    .login-card h1 {
+      text-align:center;
+      margin:0 0 8px;
+      color:var(--nav);
+    }
+
+    .login-card p {
+      text-align:center;
+      margin:0 0 24px;
+      color:var(--muted);
+    }
+
+    .login-card input,
+    .login-card select {
+      width:100%;
+      height:48px;
+      margin-bottom:12px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:0 14px;
+      font-size:15px;
+      background:white;
+    }
+
+    .login-error {
+      color:var(--danger);
+      font-size:13px;
+      margin-top:12px;
+      text-align:center;
+    }
+
+    .app {
+      display:none;
+      min-height:100vh;
+      grid-template-columns:250px 1fr;
+    }
+
+    .sidebar {
+      background:linear-gradient(180deg,#04142e,#021127);
+      color:white;
+      padding:26px 16px;
+      display:flex;
+      flex-direction:column;
+      min-height:100vh;
+      box-shadow:4px 0 30px rgba(0,0,0,.25);
+    }
+
+    .brand {
+      text-align:center;
+      padding:10px 8px 22px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      margin-bottom:18px;
+    }
+
+    .brand img {
+      max-width:180px;
+      margin-bottom:12px;
+      filter:drop-shadow(0 10px 30px rgba(6,183,165,.35));
+    }
+
+    .brand strong {
+      display:block;
+      color:#3f73e8;
+      font-size:14px;
+    }
+
+    .nav a {
+      display:flex;
+      color:white;
+      padding:14px;
+      border-radius:16px;
+      font-weight:700;
+      margin-bottom:8px;
+      text-decoration:none;
+      cursor:pointer;
+    }
+
+    .nav a.active,
+    .nav a:hover {
+      background:rgba(6,183,165,.18);
+      color:#8efff1;
+    }
+
+    .side-label {
+      color:rgba(255,255,255,.45);
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.8px;
+      text-transform:uppercase;
+      margin:18px 12px 10px;
+    }
+        .type-nav button {
+      width:100%;
+      text-align:left;
+      background:transparent;
+      color:white;
+      border:0;
+      padding:11px 14px;
+      border-radius:14px;
+      font-weight:800;
+      cursor:pointer;
+      margin-bottom:5px;
+    }
+
+    .type-nav button:hover,
+    .type-nav button.active {
+      background:rgba(6,183,165,.18);
+      color:#8efff1;
+    }
+
+    .sidebar-footer {
+      margin-top:auto;
+      padding-top:18px;
+      border-top:1px solid rgba(255,255,255,.08);
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+
+    .avatar {
+      width:42px;
+      height:42px;
+      border-radius:50%;
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      color:white;
+    }
+
+    .main { padding:28px; }
+
+    .topbar {
+      display:flex;
+      justify-content:space-between;
+      margin-bottom:20px;
+    }
+
+    .primary-btn {
+      height:46px;
+      border:0;
+      border-radius:14px;
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      color:white;
+      padding:0 22px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .secondary-btn {
+      height:46px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:white;
+      padding:0 20px;
+      cursor:pointer;
+    }
+
+    table {
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    th, td {
+      padding:12px;
+      border-bottom:1px solid var(--line);
+    }
+
+    .modal {
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.5);
+      align-items:center;
+      justify-content:center;
+    }
+
+    .modal.show { display:flex; }
+
+    .modal-box {
+      background:white;
+      padding:20px;
+      border-radius:16px;
+      width:400px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <img src="logo.png">
+    <h1>GateKeeper</h1>
+    <select id="loginUserSelect"></select>
+    <input id="loginEmail" placeholder="Email">
+    <input id="loginPassword" type="password" placeholder="Password">
+    <button class="primary-btn" id="loginBtn">Login</button>
+    <div id="loginError"></div>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="logo.png">
+    </div>
+    <div id="sideTypeFilters"></div>
+    <div class="sidebar-footer">
+      <div id="avatar"></div>
+      <div id="userEmail"></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <button class="primary-btn" id="openBtn">+ Add Shipment</button>
+      <button class="secondary-btn" id="logoutBtn">Logout</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Customer</th>
+          <th>Route</th>
+          <th>ETA</th>
+          <th>Docs</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </main>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h2>Add Shipment</h2>
+
+    <input id="client" placeholder="Customer">
+    <input id="origin" placeholder="Origin">
+    <input id="destination" placeholder="Destination">
+    <input id="eta" type="date">
+
+    <div>
+      <input id="docUpload" type="file" multiple>
+      <div id="docList">No documents</div>
+    </div>
+
+    <button id="saveBtn">Save</button>
+  </div>
+</div>
 <script>
 const sb = window.supabase.createClient(
   "https://edxgkwkdgvsajfmkejbk.supabase.co",
@@ -12,8 +330,8 @@ if (window.pdfjsLib) {
 }
 
 const users = [
-  { name:"Gerard Hall", email:"gerard.hall@mauriceward.com", admin:true },
-  { name:"Balazs Bekes", email:"balazs.bekes@mauriceward.com", admin:true },
+  { name:"Gerard Hall", email:"gerard.hall@mauriceward.com" },
+  { name:"Balazs Bekes", email:"balazs.bekes@mauriceward.com" },
   { name:"Ashley Nason", email:"ashley.nason@mauriceward.com" },
   { name:"Lisa O'Neill", email:"lisa.oneill@mauriceward.com" },
   { name:"Damian Halpin", email:"damian.halpin@mauriceward.com" },
@@ -30,47 +348,12 @@ const users = [
   { name:"Natacha Martins", email:"natacha.martins@mauriceward.com" }
 ];
 
-const shipmentTypes = [
-  "All",
-  "Air Import","Air Export",
-  "Ocean Import","Ocean Export",
-  "Road Import","Road Export","Road Domestic",
-  "Customs Clearance"
-];
-
 let user = null;
-let shipments = [];
-let map;
-let mapLayer;
-let showMine = false;
-let alertFilter = "all";
-let typeFilter = "All";
-let editingId = null;
 let selectedDocs = [];
-let existingDocs = [];
-const geoCache = {};
-
-const loginScreen = document.getElementById("loginScreen");
-const app = document.getElementById("app");
-const modal = document.getElementById("modal");
-const rows = document.getElementById("rows");
-const statusMsg = document.getElementById("statusMsg");
-const myBtn = document.getElementById("myBtn");
+let uploadedUrls = [];
 
 function getVal(id) {
   return document.getElementById(id).value.trim();
-}
-
-function initials(email) {
-  return String(email || "GK").slice(0, 2).toUpperCase();
-}
-
-function currentUserRecord() {
-  return users.find(u => String(u.email).toLowerCase() === String(user?.email || "").toLowerCase());
-}
-
-function isAdminUser() {
-  return !!currentUserRecord()?.admin;
 }
 
 function renderLoginUsers() {
@@ -81,50 +364,6 @@ function renderLoginUsers() {
   select.onchange = () => {
     document.getElementById("loginEmail").value = select.value;
   };
-}
-
-function renderUserDropdown() {
-  const el = document.getElementById("assigned");
-  el.innerHTML = `<option value="">Unassigned</option>` +
-    users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
-}
-
-function renderTypeFilters() {
-  const top = document.getElementById("topTypeFilters");
-  const side = document.getElementById("sideTypeFilters");
-
-  top.innerHTML = shipmentTypes.map(t => `
-    <button class="type-chip ${typeFilter === t ? "active" : ""}" onclick="setTypeFilter('${t}')">${t}</button>
-  `).join("");
-
-  side.innerHTML = shipmentTypes.map(t => `
-    <button class="${typeFilter === t ? "active" : ""}" onclick="setTypeFilter('${t}')">${t}</button>
-  `).join("");
-
-  document.getElementById("shipmentType").innerHTML =
-    shipmentTypes.filter(t => t !== "All").map(t => `<option value="${t}">${t}</option>`).join("");
-}
-
-function setTypeFilter(type) {
-  typeFilter = type;
-  renderTypeFilters();
-  renderRows();
-}
-
-function updateDocList() {
-  const docList = document.getElementById("docList");
-
-  const existingHtml = existingDocs.length
-    ? existingDocs.map((u, i) => `<a class="doc-link" href="${u}" target="_blank">Existing document ${i + 1}</a>`).join("")
-    : "";
-
-  const selectedHtml = selectedDocs.length
-    ? selectedDocs.map(f => `📄 ${f.name}`).join("<br>")
-    : "";
-
-  docList.innerHTML = existingHtml || selectedHtml
-    ? `${existingHtml}${selectedHtml ? "<div>" + selectedHtml + "</div>" : ""}`
-    : "No documents selected.";
 }
 
 function extractFirst(text, patterns) {
@@ -180,21 +419,9 @@ function parseShipmentText(text) {
     /(?:AWB|Waybill|Waybill No|Waybill Number|Tracking No|Tracking Number)[:\s#-]+([A-Z0-9\-]+)/i
   ]);
 
-  const carrier = extractFirst(clean, [
-    /(?:Carrier|Courier|Airline|Forwarder)[:\s]+([^\n]+)/i
-  ]);
-
   const etaRaw = extractFirst(clean, [
     /(?:ETA|Arrival Date|Date of Arrival)[:\s]+([0-9]{4}-[0-9]{2}-[0-9]{2})/i,
     /(?:ETA|Arrival Date|Date of Arrival)[:\s]+([0-9]{1,2}[\/.-][0-9]{1,2}[\/.-][0-9]{2,4})/i
-  ]);
-
-  const pieces = extractFirst(clean, [
-    /(?:Pieces|PCS|Packages|No\. of Pieces|Number of Pieces)[:\s]+([0-9]+)/i
-  ]);
-
-  const weight = extractFirst(clean, [
-    /(?:Weight|Gross Weight|Chargeable Weight)[:\s]+([0-9.,]+\s?(?:KG|KGS|LB|LBS)?)/i
   ]);
 
   const shipper = extractFirst(clean, [
@@ -218,78 +445,50 @@ function parseShipmentText(text) {
   fillIfEmpty("destination", destination);
   fillIfEmpty("eta", normaliseDate(etaRaw));
 
-  console.log("Parsed document:", {
-    awb,
-    carrier,
-    eta: normaliseDate(etaRaw),
-    pieces,
-    weight,
-    shipper,
-    consignee
-  });
+  console.log("Parsed document:", { awb, eta: normaliseDate(etaRaw), shipper, consignee });
 }
 
 function initDocUpload() {
   const input = document.getElementById("docUpload");
-  if (!input) return;
+  const list = document.getElementById("docList");
 
-  input.addEventListener("change", e => {
+  input.addEventListener("change", async e => {
     selectedDocs = Array.from(e.target.files || []);
-    updateDocList();
 
-    selectedDocs.forEach(async file => {
+    list.innerHTML = selectedDocs.length
+      ? selectedDocs.map(f => "📄 " + f.name).join("<br>")
+      : "No documents";
+
+    for (const file of selectedDocs) {
       try {
         const text = await readDocText(file);
         parseShipmentText(text);
       } catch (err) {
-        console.warn("Could not parse file:", file.name, err);
+        console.warn("Could not parse:", file.name, err);
       }
-    });
+    }
   });
 }
 
 async function uploadSelectedDocs() {
-  const urls = [...existingDocs];
+  const urls = [];
 
   for (const file of selectedDocs) {
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     const path = `${Date.now()}_${safeName}`;
 
-    const { error } = await sb.storage
-      .from(BUCKET)
-      .upload(path, file);
+    const { error } = await sb.storage.from(BUCKET).upload(path, file);
 
     if (error) {
       alert("Document upload failed: " + error.message);
       return urls;
     }
 
-    const { data } = sb.storage
-      .from(BUCKET)
-      .getPublicUrl(path);
-
+    const { data } = sb.storage.from(BUCKET).getPublicUrl(path);
     urls.push(data.publicUrl);
   }
 
   return urls;
-}
-
-function clearForm() {
-  editingId = null;
-  selectedDocs = [];
-  existingDocs = [];
-
-  document.getElementById("modalTitle").textContent = "Add Shipment";
-
-  ["client", "origin", "destination", "pickupDate", "etdDate", "eta"].forEach(id => {
-    document.getElementById(id).value = "";
-  });
-
-  document.getElementById("docUpload").value = "";
-  document.getElementById("assigned").value = "";
-  document.getElementById("shipmentType").value = "Air Import";
-  document.getElementById("status").value = "Pending";
-  updateDocList();
 }
 
 async function login() {
@@ -304,13 +503,10 @@ async function login() {
   }
 
   user = data.user;
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("app").style.display = "grid";
   document.getElementById("userEmail").textContent = user.email;
-  document.getElementById("avatar").textContent = initials(user.email);
 
-  loginScreen.style.display = "none";
-  app.style.display = "grid";
-
-  initMap();
   await loadShipments();
 }
 
@@ -319,365 +515,58 @@ async function logout() {
   location.reload();
 }
 
-function initMap() {
-  if (map) {
-    map.invalidateSize();
-    return;
-  }
-
-  map = L.map("map").setView([53.3498, -6.2603], 4);
-
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "© OpenStreetMap"
-  }).addTo(map);
-
-  mapLayer = L.layerGroup().addTo(map);
-  setTimeout(() => map.invalidateSize(), 300);
-}
-
-async function geocode(place) {
-  if (!place) return [53.3, -6.2];
-
-  const key = place.toLowerCase();
-  if (geoCache[key]) return geoCache[key];
-
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(place)}`
-    );
-    const data = await res.json();
-
-    if (data[0]) {
-      const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-      geoCache[key] = coords;
-      return coords;
-    }
-  } catch {}
-
-  return [53.3, -6.2];
-}
-
-function statusClass(s) {
-  if (s === "In Transit") return "transit";
-  if (s === "Delivered") return "delivered";
-  if (s === "Delayed") return "delayed";
-  return "pending";
-}
-
-function riskLabel(x) {
-  if (!x.eta || x.status === "Delivered") return "";
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const eta = new Date(x.eta);
-  eta.setHours(0, 0, 0, 0);
-
-  const diff = Math.ceil((eta - today) / 86400000);
-
-  if (diff < 0) return "Overdue";
-  if (diff <= 2) return "At Risk";
-  return "";
-}
-
-function setAlertFilter(type) {
-  alertFilter = type;
-  renderRows();
-}
-
-function baseVisible() {
-  let data = isAdminUser()
-    ? shipments
-    : shipments.filter(x => !x.assigned_to || String(x.assigned_to).toLowerCase() === String(user?.email || "").toLowerCase());
-
-  if (showMine) {
-    data = data.filter(x => String(x.assigned_to || "").toLowerCase() === String(user?.email || "").toLowerCase());
-  }
-
-  if (typeFilter !== "All") {
-    data = data.filter(x => (x.shipment_type || "") === typeFilter);
-  }
-
-  return data;
-}
-
-function getVisible() {
-  let data = baseVisible();
-
-  if (alertFilter === "overdue") {
-    data = data.filter(x => riskLabel(x) === "Overdue");
-  }
-
-  if (alertFilter === "risk") {
-    data = data.filter(x => riskLabel(x) === "At Risk");
-  }
-
-  return data;
-}
-
-function eventDateValue(x, field) {
-  if (field === "pickup") return x.pickup_date || "";
-  if (field === "etd") return x.etd || "";
-  if (field === "eta") return x.eta || "";
-  return "";
-}
-
-function renderTimeline(data) {
-  const grid = document.getElementById("timelineGrid");
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const days = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    return d;
-  });
-
-  grid.innerHTML = days.map(day => {
-    const key = day.toISOString().slice(0, 10);
-    const events = [];
-
-    data.forEach(x => {
-      if (eventDateValue(x, "pickup") === key) events.push({ type: "Pickup", item: x });
-      if (eventDateValue(x, "etd") === key) events.push({ type: "ETD", item: x });
-      if (eventDateValue(x, "eta") === key) events.push({ type: "ETA", item: x });
-    });
-
-    const eventHtml = events.length
-      ? events.map(e => {
-          const r = riskLabel(e.item);
-          const cls =
-            r === "Overdue" ? "overdue" :
-            r === "At Risk" ? "risk" :
-            e.item.status === "Delivered" ? "delivered" : "";
-
-          return `
-            <div class="timeline-item ${cls}">
-              <strong>${e.type} · ${e.item.shipment_type || "Shipment"}</strong>
-              <div class="timeline-customer">${e.item.client || "No customer"}</div>
-              <div>${e.item.shipment_ref || ""}</div>
-              <div class="timeline-route">${e.item.origin || ""} → ${e.item.destination || ""}</div>
-            </div>
-          `;
-        }).join("")
-      : `<div style="color:#6f7d93; font-size:12px;">No events</div>`;
-
-    return `
-      <div class="timeline-day">
-        <h3>${day.toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short" })}</h3>
-        ${eventHtml}
-      </div>
-    `;
-  }).join("");
-}
-
-async function renderMap(data) {
-  if (!mapLayer) return;
-
-  mapLayer.clearLayers();
-  const bounds = [];
-
-  for (const x of data.slice(0, 10)) {
-    const o = await geocode(x.origin);
-    const d = await geocode(x.destination);
-
-    bounds.push(o, d);
-
-    const color =
-      riskLabel(x) === "Overdue" || x.status === "Delayed" ? "red" :
-      x.status === "Delivered" ? "green" :
-      "#06b7a5";
-
-    L.polyline([o, d], {
-      color,
-      weight: 4,
-      opacity: .85,
-      dashArray: x.status === "In Transit" ? "8,8" : null
-    }).addTo(mapLayer);
-
-    L.marker(o).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>${x.client || ""}<br>${x.origin || ""}`);
-    L.marker(d).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>${x.client || ""}<br>${x.destination || ""}`);
-  }
-
-  if (bounds.length) {
-    map.fitBounds(bounds, { padding: [30, 30], maxZoom: 6 });
-  }
-}
-
-function renderUnassigned() {
-  const box = document.getElementById("unassignedBox");
-  const list = shipments.filter(x => !x.assigned_to);
-
-  if (!list.length) {
-    box.innerHTML = `<div style="color:#6f7d93;">No unassigned shipments</div>`;
-    return;
-  }
-
-  box.innerHTML = list.slice(0, 8).map(x => `
-    <div class="unassigned-card">
-      <strong>${x.client || "No customer"}</strong>
-      <small>${x.shipment_type || "Shipment"} · ${x.origin || ""} → ${x.destination || ""}</small><br>
-      <button class="primary-btn" style="height:36px; margin-top:8px;" onclick="takeShipment('${x.id}')">Take</button>
-    </div>
-  `).join("");
-}
-
-async function takeShipment(id) {
-  const { error } = await sb
-    .from("shipments")
-    .update({ assigned_to: user.email })
-    .eq("id", id);
-
-  if (error) {
-    alert("Could not take shipment: " + error.message);
-    return;
-  }
-
-  await loadShipments();
-  statusMsg.textContent = "Shipment assigned to you ✔";
-}
-
-function renderRows() {
-  const data = getVisible();
-  const allVisible = baseVisible();
-
-  if (!data.length) {
-    rows.innerHTML = `<tr><td colspan="9">No shipments found.</td></tr>`;
-  } else {
-    rows.innerHTML = data.map(x => {
-      const risk = riskLabel(x);
-      const docs = Array.isArray(x.document_urls) ? x.document_urls : [];
-
-      return `
-      <tr style="
-        ${risk === "Overdue" ? "background:#fff3f3;" : ""}
-        ${risk === "At Risk" ? "background:#fff9f0;" : ""}
-      ">
-        <td>${x.shipment_ref || ""}</td>
-        <td>${x.client || ""}</td>
-        <td><span class="pill pickup">${x.shipment_type || "Not set"}</span></td>
-        <td>${x.origin || ""} → ${x.destination || ""}</td>
-        <td>
-          <span class="pill ${statusClass(x.status)}">${x.status || "Pending"}</span>
-          ${risk ? `<span class="pill ${risk === "Overdue" ? "delayed" : "pending"}">${risk}</span>` : ""}
-        </td>
-        <td>${eventDateValue(x, "eta") || "-"}</td>
-        <td>${docs.length ? docs.map((u, i) => `<a class="doc-link" href="${u}" target="_blank">Doc ${i + 1}</a>`).join("") : "-"}</td>
-        <td>${x.assigned_to || "-"}</td>
-        <td>
-          <button class="action-btn" onclick="editShipment('${x.id}')">✏️</button>
-          <button class="action-btn" onclick="setStatus('${x.id}','In Transit')">🚚</button>
-          <button class="action-btn" onclick="setStatus('${x.id}','Delivered')">✅</button>
-          <button class="action-btn" onclick="deleteShipment('${x.id}')">🗑️</button>
-        </td>
-      </tr>`;
-    }).join("");
-  }
-
-  document.getElementById("totalStat").textContent = data.length;
-  document.getElementById("transitStat").textContent = data.filter(x => x.status === "In Transit").length;
-  document.getElementById("delayedStat").textContent = data.filter(x => x.status === "Delayed" || riskLabel(x)).length;
-
-  document.getElementById("alertAll").textContent = allVisible.length;
-  document.getElementById("alertOverdue").textContent = allVisible.filter(x => riskLabel(x) === "Overdue").length;
-  document.getElementById("alertRisk").textContent = allVisible.filter(x => riskLabel(x) === "At Risk").length;
-
-  renderTimeline(data);
-  renderMap(data);
-  renderUnassigned();
-
-  statusMsg.textContent =
-    (typeFilter !== "All" ? typeFilter + " · " : "") +
-    (showMine ? "Showing my shipments: " + data.length : "Loaded " + data.length + " shipment(s)");
-}
-
-function editShipment(id) {
-  const x = shipments.find(s => s.id === id);
-  if (!x) return;
-
-  editingId = id;
-  selectedDocs = [];
-  existingDocs = Array.isArray(x.document_urls) ? x.document_urls : [];
-
-  document.getElementById("modalTitle").textContent = "Edit Shipment";
-
-  document.getElementById("client").value = x.client || "";
-  document.getElementById("origin").value = x.origin || "";
-  document.getElementById("destination").value = x.destination || "";
-  document.getElementById("assigned").value = x.assigned_to || "";
-  document.getElementById("shipmentType").value = x.shipment_type || "Air Import";
-  document.getElementById("pickupDate").value = x.pickup_date || "";
-  document.getElementById("etdDate").value = x.etd || "";
-  document.getElementById("eta").value = x.eta || "";
-  document.getElementById("status").value = x.status || "Pending";
-
-  updateDocList();
-  modal.classList.add("show");
-}
-
-async function setStatus(id, status) {
-  const { error } = await sb
-    .from("shipments")
-    .update({ status })
-    .eq("id", id);
-
-  if (error) {
-    alert("Update failed: " + error.message);
-    return;
-  }
-
-  await loadShipments();
-  statusMsg.textContent = "Shipment updated ✔";
-}
-
-async function deleteShipment(id) {
-  if (!confirm("Delete this shipment?")) return;
-
-  const { error } = await sb
-    .from("shipments")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    alert("Delete failed: " + error.message);
-    return;
-  }
-
-  await loadShipments();
-  statusMsg.textContent = "Shipment deleted ✔";
-}
-
 async function loadShipments() {
-  statusMsg.textContent = "Loading...";
-
   const { data, error } = await sb
     .from("shipments")
     .select("*")
     .order("created_at", { ascending: false });
 
   if (error) {
-    statusMsg.textContent = "LOAD ERROR: " + error.message;
+    alert("Load error: " + error.message);
     return;
   }
 
-  shipments = data || [];
-  renderRows();
+  renderRows(data || []);
 }
+
+function renderRows(data) {
+  document.getElementById("rows").innerHTML = data.map(x => {
+    const docs = Array.isArray(x.document_urls) ? x.document_urls : [];
+
+    return `
+      <tr>
+        <td>${x.shipment_ref || ""}</td>
+        <td>${x.client || ""}</td>
+        <td>${x.origin || ""} → ${x.destination || ""}</td>
+        <td>${x.eta || "-"}</td>
+        <td>${docs.length ? docs.map((u, i) => `<a href="${u}" target="_blank">Doc ${i + 1}</a>`).join("<br>") : "-"}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+document.getElementById("loginBtn").onclick = login;
+document.getElementById("logoutBtn").onclick = logout;
+
+document.getElementById("openBtn").onclick = () => {
+  document.getElementById("modal").classList.add("show");
+};
 
 document.getElementById("saveBtn").onclick = async () => {
   const documentUrls = await uploadSelectedDocs();
 
   const payload = {
+    shipment_ref: "SHP" + Date.now(),
     client: getVal("client"),
     origin: getVal("origin"),
     destination: getVal("destination"),
-    assigned_to: getVal("assigned") || null,
-    shipment_type: getVal("shipmentType") || "Air Import",
-    pickup_date: getVal("pickupDate") || null,
-    etd: getVal("etdDate") || null,
     eta: getVal("eta") || null,
-    status: getVal("status") || "Pending",
-    document_urls: documentUrls
+    shipment_type: "Air Import",
+    status: "Pending",
+    assigned_to: null,
+    document_urls: documentUrls,
+    created_by_email: user?.email || null,
+    source: "manual"
   };
 
   if (!payload.client || !payload.origin || !payload.destination) {
@@ -685,91 +574,28 @@ document.getElementById("saveBtn").onclick = async () => {
     return;
   }
 
-  let error;
-
-  if (editingId) {
-    const res = await sb
-      .from("shipments")
-      .update(payload)
-      .eq("id", editingId);
-
-    error = res.error;
-  } else {
-    const res = await sb
-      .from("shipments")
-      .insert([{
-        ...payload,
-        shipment_ref: "SHP" + Date.now(),
-        priority: "Medium",
-        created_by_email: user?.email || null,
-        source: "manual"
-      }]);
-
-    error = res.error;
-  }
+  const { error } = await sb.from("shipments").insert([payload]);
 
   if (error) {
-    alert("SAVE ERROR: " + error.message);
+    alert("Save error: " + error.message);
     return;
   }
 
-  clearForm();
-  modal.classList.remove("show");
+  selectedDocs = [];
+  uploadedUrls = [];
+  document.getElementById("docUpload").value = "";
+  document.getElementById("docList").innerHTML = "No documents";
+  document.getElementById("client").value = "";
+  document.getElementById("origin").value = "";
+  document.getElementById("destination").value = "";
+  document.getElementById("eta").value = "";
+
+  document.getElementById("modal").classList.remove("show");
   await loadShipments();
-  statusMsg.textContent = "Saved ✔";
 };
 
-document.getElementById("loginBtn").onclick = login;
-document.getElementById("logoutBtn").onclick = logout;
-
-myBtn.onclick = () => {
-  showMine = !showMine;
-  myBtn.classList.toggle("active", showMine);
-  renderRows();
-};
-
-document.getElementById("openBtn").onclick = () => {
-  clearForm();
-  modal.classList.add("show");
-};
-
-document.getElementById("cancelBtn").onclick = () => {
-  clearForm();
-  modal.classList.remove("show");
-};
-
-modal.onclick = e => {
-  if (e.target === modal) {
-    clearForm();
-    modal.classList.remove("show");
-  }
-};
-
-async function init() {
-  renderLoginUsers();
-  renderUserDropdown();
-  renderTypeFilters();
-  initDocUpload();
-
-  const { data } = await sb.auth.getSession();
-
-  if (data.session?.user) {
-    user = data.session.user;
-    document.getElementById("userEmail").textContent = user.email;
-    document.getElementById("avatar").textContent = initials(user.email);
-
-    loginScreen.style.display = "none";
-    app.style.display = "grid";
-
-    initMap();
-    await loadShipments();
-  } else {
-    loginScreen.style.display = "flex";
-    app.style.display = "none";
-  }
-}
-
-init();
+renderLoginUsers();
+initDocUpload();
 </script>
 </body>
 </html>
