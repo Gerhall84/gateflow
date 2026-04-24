@@ -745,17 +745,33 @@ function getRiskLevel(x){
   return "none";
 }
 
+console.log("Users loaded:", users.length);
 function initDropdowns(){
-  loginUserSelect.innerHTML = `<option value="">Select your name</option>` +
-    users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
+  const loginSelect = document.getElementById("loginUserSelect");
+  const loginEmailField = document.getElementById("loginEmail");
+  const assignedSelect = document.getElementById("assigned");
+  const typeSelect = document.getElementById("shipmentType");
 
-  loginUserSelect.onchange = e => loginEmail.value = e.target.value;
+  if (loginSelect) {
+    loginSelect.innerHTML =
+      `<option value="">Select your name</option>` +
+      users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
 
-  assigned.innerHTML = `<option value="">Unassigned</option>` +
-    users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
+    loginSelect.onchange = e => {
+      if (loginEmailField) loginEmailField.value = e.target.value;
+    };
+  }
 
-  shipmentType.innerHTML = shipmentTypes.map(t => `<option>${t}</option>`).join("");
-}
+  if (assignedSelect) {
+    assignedSelect.innerHTML =
+      `<option value="">Unassigned</option>` +
+      users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
+  }
+
+  if (typeSelect) {
+    typeSelect.innerHTML =
+      shipmentTypes.map(t => `<option>${t}</option>`).join("");
+  }
 
 async function login(){
   const { data, error } = await sb.auth.signInWithPassword({
