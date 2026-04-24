@@ -6,275 +6,59 @@
   <title>GateKeeper Pro</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
     :root {
-      --bg:#f4f7f8;
-      --nav:#04142e;
-      --text:#11213d;
-      --muted:#6f7d93;
-      --brand:#06b7a5;
-      --brand-dark:#069788;
-      --line:#e4ebed;
-      --danger:#ef5c5c;
-      --success:#18a66e;
-      --shadow:0 10px 30px rgba(6,20,46,.08);
+      --bg:#f4f7f8; --nav:#04142e; --text:#11213d; --muted:#6f7d93;
+      --brand:#06b7a5; --brand-dark:#069788; --line:#e4ebed;
+      --danger:#ef5c5c; --success:#18a66e; --shadow:0 10px 30px rgba(6,20,46,.08);
     }
-
-    * { box-sizing:border-box; }
-
-    body {
-      margin:0;
-      font-family:Arial, sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
-
-    .login-screen {
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:linear-gradient(135deg,#04142e,#063b63);
-      padding:20px;
-    }
-
-    .login-card {
-      width:100%;
-      max-width:420px;
-      background:white;
-      border-radius:22px;
-      padding:28px;
-      box-shadow:0 30px 80px rgba(0,0,0,.25);
-    }
-
-    .login-card input {
-      width:100%;
-      height:46px;
-      margin-bottom:12px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:0 12px;
-    }
-
-    .login-error {
-      color:var(--danger);
-      font-size:13px;
-      margin-top:12px;
-    }
-
-    .app {
-      display:none;
-      min-height:100vh;
-      grid-template-columns:240px 1fr;
-    }
-
-    .sidebar {
-      background:linear-gradient(180deg,var(--nav),#021127);
-      color:white;
-      padding:22px 14px;
-    }
-
-    .brand {
-      text-align:center;
-      padding-bottom:18px;
-      border-bottom:1px solid rgba(255,255,255,.08);
-      margin-bottom:18px;
-    }
-
-    .brand img {
-      max-width:160px;
-      margin-bottom:10px;
-    }
-
-    .nav a {
-      display:block;
-      color:white;
-      padding:14px;
-      border-radius:14px;
-      font-weight:700;
-      margin-bottom:8px;
-    }
-
-    .nav a.active,
-    .nav a:hover {
-      background:rgba(6,183,165,.18);
-      color:#8efff1;
-    }
-
-    .main { padding:20px; }
-
-    .topbar {
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:18px;
-      flex-wrap:wrap;
-    }
-
-    .primary-btn {
-      height:46px;
-      border:0;
-      border-radius:12px;
-      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
-      color:white;
-      padding:0 20px;
-      font-weight:800;
-      cursor:pointer;
-      box-shadow:0 12px 24px rgba(6,183,165,.24);
-    }
-
-    .secondary-btn {
-      height:46px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      background:white;
-      color:var(--text);
-      padding:0 20px;
-      font-weight:800;
-      cursor:pointer;
-    }
-
-    .stats {
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:14px;
-      margin-bottom:14px;
-    }
-
-    .card {
-      background:white;
-      border:1px solid var(--line);
-      border-radius:18px;
-      box-shadow:var(--shadow);
-      overflow:hidden;
-    }
-
-    .stat-card {
-      padding:20px;
-    }
-
-    .stat-label {
-      color:var(--muted);
-      font-size:13px;
-      font-weight:700;
-    }
-
-    .stat-value {
-      font-size:28px;
-      font-weight:900;
-      margin-top:6px;
-    }
-
-    .grid {
-      display:grid;
-      grid-template-columns:1.35fr 1fr;
-      gap:14px;
-      margin-bottom:14px;
-    }
-
-    .section-head {
-      padding:18px;
-      border-bottom:1px solid var(--line);
-    }
-
-    .section-head h2 {
-      margin:0;
-      color:var(--brand-dark);
-      font-size:18px;
-    }
-
-    #map {
-      height:430px;
-      width:100%;
-    }
-
-    table {
-      width:100%;
-      border-collapse:collapse;
-      font-size:14px;
-    }
-
-    th, td {
-      padding:14px 18px;
-      border-top:1px solid var(--line);
-      text-align:left;
-      white-space:nowrap;
-    }
-
-    th {
-      background:#f6f9fb;
-    }
-
-    .pill {
-      display:inline-flex;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:800;
-    }
-
-    .pending { background:#fff1da; color:#d88d10; }
-    .transit { background:#dff7f3; color:#069788; }
-    .delivered { background:#dff5eb; color:#18a66e; }
-    .delayed { background:#ffe4e4; color:#ef5c5c; }
-
-    #statusMsg {
-      padding:14px 18px;
-      color:var(--muted);
-      font-size:13px;
-    }
-
-    .modal {
-      display:none;
-      position:fixed;
-      inset:0;
-      background:rgba(3,12,28,.55);
-      align-items:center;
-      justify-content:center;
-      z-index:1000;
-      padding:20px;
-    }
-
-    .modal.show { display:flex; }
-
-    .modal-box {
-      width:min(520px,100%);
-      background:white;
-      border-radius:20px;
-      padding:22px;
-      box-shadow:0 30px 80px rgba(2,17,39,.28);
-    }
-
-    .modal-box input,
-    .modal-box select {
-      width:100%;
-      height:44px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:0 12px;
-      margin-bottom:12px;
-    }
-
-    .modal-actions {
-      display:flex;
-      justify-content:flex-end;
-      gap:10px;
-    }
-
-    @media(max-width:900px) {
-      .app { grid-template-columns:1fr; }
-      .sidebar { display:none; }
-      .grid, .stats { grid-template-columns:1fr; }
-    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+    .login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#04142e,#063b63);padding:20px}
+    .login-card{width:100%;max-width:420px;background:white;border-radius:22px;padding:28px;box-shadow:0 30px 80px rgba(0,0,0,.25)}
+    .login-card input{width:100%;height:46px;margin-bottom:12px;border:1px solid var(--line);border-radius:12px;padding:0 12px}
+    .login-error{color:var(--danger);font-size:13px;margin-top:12px}
+    .app{display:none;min-height:100vh;grid-template-columns:240px 1fr}
+    .sidebar{background:linear-gradient(180deg,var(--nav),#021127);color:white;padding:22px 14px}
+    .brand{text-align:center;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:18px}
+    .brand img{max-width:160px;margin-bottom:10px}
+    .nav a{display:block;color:white;padding:14px;border-radius:14px;font-weight:700;margin-bottom:8px}
+    .nav a.active,.nav a:hover{background:rgba(6,183,165,.18);color:#8efff1}
+    .main{padding:20px}
+    .topbar{display:flex;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+    .primary-btn{height:46px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;padding:0 20px;font-weight:800;cursor:pointer;box-shadow:0 12px 24px rgba(6,183,165,.24)}
+    .secondary-btn{height:46px;border:1px solid var(--line);border-radius:12px;background:white;color:var(--text);padding:0 20px;font-weight:800;cursor:pointer}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+    .card{background:white;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+    .stat-card{padding:20px}
+    .stat-label{color:var(--muted);font-size:13px;font-weight:700}
+    .stat-value{font-size:28px;font-weight:900;margin-top:6px}
+    .grid{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;margin-bottom:14px}
+    .section-head{padding:18px;border-bottom:1px solid var(--line)}
+    .section-head h2{margin:0;color:var(--brand-dark);font-size:18px}
+    #map{height:430px;width:100%}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    th,td{padding:14px 18px;border-top:1px solid var(--line);text-align:left;white-space:nowrap}
+    th{background:#f6f9fb}
+    .pill{display:inline-flex;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;margin-right:4px}
+    .pending{background:#fff1da;color:#d88d10}
+    .transit{background:#dff7f3;color:#069788}
+    .delivered{background:#dff5eb;color:#18a66e}
+    .delayed{background:#ffe4e4;color:#ef5c5c}
+    #statusMsg{padding:14px 18px;color:var(--muted);font-size:13px}
+    .modal{display:none;position:fixed;inset:0;background:rgba(3,12,28,.55);align-items:center;justify-content:center;z-index:1000;padding:20px}
+    .modal.show{display:flex}
+    .modal-box{width:min(520px,100%);background:white;border-radius:20px;padding:22px;box-shadow:0 30px 80px rgba(2,17,39,.28)}
+    .modal-box input,.modal-box select{width:100%;height:44px;border:1px solid var(--line);border-radius:12px;padding:0 12px;margin-bottom:12px}
+    .modal-actions{display:flex;justify-content:flex-end;gap:10px}
+    @media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.grid,.stats{grid-template-columns:1fr}}
   </style>
 </head>
 
 <body>
-
   <div class="login-screen" id="loginScreen">
     <div class="login-card">
       <h1>GateKeeper Pro</h1>
@@ -292,7 +76,6 @@
         <img src="logo.png" alt="Maurice Ward Group">
         <strong>Maurice Ward Group</strong>
       </div>
-
       <nav class="nav">
         <a class="active">🏠 Dashboard</a>
         <a>📦 Shipments</a>
@@ -308,18 +91,9 @@
       </div>
 
       <section class="stats">
-        <div class="card stat-card">
-          <div class="stat-label">Total Shipments</div>
-          <div class="stat-value" id="totalStat">0</div>
-        </div>
-        <div class="card stat-card">
-          <div class="stat-label">In Transit</div>
-          <div class="stat-value" id="transitStat">0</div>
-        </div>
-        <div class="card stat-card">
-          <div class="stat-label">Delayed</div>
-          <div class="stat-value" id="delayedStat">0</div>
-        </div>
+        <div class="card stat-card"><div class="stat-label">Total Shipments</div><div class="stat-value" id="totalStat">0</div></div>
+        <div class="card stat-card"><div class="stat-label">In Transit</div><div class="stat-value" id="transitStat">0</div></div>
+        <div class="card stat-card"><div class="stat-label">Delayed / Risk</div><div class="stat-value" id="delayedStat">0</div></div>
       </section>
 
       <section class="grid">
@@ -327,7 +101,6 @@
           <div class="section-head"><h2>Live Map</h2></div>
           <div id="map"></div>
         </div>
-
         <div class="card">
           <div class="section-head"><h2>Status</h2></div>
           <div id="statusMsg">Loading...</div>
@@ -340,10 +113,7 @@
           <table>
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Client</th>
-                <th>Route</th>
-                <th>Status</th>
+                <th>ID</th><th>Client</th><th>Route</th><th>Status</th><th>ETA</th>
               </tr>
             </thead>
             <tbody id="rows"></tbody>
@@ -356,24 +126,16 @@
   <div class="modal" id="modal">
     <div class="modal-box">
       <h2>Add Shipment</h2>
-
       <input id="client" placeholder="Client">
       <input id="origin" placeholder="Origin">
       <input id="destination" placeholder="Destination">
-
+      <input id="eta" type="date" placeholder="ETA">
       <select id="shipmentType">
-        <option>Road</option>
-        <option>Air</option>
-        <option>Sea</option>
+        <option>Road</option><option>Air</option><option>Sea</option>
       </select>
-
       <select id="status">
-        <option>Pending</option>
-        <option>In Transit</option>
-        <option>Delivered</option>
-        <option>Delayed</option>
+        <option>Pending</option><option>In Transit</option><option>Delivered</option><option>Delayed</option>
       </select>
-
       <div class="modal-actions">
         <button class="secondary-btn" id="cancelBtn">Cancel</button>
         <button class="primary-btn" id="saveBtn">Save</button>
@@ -406,7 +168,6 @@
     async function login() {
       const email = getVal("loginEmail");
       const password = getVal("loginPassword");
-
       const { data, error } = await sb.auth.signInWithPassword({ email, password });
 
       if (error) {
@@ -439,7 +200,6 @@
       }
 
       map = L.map("map").setView([53.3498, -6.2603], 4);
-
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "© OpenStreetMap"
       }).addTo(map);
@@ -449,16 +209,12 @@
 
     async function geocode(place) {
       if (!place) return [53.3498, -6.2603];
-
       const key = place.toLowerCase();
 
       if (geoCache[key]) return geoCache[key];
 
       try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(place)}`
-        );
-
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(place)}`);
         const data = await res.json();
 
         if (data[0]) {
@@ -475,7 +231,6 @@
 
     async function renderMap(data) {
       if (!mapLayer) return;
-
       mapLayer.clearLayers();
 
       const bounds = [];
@@ -483,18 +238,12 @@
       for (const x of data.slice(0, 10)) {
         const origin = await geocode(x.origin);
         const destination = await geocode(x.destination);
-
         bounds.push(origin, destination);
 
-        const color = x.status === "Delayed" ? "red" : x.status === "Delivered" ? "green" : "#06b7a5";
+        const color = riskLabel(x) === "Overdue" || x.status === "Delayed" ? "red" : x.status === "Delivered" ? "green" : "#06b7a5";
 
-        L.marker(origin)
-          .addTo(mapLayer)
-          .bindPopup(`<strong>${x.shipment_ref}</strong><br>Origin: ${x.origin}`);
-
-        L.marker(destination)
-          .addTo(mapLayer)
-          .bindPopup(`<strong>${x.shipment_ref}</strong><br>Destination: ${x.destination}`);
+        L.marker(origin).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>Origin: ${x.origin || ""}`);
+        L.marker(destination).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>Destination: ${x.destination || ""}`);
 
         L.polyline([origin, destination], {
           color,
@@ -504,62 +253,58 @@
         }).addTo(mapLayer);
       }
 
-      if (bounds.length) {
-        map.fitBounds(bounds, { padding: [30, 30], maxZoom: 6 });
-      }
-
+      if (bounds.length) map.fitBounds(bounds, { padding: [30, 30], maxZoom: 6 });
       setTimeout(() => map.invalidateSize(), 200);
     }
 
     function statusClass(status) {
-      function riskLabel(x) {
-  if (x.status === "Delivered") return "";
-
-  if (!x.eta) return "";
-
-  const today = new Date();
-  today.setHours(0,0,0,0);
-
-  const eta = new Date(x.eta);
-  eta.setHours(0,0,0,0);
-
-  const diffDays = Math.ceil((eta - today) / (1000 * 60 * 60 * 24));
-
-  if (diffDays < 0) return "Overdue";
-  if (diffDays <= 2) return "At Risk";
-
-  return "";
-}
       if (status === "In Transit") return "transit";
       if (status === "Delivered") return "delivered";
       if (status === "Delayed") return "delayed";
       return "pending";
     }
 
+    function riskLabel(x) {
+      if (x.status === "Delivered") return "";
+      if (!x.eta) return "";
+
+      const today = new Date();
+      today.setHours(0,0,0,0);
+
+      const eta = new Date(x.eta);
+      eta.setHours(0,0,0,0);
+
+      const diffDays = Math.ceil((eta - today) / (1000 * 60 * 60 * 24));
+
+      if (diffDays < 0) return "Overdue";
+      if (diffDays <= 2) return "At Risk";
+      return "";
+    }
+
     function renderRows(data) {
       if (!data.length) {
-        rows.innerHTML = `<tr><td colspan="4">No shipments yet.</td></tr>`;
+        rows.innerHTML = `<tr><td colspan="5">No shipments yet.</td></tr>`;
       } else {
-        rows.innerHTML = data.map(x => `
-          <tr>
-            <td>${x.shipment_ref || ""}</td>
-            <td>${x.client || ""}</td>
-            <td>${x.origin || ""} → ${x.destination || ""}</td>
-            <<td>
-  <span class="pill ${statusClass(x.status)}">${x.status || "Pending"}</span>
-  ${
-    riskLabel(x)
-      ? `<span class="pill ${riskLabel(x) === "Overdue" ? "delayed" : "pending"}" style="margin-left:6px;">${riskLabel(x)}</span>`
-      : ""
-  }
-</td>
-          </tr>
-        `).join("");
+        rows.innerHTML = data.map(x => {
+          const risk = riskLabel(x);
+          return `
+            <tr>
+              <td>${x.shipment_ref || ""}</td>
+              <td>${x.client || ""}</td>
+              <td>${x.origin || ""} → ${x.destination || ""}</td>
+              <td>
+                <span class="pill ${statusClass(x.status)}">${x.status || "Pending"}</span>
+                ${risk ? `<span class="pill ${risk === "Overdue" ? "delayed" : "pending"}">${risk}</span>` : ""}
+              </td>
+              <td>${x.eta || "-"}</td>
+            </tr>
+          `;
+        }).join("");
       }
 
       document.getElementById("totalStat").textContent = data.length;
       document.getElementById("transitStat").textContent = data.filter(x => x.status === "In Transit").length;
-      document.getElementById("delayedStat").textContent = data.filter(x => x.status === "Delayed").length;
+      document.getElementById("delayedStat").textContent = data.filter(x => x.status === "Delayed" || riskLabel(x)).length;
 
       renderMap(data);
     }
@@ -603,6 +348,7 @@
         client: getVal("client"),
         origin: getVal("origin"),
         destination: getVal("destination"),
+        eta: getVal("eta") || null,
         shipment_type: getVal("shipmentType") || "Road",
         status: getVal("status") || "Pending",
         priority: "Medium",
@@ -615,10 +361,7 @@
         return;
       }
 
-      const { data, error } = await sb
-        .from("shipments")
-        .insert([payload])
-        .select();
+      const { data, error } = await sb.from("shipments").insert([payload]).select();
 
       if (error || !data) {
         alert("SAVE ERROR: " + (error?.message || "No data returned"));
@@ -626,14 +369,14 @@
         return;
       }
 
-      statusMsg.textContent = "Shipment saved ✔";
-
       document.getElementById("client").value = "";
       document.getElementById("origin").value = "";
       document.getElementById("destination").value = "";
+      document.getElementById("eta").value = "";
 
       modal.classList.remove("show");
       await loadShipments();
+      statusMsg.textContent = "Shipment saved ✔";
     };
 
     async function init() {
