@@ -11,436 +11,858 @@
 
   <style>
     :root {
-      --bg:#f4f7f8; --nav:#04142e; --text:#11213d; --muted:#6f7d93;
-      --brand:#06b7a5; --brand-dark:#069788; --line:#e4ebed;
-      --danger:#ef5c5c; --success:#18a66e; --shadow:0 10px 30px rgba(6,20,46,.08);
+      --bg:#f4f7f8;
+      --nav:#04142e;
+      --nav2:#071c3e;
+      --text:#11213d;
+      --muted:#6f7d93;
+      --brand:#06b7a5;
+      --brand-dark:#069788;
+      --line:#e4ebed;
+      --danger:#ef5c5c;
+      --success:#18a66e;
+      --warning:#f0a227;
+      --shadow:0 20px 50px rgba(6,20,46,0.08);
     }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
-    .login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#04142e,#063b63);padding:20px}
-    .login-card{width:100%;max-width:420px;background:white;border-radius:22px;padding:28px;box-shadow:0 30px 80px rgba(0,0,0,.25)}
-    .login-card input{width:100%;height:46px;margin-bottom:12px;border:1px solid var(--line);border-radius:12px;padding:0 12px}
-    .login-error{color:var(--danger);font-size:13px;margin-top:12px}
-    .app{display:none;min-height:100vh;grid-template-columns:240px 1fr}
-    .sidebar{background:linear-gradient(180deg,var(--nav),#021127);color:white;padding:22px 14px}
-    .brand{text-align:center;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:18px}
-    .brand img{max-width:160px;margin-bottom:10px}
-    .nav a{display:block;color:white;padding:14px;border-radius:14px;font-weight:700;margin-bottom:8px}
-    .nav a.active,.nav a:hover{background:rgba(6,183,165,.18);color:#8efff1}
-    .main{padding:20px}
-    .topbar{display:flex;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
-    .topbar-left,.topbar-right{display:flex;gap:10px;flex-wrap:wrap}
-    .primary-btn{height:46px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;padding:0 20px;font-weight:800;cursor:pointer;box-shadow:0 12px 24px rgba(6,183,165,.24)}
-    .secondary-btn{height:46px;border:1px solid var(--line);border-radius:12px;background:white;color:var(--text);padding:0 20px;font-weight:800;cursor:pointer}
-    .secondary-btn.active{background:#dff7f3;color:#069788;border-color:#06b7a5}
-    .action-btn{border:0;border-radius:10px;padding:8px 10px;margin-right:6px;cursor:pointer;background:#f4f7f8}
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
-    .card{background:white;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
-    .stat-card{padding:20px}
-    .stat-label{color:var(--muted);font-size:13px;font-weight:700}
-    .stat-value{font-size:28px;font-weight:900;margin-top:6px}
-    .grid{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;margin-bottom:14px}
-    .section-head{padding:18px;border-bottom:1px solid var(--line)}
-    .section-head h2{margin:0;color:var(--brand-dark);font-size:18px}
-    #map{height:430px;width:100%}
-    table{width:100%;border-collapse:collapse;font-size:14px}
-    th,td{padding:14px 18px;border-top:1px solid var(--line);text-align:left;white-space:nowrap}
-    th{background:#f6f9fb}
-    .pill{display:inline-flex;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;margin-right:4px}
-    .pending{background:#fff1da;color:#d88d10}
-    .transit{background:#dff7f3;color:#069788}
-    .delivered{background:#dff5eb;color:#18a66e}
-    .delayed{background:#ffe4e4;color:#ef5c5c}
-    #statusMsg{padding:14px 18px;color:var(--muted);font-size:13px}
-    .modal{display:none;position:fixed;inset:0;background:rgba(3,12,28,.55);align-items:center;justify-content:center;z-index:1000;padding:20px}
-    .modal.show{display:flex}
-    .modal-box{width:min(560px,100%);background:white;border-radius:20px;padding:22px;box-shadow:0 30px 80px rgba(2,17,39,.28)}
-    .modal-box input,.modal-box select{width:100%;height:44px;border:1px solid var(--line);border-radius:12px;padding:0 12px;margin-bottom:12px}
-    .modal-actions{display:flex;justify-content:flex-end;gap:10px}
-    @media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.grid,.stats{grid-template-columns:1fr}}
+
+    * { box-sizing:border-box; }
+
+    body {
+      margin:0;
+      font-family:Arial, sans-serif;
+      background:linear-gradient(180deg,#f4f7f8 0%,#eef4f5 100%);
+      color:var(--text);
+    }
+
+    .login-screen {
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(135deg,#04142e,#063b63);
+      padding:20px;
+    }
+
+    .login-card {
+      width:100%;
+      max-width:420px;
+      background:white;
+      border-radius:24px;
+      padding:32px;
+      box-shadow:0 30px 80px rgba(0,0,0,.28);
+      border:1px solid rgba(255,255,255,.18);
+    }
+
+    .login-card img {
+      display:block;
+      max-width:190px;
+      margin:0 auto 20px;
+    }
+
+    .login-card h1 {
+      margin:0 0 8px;
+      color:var(--nav);
+      text-align:center;
+      font-size:28px;
+    }
+
+    .login-card p {
+      margin:0 0 24px;
+      color:var(--muted);
+      text-align:center;
+    }
+
+    .login-card input {
+      width:100%;
+      height:48px;
+      margin-bottom:12px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:0 14px;
+      font-size:15px;
+      outline:none;
+    }
+
+    .login-card input:focus {
+      border-color:var(--brand);
+      box-shadow:0 0 0 4px rgba(6,183,165,.12);
+    }
+
+    .login-error {
+      color:var(--danger);
+      font-size:13px;
+      margin-top:12px;
+      text-align:center;
+    }
+
+    .app {
+      display:none;
+      min-height:100vh;
+      grid-template-columns:250px 1fr;
+    }
+
+    .sidebar {
+      background:linear-gradient(180deg,var(--nav),#021127);
+      color:white;
+      padding:24px 16px;
+      display:flex;
+      flex-direction:column;
+      min-height:100vh;
+    }
+
+    .brand {
+      text-align:center;
+      padding:10px 8px 22px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      margin-bottom:18px;
+    }
+
+    .brand img {
+      max-width:175px;
+      margin-bottom:12px;
+      filter:drop-shadow(0 6px 20px rgba(6,183,165,.18));
+    }
+
+    .brand strong {
+      display:block;
+      color:#3f73e8;
+      font-size:14px;
+      letter-spacing:.2px;
+    }
+
+    .nav a {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      color:white;
+      padding:14px;
+      border-radius:16px;
+      font-weight:700;
+      margin-bottom:8px;
+      text-decoration:none;
+      transition:.2s ease;
+    }
+
+    .nav a.active,
+    .nav a:hover {
+      background:rgba(6,183,165,.18);
+      color:#8efff1;
+      box-shadow:inset 0 0 0 1px rgba(6,183,165,.16);
+    }
+
+    .sidebar-footer {
+      margin-top:auto;
+      padding-top:18px;
+      border-top:1px solid rgba(255,255,255,.08);
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+
+    .avatar {
+      width:42px;
+      height:42px;
+      border-radius:50%;
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      color:white;
+    }
+
+    .main {
+      padding:22px;
+    }
+
+    .topbar {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:20px;
+      flex-wrap:wrap;
+    }
+
+    .topbar-left,
+    .topbar-right {
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .welcome {
+      margin-bottom:18px;
+    }
+
+    .welcome h1 {
+      margin:0 0 8px;
+      font-size:28px;
+      letter-spacing:-.5px;
+    }
+
+    .welcome p {
+      margin:0;
+      color:var(--muted);
+      font-size:16px;
+    }
+
+    .primary-btn {
+      height:46px;
+      border:0;
+      border-radius:14px;
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      color:white;
+      padding:0 22px;
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 12px 30px rgba(6,183,165,.3);
+      transition:.2s ease;
+    }
+
+    .primary-btn:hover {
+      transform:translateY(-2px);
+      box-shadow:0 18px 42px rgba(6,183,165,.38);
+    }
+
+    .secondary-btn {
+      height:46px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:white;
+      color:var(--text);
+      padding:0 20px;
+      font-weight:800;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    .secondary-btn:hover,
+    .secondary-btn.active {
+      background:#dff7f3;
+      color:var(--brand-dark);
+      border-color:var(--brand);
+    }
+
+    .action-btn {
+      border:0;
+      border-radius:12px;
+      padding:9px 11px;
+      margin-right:6px;
+      cursor:pointer;
+      background:#f4f7f8;
+      transition:.15s ease;
+    }
+
+    .action-btn:hover {
+      transform:translateY(-1px);
+      background:#e8f4f2;
+    }
+        .stats {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:16px;
+      margin-bottom:16px;
+    }
+
+    .card {
+      background:white;
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(0,0,0,0.04);
+      transition:.25s ease;
+      overflow:hidden;
+    }
+
+    .card:hover {
+      transform:translateY(-3px);
+      box-shadow:0 30px 70px rgba(6,20,46,0.12);
+    }
+
+    .stat-card {
+      padding:22px;
+    }
+
+    .stat-label {
+      color:var(--muted);
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:6px;
+    }
+
+    .stat-value {
+      font-size:30px;
+      font-weight:900;
+    }
+
+    .grid {
+      display:grid;
+      grid-template-columns:1.4fr 1fr;
+      gap:16px;
+      margin-bottom:16px;
+    }
+
+    .section-head {
+      padding:20px 20px 12px;
+      border-bottom:1px solid var(--line);
+    }
+
+    .section-head h2 {
+      margin:0;
+      font-size:18px;
+      color:var(--brand-dark);
+    }
+
+    #map {
+      height:430px;
+      border-radius:16px;
+      overflow:hidden;
+      margin:0 16px 16px;
+      border:1px solid var(--line);
+    }
+
+    table {
+      width:100%;
+      border-collapse:collapse;
+      font-size:14px;
+    }
+
+    th, td {
+      padding:14px 18px;
+      border-top:1px solid var(--line);
+      text-align:left;
+    }
+
+    th {
+      background:#f6f9fb;
+      font-size:13px;
+    }
+
+    tbody tr {
+      transition:.15s ease;
+    }
+
+    tbody tr:hover {
+      background:#f8fcfb;
+      transform:scale(1.01);
+    }
+
+    .pill {
+      display:inline-flex;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      margin-right:4px;
+    }
+
+    .pending { background:#fff1da; color:#d88d10; }
+    .transit { background:#dff7f3; color:#069788; }
+    .delivered { background:#dff5eb; color:#18a66e; }
+    .delayed { background:#ffe4e4; color:#ef5c5c; }
+
+    #statusMsg {
+      padding:16px 18px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .modal {
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(3,12,28,.6);
+      align-items:center;
+      justify-content:center;
+      z-index:1000;
+      padding:20px;
+    }
+
+    .modal.show { display:flex; }
+
+    .modal-box {
+      width:min(560px,100%);
+      background:white;
+      border-radius:22px;
+      padding:24px;
+      box-shadow:0 30px 80px rgba(2,17,39,.28);
+    }
+
+    .modal-box input,
+    .modal-box select {
+      width:100%;
+      height:46px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:0 12px;
+      margin-bottom:12px;
+    }
+
+    .modal-actions {
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+    }
+
+    @media(max-width:900px){
+      .app{grid-template-columns:1fr}
+      .sidebar{display:none}
+      .grid,.stats{grid-template-columns:1fr}
+    }
   </style>
 </head>
 
 <body>
-  <div class="login-screen" id="loginScreen">
-    <div class="login-card">
-      <h1>GateKeeper Pro</h1>
-      <p>Login to manage shipments.</p>
-      <input id="loginEmail" type="email" placeholder="Email">
-      <input id="loginPassword" type="password" placeholder="Password">
-      <button class="primary-btn" id="loginBtn" style="width:100%;">Login</button>
-      <div class="login-error" id="loginError"></div>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <img src="https://gerhall84.github.io/gateflow/logo.png">
+    <h1>GateKeeper</h1>
+    <p>Log in to manage shipments</p>
+    <input id="loginEmail" placeholder="Email">
+    <input id="loginPassword" type="password" placeholder="Password">
+    <button class="primary-btn" id="loginBtn">Login</button>
+    <div id="loginError" class="login-error"></div>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="https://gerhall84.github.io/gateflow/logo.png">
+      <strong>Operations</strong>
     </div>
-  </div>
 
-  <div class="app" id="app">
-    <aside class="sidebar">
-      <div class="brand">
-        <img src="logo.png" alt="Maurice Ward Group">
-        <strong>Maurice Ward Group</strong>
-      </div>
-      <nav class="nav">
-        <a class="active">🏠 Dashboard</a>
-        <a>📦 Shipments</a>
-        <a>🌍 Map</a>
-        <a>⚙ Settings</a>
-      </nav>
-    </aside>
+    <nav class="nav">
+      <a class="active">Dashboard</a>
+      <a>Shipments</a>
+      <a>Map</a>
+    </nav>
 
-    <main class="main">
-      <div class="topbar">
-        <div class="topbar-left">
-          <button class="primary-btn" id="openBtn">+ Add Shipment</button>
-          <button class="secondary-btn" id="myBtn">My Shipments</button>
-        </div>
-        <div class="topbar-right">
-          <button class="secondary-btn" id="logoutBtn">Logout</button>
-        </div>
-      </div>
-
-      <section class="stats">
-        <div class="card stat-card"><div class="stat-label">Total Shipments</div><div class="stat-value" id="totalStat">0</div></div>
-        <div class="card stat-card"><div class="stat-label">In Transit</div><div class="stat-value" id="transitStat">0</div></div>
-        <div class="card stat-card"><div class="stat-label">Delayed / Risk</div><div class="stat-value" id="delayedStat">0</div></div>
-      </section>
-
-      <section class="grid">
-        <div class="card">
-          <div class="section-head"><h2>Live Map</h2></div>
-          <div id="map"></div>
-        </div>
-        <div class="card">
-          <div class="section-head"><h2>Status</h2></div>
-          <div id="statusMsg">Loading...</div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="section-head"><h2>Shipments</h2></div>
-        <div style="overflow-x:auto;">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th><th>Client</th><th>Route</th><th>Status</th><th>ETA</th><th>Assigned</th><th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="rows"></tbody>
-          </table>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <div class="modal" id="modal">
-    <div class="modal-box">
-      <h2>Add Shipment</h2>
-      <input id="client" placeholder="Client">
-      <input id="origin" placeholder="Origin">
-      <input id="destination" placeholder="Destination">
-      <input id="assigned" placeholder="Assign to email">
-      <input id="eta" type="date" placeholder="ETA">
-      <select id="shipmentType">
-        <option>Road</option><option>Air</option><option>Sea</option>
-      </select>
-      <select id="status">
-        <option>Pending</option><option>In Transit</option><option>Delivered</option><option>Delayed</option>
-      </select>
-      <div class="modal-actions">
-        <button class="secondary-btn" id="cancelBtn">Cancel</button>
-        <button class="primary-btn" id="saveBtn">Save</button>
+    <div class="sidebar-footer">
+      <div class="avatar" id="avatar">GK</div>
+      <div>
+        <strong id="userEmail"></strong>
       </div>
     </div>
+  </aside>
+
+  <main class="main">
+    <div class="welcome">
+      <h1>Operations Dashboard</h1>
+      <p>Live shipment visibility and risk tracking</p>
+    </div>
+
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="primary-btn" id="openBtn">+ Add Shipment</button>
+        <button class="secondary-btn" id="myBtn">My Shipments</button>
+      </div>
+      <div class="topbar-right">
+        <button class="secondary-btn" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+
+    <section class="stats">
+      <div class="card stat-card">
+        <div class="stat-label">Total</div>
+        <div class="stat-value" id="totalStat">0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">In Transit</div>
+        <div class="stat-value" id="transitStat">0</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Delayed / Risk</div>
+        <div class="stat-value" id="delayedStat">0</div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <div class="section-head"><h2>Live Map</h2></div>
+        <div id="map"></div>
+      </div>
+
+      <div class="card">
+        <div class="section-head"><h2>Status</h2></div>
+        <div id="statusMsg">Loading...</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head"><h2>Shipments</h2></div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Client</th>
+            <th>Route</th>
+            <th>Status</th>
+            <th>ETA</th>
+            <th>Assigned</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </section>
+
+  </main>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h2>Add Shipment</h2>
+
+    <input id="client" placeholder="Client">
+    <input id="origin" placeholder="Origin">
+    <input id="destination" placeholder="Destination">
+    <input id="assigned" placeholder="Assign to email">
+    <input id="eta" type="date">
+
+    <select id="status">
+      <option>Pending</option>
+      <option>In Transit</option>
+      <option>Delivered</option>
+      <option>Delayed</option>
+    </select>
+
+    <div class="modal-actions">
+      <button class="secondary-btn" id="cancelBtn">Cancel</button>
+      <button class="primary-btn" id="saveBtn">Save</button>
+    </div>
   </div>
+</div>
+<script>
+  const sb = window.supabase.createClient(
+    "https://edxgkwkdgvsajfmkejbk.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
+  );
 
-  <script>
-    const sb = window.supabase.createClient(
-      "https://edxgkwkdgvsajfmkejbk.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
-    );
+  let user = null;
+  let shipments = [];
+  let map;
+  let mapLayer;
+  let showMine = false;
+  const geoCache = {};
 
-    let user = null;
-    let shipments = [];
-    let map;
-    let mapLayer;
-    let showMine = false;
-    const geoCache = {};
+  const loginScreen = document.getElementById("loginScreen");
+  const app = document.getElementById("app");
+  const modal = document.getElementById("modal");
+  const rows = document.getElementById("rows");
+  const statusMsg = document.getElementById("statusMsg");
+  const myBtn = document.getElementById("myBtn");
 
-    const loginScreen = document.getElementById("loginScreen");
-    const app = document.getElementById("app");
-    const modal = document.getElementById("modal");
-    const rows = document.getElementById("rows");
-    const statusMsg = document.getElementById("statusMsg");
-    const myBtn = document.getElementById("myBtn");
+  function getVal(id) {
+    return document.getElementById(id).value.trim();
+  }
 
-    function getVal(id) {
-      return document.getElementById(id).value.trim();
+  function initials(email) {
+    return String(email || "GK").slice(0, 2).toUpperCase();
+  }
+
+  async function login() {
+    const email = getVal("loginEmail");
+    const password = getVal("loginPassword");
+
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      document.getElementById("loginError").textContent = error.message;
+      return;
     }
 
-    async function login() {
-      const email = getVal("loginEmail");
-      const password = getVal("loginPassword");
-      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    user = data.user;
+    showApp();
+    await loadShipments();
+  }
 
-      if (error) {
-        document.getElementById("loginError").textContent = error.message;
-        return;
+  async function logout() {
+    await sb.auth.signOut();
+    user = null;
+    app.style.display = "none";
+    loginScreen.style.display = "flex";
+  }
+
+  function showApp() {
+    loginScreen.style.display = "none";
+    app.style.display = "grid";
+
+    document.getElementById("userEmail").textContent = user?.email || "";
+    document.getElementById("avatar").textContent = initials(user?.email);
+
+    setTimeout(initMap, 200);
+  }
+
+  function initMap() {
+    if (map) {
+      map.invalidateSize();
+      return;
+    }
+
+    map = L.map("map").setView([53.3498, -6.2603], 4);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap"
+    }).addTo(map);
+
+    mapLayer = L.layerGroup().addTo(map);
+  }
+
+  async function geocode(place) {
+    if (!place) return [53.3498, -6.2603];
+
+    const key = place.toLowerCase();
+
+    if (geoCache[key]) return geoCache[key];
+
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(place)}`
+      );
+
+      const data = await res.json();
+
+      if (data[0]) {
+        const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+        geoCache[key] = coords;
+        return coords;
       }
+    } catch (err) {
+      console.error(err);
+    }
 
-      user = data.user;
+    return [53.3498, -6.2603];
+  }
+
+  async function renderMap(data) {
+    if (!mapLayer) return;
+
+    mapLayer.clearLayers();
+
+    const bounds = [];
+
+    for (const x of data.slice(0, 10)) {
+      const origin = await geocode(x.origin);
+      const destination = await geocode(x.destination);
+
+      bounds.push(origin, destination);
+
+      const color =
+        riskLabel(x) === "Overdue" || x.status === "Delayed"
+          ? "red"
+          : x.status === "Delivered"
+            ? "green"
+            : "#06b7a5";
+
+      L.marker(origin)
+        .addTo(mapLayer)
+        .bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>Origin: ${x.origin || ""}`);
+
+      L.marker(destination)
+        .addTo(mapLayer)
+        .bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>Destination: ${x.destination || ""}`);
+
+      L.polyline([origin, destination], {
+        color,
+        weight: 4,
+        opacity: 0.85,
+        dashArray: x.status === "In Transit" ? "8,8" : null
+      }).addTo(mapLayer);
+    }
+
+    if (bounds.length) {
+      map.fitBounds(bounds, { padding: [30, 30], maxZoom: 6 });
+    }
+
+    setTimeout(() => map.invalidateSize(), 200);
+  }
+
+  function statusClass(status) {
+    if (status === "In Transit") return "transit";
+    if (status === "Delivered") return "delivered";
+    if (status === "Delayed") return "delayed";
+    return "pending";
+  }
+
+  function riskLabel(x) {
+    if (x.status === "Delivered") return "";
+    if (!x.eta) return "";
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const eta = new Date(x.eta);
+    eta.setHours(0, 0, 0, 0);
+
+    const diffDays = Math.ceil((eta - today) / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) return "Overdue";
+    if (diffDays <= 2) return "At Risk";
+    return "";
+  }
+
+  function getVisibleShipments() {
+    if (!showMine) return shipments;
+
+    return shipments.filter(
+      x => String(x.assigned_to || "").toLowerCase() === String(user?.email || "").toLowerCase()
+    );
+  }
+
+  function renderRows() {
+    const visible = getVisibleShipments();
+
+    if (!visible.length) {
+      rows.innerHTML = `<tr><td colspan="7">No shipments found.</td></tr>`;
+    } else {
+      rows.innerHTML = visible.map(x => {
+        const risk = riskLabel(x);
+
+        return `
+          <tr style="${risk === "Overdue" ? "background:#fff5f5;" : ""}">
+            <td>${x.shipment_ref || ""}</td>
+            <td>${x.client || ""}</td>
+            <td>${x.origin || ""} → ${x.destination || ""}</td>
+            <td>
+              <span class="pill ${statusClass(x.status)}">${x.status || "Pending"}</span>
+              ${risk ? `<span class="pill ${risk === "Overdue" ? "delayed" : "pending"}">${risk}</span>` : ""}
+            </td>
+            <td>${x.eta || "-"}</td>
+            <td>${x.assigned_to || "-"}</td>
+            <td>
+              <button class="action-btn" onclick="setStatus('${x.id}', 'In Transit')">🚚</button>
+              <button class="action-btn" onclick="setStatus('${x.id}', 'Delivered')">✅</button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    document.getElementById("totalStat").textContent = visible.length;
+    document.getElementById("transitStat").textContent =
+      visible.filter(x => x.status === "In Transit").length;
+    document.getElementById("delayedStat").textContent =
+      visible.filter(x => x.status === "Delayed" || riskLabel(x)).length;
+
+    renderMap(visible);
+
+    statusMsg.textContent = showMine
+      ? "Showing my shipments: " + visible.length
+      : "Loaded " + visible.length + " shipment(s)";
+  }
+
+  async function setStatus(id, newStatus) {
+    const { error } = await sb
+      .from("shipments")
+      .update({ status: newStatus })
+      .eq("id", id);
+
+    if (error) {
+      alert("Update failed: " + error.message);
+      return;
+    }
+
+    await loadShipments();
+    statusMsg.textContent = "Shipment updated ✔";
+  }
+
+  async function loadShipments() {
+    statusMsg.textContent = "Loading shipments...";
+
+    const { data, error } = await sb
+      .from("shipments")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      statusMsg.textContent = "LOAD ERROR: " + error.message;
+      return;
+    }
+
+    shipments = data || [];
+    renderRows();
+  }
+
+  document.getElementById("loginBtn").onclick = login;
+  document.getElementById("logoutBtn").onclick = logout;
+
+  myBtn.onclick = () => {
+    showMine = !showMine;
+    myBtn.classList.toggle("active", showMine);
+    renderRows();
+  };
+
+  document.getElementById("openBtn").onclick = () => {
+    modal.classList.add("show");
+  };
+
+  document.getElementById("cancelBtn").onclick = () => {
+    modal.classList.remove("show");
+  };
+
+  modal.onclick = e => {
+    if (e.target === modal) modal.classList.remove("show");
+  };
+
+  document.getElementById("saveBtn").onclick = async () => {
+    const payload = {
+      shipment_ref: "SHP" + Date.now(),
+      client: getVal("client"),
+      origin: getVal("origin"),
+      destination: getVal("destination"),
+      assigned_to: getVal("assigned") || null,
+      eta: getVal("eta") || null,
+      shipment_type: "Road",
+      status: getVal("status") || "Pending",
+      priority: "Medium",
+      created_by_email: user?.email || null,
+      source: "manual"
+    };
+
+    if (!payload.client || !payload.origin || !payload.destination) {
+      alert("Fill Client, Origin and Destination.");
+      return;
+    }
+
+    const { data, error } = await sb
+      .from("shipments")
+      .insert([payload])
+      .select();
+
+    if (error || !data) {
+      alert("SAVE ERROR: " + (error?.message || "No data returned"));
+      statusMsg.textContent = "SAVE ERROR: " + (error?.message || "No data returned");
+      return;
+    }
+
+    document.getElementById("client").value = "";
+    document.getElementById("origin").value = "";
+    document.getElementById("destination").value = "";
+    document.getElementById("assigned").value = "";
+    document.getElementById("eta").value = "";
+
+    modal.classList.remove("show");
+    await loadShipments();
+    statusMsg.textContent = "Shipment saved ✔";
+  };
+
+  async function init() {
+    const { data } = await sb.auth.getSession();
+
+    if (data.session?.user) {
+      user = data.session.user;
       showApp();
       await loadShipments();
-    }
-
-    async function logout() {
-      await sb.auth.signOut();
-      user = null;
-      app.style.display = "none";
+    } else {
       loginScreen.style.display = "flex";
+      app.style.display = "none";
     }
+  }
 
-    function showApp() {
-      loginScreen.style.display = "none";
-      app.style.display = "grid";
-      setTimeout(initMap, 200);
-    }
-
-    function initMap() {
-      if (map) {
-        map.invalidateSize();
-        return;
-      }
-
-      map = L.map("map").setView([53.3498, -6.2603], 4);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap"
-      }).addTo(map);
-
-      mapLayer = L.layerGroup().addTo(map);
-    }
-
-    async function geocode(place) {
-      if (!place) return [53.3498, -6.2603];
-      const key = place.toLowerCase();
-
-      if (geoCache[key]) return geoCache[key];
-
-      try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(place)}`);
-        const data = await res.json();
-
-        if (data[0]) {
-          const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-          geoCache[key] = coords;
-          return coords;
-        }
-      } catch (err) {
-        console.error(err);
-      }
-
-      return [53.3498, -6.2603];
-    }
-
-    async function renderMap(data) {
-      if (!mapLayer) return;
-      mapLayer.clearLayers();
-
-      const bounds = [];
-
-      for (const x of data.slice(0, 10)) {
-        const origin = await geocode(x.origin);
-        const destination = await geocode(x.destination);
-        bounds.push(origin, destination);
-
-        const color = riskLabel(x) === "Overdue" || x.status === "Delayed" ? "red" : x.status === "Delivered" ? "green" : "#06b7a5";
-
-        L.marker(origin).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>Origin: ${x.origin || ""}`);
-        L.marker(destination).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>Destination: ${x.destination || ""}`);
-
-        L.polyline([origin, destination], {
-          color,
-          weight: 4,
-          opacity: 0.85,
-          dashArray: x.status === "In Transit" ? "8,8" : null
-        }).addTo(mapLayer);
-      }
-
-      if (bounds.length) map.fitBounds(bounds, { padding: [30, 30], maxZoom: 6 });
-      setTimeout(() => map.invalidateSize(), 200);
-    }
-
-    function statusClass(status) {
-      if (status === "In Transit") return "transit";
-      if (status === "Delivered") return "delivered";
-      if (status === "Delayed") return "delayed";
-      return "pending";
-    }
-
-    function riskLabel(x) {
-      if (x.status === "Delivered") return "";
-      if (!x.eta) return "";
-
-      const today = new Date();
-      today.setHours(0,0,0,0);
-
-      const eta = new Date(x.eta);
-      eta.setHours(0,0,0,0);
-
-      const diffDays = Math.ceil((eta - today) / (1000 * 60 * 60 * 24));
-
-      if (diffDays < 0) return "Overdue";
-      if (diffDays <= 2) return "At Risk";
-      return "";
-    }
-
-    function getVisibleShipments() {
-      if (!showMine) return shipments;
-      return shipments.filter(x => String(x.assigned_to || "").toLowerCase() === String(user?.email || "").toLowerCase());
-    }
-
-    function renderRows(data) {
-      const visible = getVisibleShipments();
-
-      if (!visible.length) {
-        rows.innerHTML = `<tr><td colspan="7">No shipments found.</td></tr>`;
-      } else {
-        rows.innerHTML = visible.map(x => {
-          const risk = riskLabel(x);
-          return `
-            <tr>
-              <td>${x.shipment_ref || ""}</td>
-              <td>${x.client || ""}</td>
-              <td>${x.origin || ""} → ${x.destination || ""}</td>
-              <td>
-                <span class="pill ${statusClass(x.status)}">${x.status || "Pending"}</span>
-                ${risk ? `<span class="pill ${risk === "Overdue" ? "delayed" : "pending"}">${risk}</span>` : ""}
-              </td>
-              <td>${x.eta || "-"}</td>
-              <td>${x.assigned_to || "-"}</td>
-              <td>
-                <button class="action-btn" onclick="setStatus('${x.id}', 'In Transit')">🚚</button>
-                <button class="action-btn" onclick="setStatus('${x.id}', 'Delivered')">✅</button>
-              </td>
-            </tr>
-          `;
-        }).join("");
-      }
-
-      document.getElementById("totalStat").textContent = visible.length;
-      document.getElementById("transitStat").textContent = visible.filter(x => x.status === "In Transit").length;
-      document.getElementById("delayedStat").textContent = visible.filter(x => x.status === "Delayed" || riskLabel(x)).length;
-
-      renderMap(visible);
-      statusMsg.textContent = showMine
-        ? "Showing my shipments: " + visible.length
-        : "Loaded " + visible.length + " shipment(s)";
-    }
-
-    async function setStatus(id, newStatus) {
-      const { error } = await sb
-        .from("shipments")
-        .update({ status: newStatus })
-        .eq("id", id);
-
-      if (error) {
-        alert("Update failed: " + error.message);
-        return;
-      }
-
-      await loadShipments();
-      statusMsg.textContent = "Shipment updated ✔";
-    }
-
-    async function loadShipments() {
-      statusMsg.textContent = "Loading shipments...";
-
-      const { data, error } = await sb
-        .from("shipments")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        statusMsg.textContent = "LOAD ERROR: " + error.message;
-        return;
-      }
-
-      shipments = data || [];
-      renderRows(shipments);
-    }
-
-    document.getElementById("loginBtn").onclick = login;
-    document.getElementById("logoutBtn").onclick = logout;
-
-    myBtn.onclick = () => {
-      showMine = !showMine;
-      myBtn.classList.toggle("active", showMine);
-      renderRows(shipments);
-    };
-
-    document.getElementById("openBtn").onclick = () => {
-      modal.classList.add("show");
-    };
-
-    document.getElementById("cancelBtn").onclick = () => {
-      modal.classList.remove("show");
-    };
-
-    modal.onclick = e => {
-      if (e.target === modal) modal.classList.remove("show");
-    };
-
-    document.getElementById("saveBtn").onclick = async () => {
-      const payload = {
-        shipment_ref: "SHP" + Date.now(),
-        client: getVal("client"),
-        origin: getVal("origin"),
-        destination: getVal("destination"),
-        assigned_to: getVal("assigned") || null,
-        eta: getVal("eta") || null,
-        shipment_type: getVal("shipmentType") || "Road",
-        status: getVal("status") || "Pending",
-        priority: "Medium",
-        created_by_email: user?.email || null,
-        source: "manual"
-      };
-
-      if (!payload.client || !payload.origin || !payload.destination) {
-        alert("Fill Client, Origin and Destination.");
-        return;
-      }
-
-      const { data, error } = await sb.from("shipments").insert([payload]).select();
-
-      if (error || !data) {
-        alert("SAVE ERROR: " + (error?.message || "No data returned"));
-        statusMsg.textContent = "SAVE ERROR: " + (error?.message || "No data returned");
-        return;
-      }
-
-      document.getElementById("client").value = "";
-      document.getElementById("origin").value = "";
-      document.getElementById("destination").value = "";
-      document.getElementById("assigned").value = "";
-      document.getElementById("eta").value = "";
-
-      modal.classList.remove("show");
-      await loadShipments();
-      statusMsg.textContent = "Shipment saved ✔";
-    };
-
-    async function init() {
-      const { data } = await sb.auth.getSession();
-
-      if (data.session?.user) {
-        user = data.session.user;
-        showApp();
-        await loadShipments();
-      } else {
-        loginScreen.style.display = "flex";
-        app.style.display = "none";
-      }
-    }
-
-    init();
-  </script>
+  init();
+</script>
 </body>
 </html>
