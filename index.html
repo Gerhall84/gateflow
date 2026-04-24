@@ -848,6 +848,23 @@
   }
 
   async function setStatus(id, status) {
+    function editShipment(id) {
+  const x = shipments.find(s => s.id === id);
+  if (!x) return;
+
+  editingId = id;
+
+  document.getElementById("client").value = x.client || "";
+  document.getElementById("origin").value = x.origin || "";
+  document.getElementById("destination").value = x.destination || "";
+  document.getElementById("assigned").value = x.assigned_to || "";
+  document.getElementById("pickupDate").value = x.pickup_date || "";
+  document.getElementById("etdDate").value = x.etd || "";
+  document.getElementById("eta").value = x.eta || "";
+  document.getElementById("status").value = x.status || "Pending";
+
+  modal.classList.add("show");
+}
     const { error } = await sb
       .from("shipments")
       .update({ status })
