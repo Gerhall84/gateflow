@@ -21,6 +21,7 @@
       --danger:#ef5c5c;
       --success:#18a66e;
       --warning:#f0a227;
+      --blue:#2d79ff;
       --shadow:0 25px 60px rgba(6,20,46,0.08);
     }
 
@@ -132,10 +133,39 @@
       font-weight:700;
       margin-bottom:8px;
       text-decoration:none;
+      cursor:pointer;
     }
 
     .nav a.active,
     .nav a:hover {
+      background:rgba(6,183,165,.18);
+      color:#8efff1;
+    }
+
+    .side-label {
+      color:rgba(255,255,255,.45);
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.8px;
+      text-transform:uppercase;
+      margin:18px 12px 10px;
+    }
+
+    .type-nav button {
+      width:100%;
+      text-align:left;
+      background:transparent;
+      color:white;
+      border:0;
+      padding:11px 14px;
+      border-radius:14px;
+      font-weight:800;
+      cursor:pointer;
+      margin-bottom:5px;
+    }
+
+    .type-nav button:hover,
+    .type-nav button.active {
       background:rgba(6,183,165,.18);
       color:#8efff1;
     }
@@ -214,6 +244,32 @@
     }
 
     .secondary-btn.active {
+      background:#dff7f3;
+      color:var(--brand-dark);
+      border-color:var(--brand);
+    }
+
+    .type-filter-bar {
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+
+    .type-chip {
+      height:40px;
+      border:1px solid var(--line);
+      background:white;
+      border-radius:999px;
+      padding:0 14px;
+      font-weight:900;
+      cursor:pointer;
+      color:var(--text);
+      box-shadow:0 10px 25px rgba(6,20,46,.04);
+    }
+
+    .type-chip.active,
+    .type-chip:hover {
       background:#dff7f3;
       color:var(--brand-dark);
       border-color:var(--brand);
@@ -339,7 +395,7 @@
     }
 
     .timeline-day {
-      min-height:160px;
+      min-height:170px;
       border:1px solid var(--line);
       border-radius:18px;
       background:#fbfdfd;
@@ -359,6 +415,22 @@
       font-size:12px;
       background:#f4f7f8;
       border-left:4px solid var(--brand);
+    }
+
+    .timeline-item strong {
+      display:block;
+      margin-bottom:3px;
+    }
+
+    .timeline-customer {
+      font-weight:900;
+      color:var(--text);
+    }
+
+    .timeline-route {
+      color:var(--muted);
+      font-size:11px;
+      margin-top:3px;
     }
 
     .timeline-item.overdue {
@@ -399,6 +471,8 @@
       border-radius:22px;
       padding:24px;
       box-shadow:0 30px 80px rgba(2,17,39,.28);
+      max-height:90vh;
+      overflow:auto;
     }
 
     .modal-box input,
@@ -457,6 +531,9 @@
       <a>Map</a>
     </nav>
 
+    <div class="side-label">Shipment Types</div>
+    <div class="type-nav" id="sideTypeFilters"></div>
+
     <div class="sidebar-footer">
       <div class="avatar" id="avatar">GK</div>
       <div><strong id="userEmail"></strong></div>
@@ -478,6 +555,8 @@
         <button class="secondary-btn" id="logoutBtn">Logout</button>
       </div>
     </div>
+
+    <div class="type-filter-bar" id="topTypeFilters"></div>
 
     <section class="stats">
       <div class="card stat-card">
@@ -523,7 +602,8 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Client</th>
+            <th>Customer</th>
+            <th>Type</th>
             <th>Route</th>
             <th>Status</th>
             <th>Pickup</th>
@@ -542,10 +622,13 @@
 <div class="modal" id="modal">
   <div class="modal-box">
     <h2 id="modalTitle">Add Shipment</h2>
-    <input id="client" placeholder="Client">
+    <input id="client" placeholder="Customer name">
     <input id="origin" placeholder="Origin">
     <input id="destination" placeholder="Destination">
     <input id="assigned" placeholder="Assign to email">
+
+    <select id="shipmentType"></select>
+
     <input id="pickupDate" type="date">
     <input id="etdDate" type="date">
     <input id="eta" type="date">
@@ -569,12 +652,25 @@
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
   );
 
+  const shipmentTypes = [
+    "All",
+    "Air Import",
+    "Air Export",
+    "Ocean Import",
+    "Ocean Export",
+    "Road Import",
+    "Road Export",
+    "Road Domestic",
+    "Customs Clearance"
+  ];
+
   let user = null;
   let shipments = [];
   let map;
   let mapLayer;
   let showMine = false;
   let alertFilter = "all";
+  let typeFilter = "All";
   let editingId = null;
   const geoCache = {};
 
@@ -593,12 +689,40 @@
     return String(email || "GK").slice(0, 2).toUpperCase();
   }
 
+  function renderTypeFilters() {
+    const top = document.getElementById("topTypeFilters");
+    const side = document.getElementById("sideTypeFilters");
+    const options = shipmentTypes.filter(t => t !== "All");
+
+    top.innerHTML = shipmentTypes.map(t => `
+      <button class="type-chip ${typeFilter === t ? "active" : ""}" onclick="setTypeFilter('${t}')">${t}</button>
+    `).join("");
+
+    side.innerHTML = `
+      <button class="${typeFilter === "All" ? "active" : ""}" onclick="setTypeFilter('All')">All Shipments</button>
+      ${options.map(t => `
+        <button class="${typeFilter === t ? "active" : ""}" onclick="setTypeFilter('${t}')">${t}</button>
+      `).join("")}
+    `;
+
+    document.getElementById("shipmentType").innerHTML = options.map(t => `
+      <option value="${t}">${t}</option>
+    `).join("");
+  }
+
+  function setTypeFilter(type) {
+    typeFilter = type;
+    renderTypeFilters();
+    renderRows();
+  }
+
   function clearForm() {
     editingId = null;
     document.getElementById("modalTitle").textContent = "Add Shipment";
     ["client", "origin", "destination", "assigned", "pickupDate", "etdDate", "eta"].forEach(id => {
       document.getElementById(id).value = "";
     });
+    document.getElementById("shipmentType").value = "Air Import";
     document.getElementById("status").value = "Pending";
   }
 
@@ -696,9 +820,15 @@
   }
 
   function baseVisible() {
-    return showMine
+    let data = showMine
       ? shipments.filter(x => String(x.assigned_to || "").toLowerCase() === String(user?.email || "").toLowerCase())
       : shipments;
+
+    if (typeFilter !== "All") {
+      data = data.filter(x => (x.shipment_type || "") === typeFilter);
+    }
+
+    return data;
   }
 
   function getVisible() {
@@ -753,9 +883,10 @@
 
             return `
               <div class="timeline-item ${cls}">
-                <strong>${e.type}</strong><br>
-                ${e.item.shipment_ref || ""}<br>
-                ${e.item.origin || ""} → ${e.item.destination || ""}
+                <strong>${e.type} · ${e.item.shipment_type || "Shipment"}</strong>
+                <div class="timeline-customer">${e.item.client || "No customer"}</div>
+                <div>${e.item.shipment_ref || ""}</div>
+                <div class="timeline-route">${e.item.origin || ""} → ${e.item.destination || ""}</div>
               </div>
             `;
           }).join("")
@@ -794,8 +925,8 @@
         dashArray: x.status === "In Transit" ? "8,8" : null
       }).addTo(mapLayer);
 
-      L.marker(o).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>${x.origin || ""}`);
-      L.marker(d).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>${x.destination || ""}`);
+      L.marker(o).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>${x.client || ""}<br>${x.origin || ""}`);
+      L.marker(d).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>${x.client || ""}<br>${x.destination || ""}`);
     }
 
     if (bounds.length) {
@@ -808,7 +939,7 @@
     const allVisible = baseVisible();
 
     if (!data.length) {
-      rows.innerHTML = `<tr><td colspan="9">No shipments found.</td></tr>`;
+      rows.innerHTML = `<tr><td colspan="10">No shipments found.</td></tr>`;
     } else {
       rows.innerHTML = data.map(x => {
         const risk = riskLabel(x);
@@ -820,6 +951,7 @@
         ">
           <td>${x.shipment_ref || ""}</td>
           <td>${x.client || ""}</td>
+          <td><span class="pill pickup">${x.shipment_type || "Not set"}</span></td>
           <td>${x.origin || ""} → ${x.destination || ""}</td>
           <td>
             <span class="pill ${statusClass(x.status)}">${x.status || "Pending"}</span>
@@ -850,9 +982,9 @@
     renderTimeline(data);
     renderMap(data);
 
-    statusMsg.textContent = showMine
-      ? "Showing my shipments: " + data.length
-      : "Loaded " + data.length + " shipment(s)";
+    statusMsg.textContent =
+      (typeFilter !== "All" ? typeFilter + " · " : "") +
+      (showMine ? "Showing my shipments: " + data.length : "Loaded " + data.length + " shipment(s)");
   }
 
   function editShipment(id) {
@@ -866,6 +998,7 @@
     document.getElementById("origin").value = x.origin || "";
     document.getElementById("destination").value = x.destination || "";
     document.getElementById("assigned").value = x.assigned_to || "";
+    document.getElementById("shipmentType").value = x.shipment_type || "Air Import";
     document.getElementById("pickupDate").value = x.pickup_date || "";
     document.getElementById("etdDate").value = x.etd || "";
     document.getElementById("eta").value = x.eta || "";
@@ -955,6 +1088,7 @@
       origin: getVal("origin"),
       destination: getVal("destination"),
       assigned_to: getVal("assigned") || null,
+      shipment_type: getVal("shipmentType") || "Air Import",
       pickup_date: getVal("pickupDate") || null,
       etd: getVal("etdDate") || null,
       eta: getVal("eta") || null,
@@ -962,7 +1096,7 @@
     };
 
     if (!payload.client || !payload.origin || !payload.destination) {
-      alert("Fill Client, Origin and Destination.");
+      alert("Fill Customer, Origin and Destination.");
       return;
     }
 
@@ -981,7 +1115,6 @@
         .insert([{
           ...payload,
           shipment_ref: "SHP" + Date.now(),
-          shipment_type: "Road",
           priority: "Medium",
           created_by_email: user?.email || null,
           source: "manual"
@@ -1002,6 +1135,8 @@
   };
 
   async function init() {
+    renderTypeFilters();
+
     const { data } = await sb.auth.getSession();
 
     if (data.session?.user) {
