@@ -12,7 +12,6 @@
 
   <style>
     :root {
-      --bg:#f4f7f8;
       --nav:#04142e;
       --text:#11213d;
       --muted:#6f7d93;
@@ -22,7 +21,6 @@
       --danger:#ef5c5c;
       --success:#18a66e;
       --warning:#f0a227;
-      --blue:#2d79ff;
       --shadow:0 25px 60px rgba(6,20,46,0.08);
     }
 
@@ -31,11 +29,11 @@
     body {
       margin:0;
       font-family:Arial, sans-serif;
-      background:linear-gradient(180deg,#f4f7f8 0%,#eef4f5 100%);
+      background:linear-gradient(180deg,#f4f7f8,#eef4f5);
       color:var(--text);
     }
 
-    button { font-family:inherit; }
+    button { font-family:inherit; cursor:pointer; }
 
     .login-screen {
       min-height:100vh;
@@ -74,23 +72,21 @@
       color:var(--muted);
     }
 
-    .login-card input,
-    .login-card select {
+    input, select {
       width:100%;
-      height:48px;
-      margin-bottom:12px;
+      height:46px;
       border:1px solid var(--line);
-      border-radius:14px;
-      padding:0 14px;
-      font-size:15px;
+      border-radius:12px;
+      padding:0 12px;
+      margin-bottom:10px;
       background:white;
     }
 
     .login-error {
       color:var(--danger);
       font-size:13px;
-      margin-top:12px;
       text-align:center;
+      margin-top:10px;
     }
 
     .app {
@@ -123,7 +119,6 @@
     }
 
     .brand strong {
-      display:block;
       color:#3f73e8;
       font-size:14px;
     }
@@ -136,7 +131,6 @@
       font-weight:700;
       margin-bottom:8px;
       text-decoration:none;
-      cursor:pointer;
     }
 
     .nav a.active,
@@ -163,7 +157,6 @@
       padding:11px 14px;
       border-radius:14px;
       font-weight:800;
-      cursor:pointer;
       margin-bottom:5px;
     }
 
@@ -180,6 +173,7 @@
       display:flex;
       gap:12px;
       align-items:center;
+      font-size:12px;
     }
 
     .avatar {
@@ -191,12 +185,9 @@
       align-items:center;
       justify-content:center;
       font-weight:900;
-      color:white;
     }
 
     .main { padding:28px; }
-
-    .welcome { margin-bottom:18px; }
 
     .welcome h1 {
       margin:0 0 8px;
@@ -204,7 +195,7 @@
     }
 
     .welcome p {
-      margin:0;
+      margin:0 0 18px;
       color:var(--muted);
     }
 
@@ -231,7 +222,6 @@
       color:white;
       padding:0 22px;
       font-weight:900;
-      cursor:pointer;
       box-shadow:0 12px 30px rgba(6,183,165,.3);
     }
 
@@ -243,7 +233,6 @@
       color:var(--text);
       padding:0 20px;
       font-weight:800;
-      cursor:pointer;
     }
 
     .secondary-btn.active {
@@ -266,7 +255,6 @@
       border-radius:999px;
       padding:0 14px;
       font-weight:900;
-      cursor:pointer;
       color:var(--text);
       box-shadow:0 10px 25px rgba(6,20,46,.04);
     }
@@ -276,14 +264,6 @@
       background:#dff7f3;
       color:var(--brand-dark);
       border-color:var(--brand);
-    }
-        .action-btn {
-      border:0;
-      border-radius:12px;
-      padding:9px 11px;
-      margin-right:6px;
-      cursor:pointer;
-      background:#f4f7f8;
     }
 
     .stats {
@@ -299,11 +279,10 @@
       box-shadow:var(--shadow);
       border:1px solid rgba(0,0,0,.03);
       overflow:hidden;
+      margin-bottom:16px;
     }
 
-    .stat-card {
-      padding:22px;
-    }
+    .stat-card { padding:22px; }
 
     .stat-label {
       color:var(--muted);
@@ -341,6 +320,30 @@
       margin:16px;
     }
 
+    .timeline {
+      padding:16px;
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:10px;
+    }
+
+    .timeline-day {
+      background:#f8fbfc;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px;
+      min-height:130px;
+      font-size:12px;
+    }
+
+    .timeline-item {
+      margin-top:8px;
+      padding:7px;
+      border-left:4px solid var(--brand);
+      background:white;
+      border-radius:8px;
+    }
+
     table {
       width:100%;
       border-collapse:collapse;
@@ -349,104 +352,152 @@
     th, td {
       padding:12px;
       border-bottom:1px solid var(--line);
+      vertical-align:top;
+      text-align:left;
+      font-size:13px;
     }
 
+    th { background:#f6f9fb; }
+
     .pill {
+      display:inline-flex;
       padding:6px 10px;
       border-radius:999px;
       font-size:12px;
       font-weight:800;
+      margin-bottom:4px;
     }
 
     .pending { background:#fff1da; color:#d88d10; }
     .transit { background:#dff7f3; color:#069788; }
+    .delivered { background:#dff5eb; color:#18a66e; }
     .delayed { background:#ffe4e4; color:#ef5c5c; }
+    .type-pill { background:#e4f0ff; color:#2d79ff; }
+
+    .action-btn {
+      border:0;
+      border-radius:12px;
+      padding:9px 11px;
+      margin:2px;
+      background:#f4f7f8;
+    }
+
+    .unassigned-card {
+      border-bottom:1px solid var(--line);
+      padding:12px 16px;
+      font-size:13px;
+    }
+
+    .doc-link {
+      color:var(--brand-dark);
+      font-weight:800;
+      text-decoration:none;
+      display:block;
+      margin-bottom:4px;
+    }
 
     .modal {
       display:none;
       position:fixed;
       inset:0;
-      background:rgba(0,0,0,.5);
+      background:rgba(3,12,28,.6);
       align-items:center;
       justify-content:center;
+      z-index:1000;
+      padding:20px;
     }
 
     .modal.show { display:flex; }
 
     .modal-box {
+      width:min(760px,100%);
       background:white;
-      padding:20px;
-      border-radius:16px;
-      width:520px;
+      border-radius:22px;
+      padding:24px;
+      box-shadow:0 30px 80px rgba(2,17,39,.28);
       max-height:90vh;
       overflow:auto;
     }
 
-    .modal-box input,
-    .modal-box select {
-      width:100%;
-      height:44px;
-      margin-bottom:10px;
-      border:1px solid var(--line);
-      border-radius:10px;
-      padding:0 10px;
+    .modal-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
     }
 
     .doc-upload-box {
       border:2px dashed var(--line);
-      padding:14px;
-      margin-bottom:12px;
-      text-align:center;
-      border-radius:12px;
-    }
-
-    .timeline {
+      border-radius:18px;
       padding:16px;
-      display:grid;
-      grid-template-columns:repeat(7,1fr);
+      margin-bottom:14px;
+      background:#fbfdfd;
+      text-align:center;
+    }
+
+    .doc-list {
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:12px;
+    }
+
+    .modal-actions {
+      display:flex;
+      justify-content:flex-end;
       gap:10px;
+      margin-top:10px;
     }
 
-    .timeline div {
-      background:#f4f7f8;
-      border-radius:10px;
-      padding:8px;
-      font-size:12px;
+    @media(max-width:900px){
+      .app { grid-template-columns:1fr; }
+      .sidebar { display:none; }
+      .grid,.stats,.timeline,.modal-grid { grid-template-columns:1fr; }
+      .main { padding:16px; }
     }
-
   </style>
 </head>
-
 <body>
 
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
-    <img src="logo.png">
+    <img src="logo.png" alt="Logo">
     <h1>GateKeeper</h1>
+    <p>Choose your user, then log in</p>
     <select id="loginUserSelect"></select>
     <input id="loginEmail" placeholder="Email">
     <input id="loginPassword" type="password" placeholder="Password">
     <button class="primary-btn" id="loginBtn">Login</button>
-    <div id="loginError"></div>
+    <div id="loginError" class="login-error"></div>
   </div>
 </div>
 
 <div class="app" id="app">
   <aside class="sidebar">
     <div class="brand">
-      <img src="logo.png">
+      <img src="logo.png" alt="Logo">
+      <strong>Operations</strong>
     </div>
 
+    <nav class="nav">
+      <a class="active">Dashboard</a>
+      <a>Shipments</a>
+      <a>Calendar</a>
+      <a>Map</a>
+    </nav>
+
     <div class="side-label">Shipment Types</div>
-    <div id="sideTypeFilters"></div>
+    <div class="type-nav" id="sideTypeFilters"></div>
 
     <div class="sidebar-footer">
-      <div class="avatar" id="avatar"></div>
+      <div class="avatar" id="avatar">GK</div>
       <div id="userEmail"></div>
     </div>
   </aside>
 
   <main class="main">
+    <div class="welcome">
+      <h1>Operations Dashboard</h1>
+      <p>Live shipment visibility, document parsing, unassigned jobs and weekly planning</p>
+    </div>
 
     <div class="topbar">
       <div class="topbar-left">
@@ -470,7 +521,7 @@
         <div class="stat-value" id="transitStat">0</div>
       </div>
       <div class="card stat-card">
-        <div class="stat-label">Delayed</div>
+        <div class="stat-label">Delayed / Risk</div>
         <div class="stat-value" id="delayedStat">0</div>
       </div>
     </section>
@@ -487,7 +538,7 @@
       </div>
 
       <div class="card">
-        <div class="section-head"><h2>Unassigned</h2></div>
+        <div class="section-head"><h2>Unassigned Shipments</h2></div>
         <div id="unassigned"></div>
       </div>
     </section>
@@ -498,544 +549,272 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Customer</th>
+            <th>Customer / AWB</th>
+            <th>Type</th>
             <th>Route</th>
             <th>Status</th>
             <th>ETA</th>
             <th>Docs</th>
+            <th>Assigned</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="rows"></tbody>
       </table>
     </section>
-
   </main>
 </div>
 
 <div class="modal" id="modal">
   <div class="modal-box">
-    <h2>Add Shipment</h2>
+    <h2 id="modalTitle">Add Shipment</h2>
 
     <div class="doc-upload-box">
+      <strong>Shipment Documents</strong><br>
+      <small>Upload PDFs or files. Parser will auto-fill what it can.</small><br><br>
       <input id="docUpload" type="file" multiple>
-      <div id="docList">No documents</div>
+      <div id="docList" class="doc-list">No documents selected.</div>
     </div>
 
-    <input id="client" placeholder="Customer">
-    <input id="origin" placeholder="Origin">
-    <input id="destination" placeholder="Destination">
+    <div class="modal-grid">
+      <input id="client" placeholder="Customer">
+      <select id="shipmentType"></select>
 
-    <input id="awb" placeholder="AWB / Waybill">
-    <input id="carrier" placeholder="Carrier">
-    <input id="pieces" placeholder="Pieces">
-    <input id="weight" placeholder="Weight">
-    <input id="shipper" placeholder="Shipper">
-    <input id="consignee" placeholder="Consignee">
+      <input id="origin" placeholder="Origin">
+      <input id="destination" placeholder="Destination">
 
-    <input id="eta" type="date">
+      <input id="awb" placeholder="AWB / Waybill">
+      <input id="carrier" placeholder="Carrier / Courier">
 
-    <button id="saveBtn">Save</button>
+      <input id="pieces" placeholder="Pieces">
+      <input id="weight" placeholder="Weight">
+
+      <input id="shipper" placeholder="Shipper">
+      <input id="consignee" placeholder="Consignee">
+
+      <input id="pickupDate" type="date">
+      <input id="etdDate" type="date">
+
+      <input id="eta" type="date">
+      <select id="assigned"></select>
+
+      <select id="status">
+        <option>Pending</option>
+        <option>In Transit</option>
+        <option>Delivered</option>
+        <option>Delayed</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="secondary-btn" id="autoCreateBtn" type="button">Auto Create from Documents</button>
+      <button class="secondary-btn" id="cancelBtn" type="button">Cancel</button>
+      <button class="primary-btn" id="saveBtn" type="button">Save</button>
+    </div>
   </div>
 </div>
 <script>
 const sb = window.supabase.createClient(
   "https://edxgkwkdgvsajfmkejbk.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 );
 
 const BUCKET = "shipment-documents";
 
-if (window.pdfjsLib) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-}
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+const shipmentTypes = [
+  "Air Import","Air Export","Ocean Import","Ocean Export",
+  "Road Import","Road Export","Road Domestic","Customs Clearance"
+];
 
 const users = [
   { name:"Gerard Hall", email:"gerard.hall@mauriceward.com", admin:true },
-  { name:"Balazs Bekes", email:"balazs.bekes@mauriceward.com", admin:true },
-  { name:"Ashley Nason", email:"ashley.nason@mauriceward.com" },
-  { name:"Lisa O'Neill", email:"lisa.oneill@mauriceward.com" },
-  { name:"Damian Halpin", email:"damian.halpin@mauriceward.com" },
-  { name:"Jason O'Neill", email:"jason.o.neill@mauriceward.com" },
-  { name:"Ciara Burns", email:"ciara.burns@mauriceward.com" },
-  { name:"Dominic Martins", email:"dominic.martins@mauriceward.com" },
-  { name:"Roisin Hogan", email:"roisin.hogan@mauriceward.com" },
-  { name:"Lee Hodges", email:"lee.hodges@mauriceward.com" },
-  { name:"Allanah O'Brien", email:"allanah.obrien@mauriceward.com" },
-  { name:"Darragh O Neill", email:"darragh.oneill@mauriceward.com" },
-  { name:"Tea Pitanti-Ivanac", email:"tea.pitanti-ivanac@mauriceward.com" },
-  { name:"Gary Mc Gettrick", email:"gary.mcgettrick@mauriceward.com" },
-  { name:"Eoin Ryan", email:"eoin.ryan@mauriceward.com" },
-  { name:"Natacha Martins", email:"natacha.martins@mauriceward.com" }
-];
-
-const shipmentTypes = [
-  "All",
-  "Air Import",
-  "Air Export",
-  "Ocean Import",
-  "Ocean Export",
-  "Road Import",
-  "Road Export",
-  "Road Domestic",
-  "Customs Clearance"
+  { name:"Balazs Bekes", email:"balazs.bekes@mauriceward.com", admin:true }
 ];
 
 let user = null;
 let shipments = [];
 let selectedDocs = [];
-let map = null;
-let mapLayer = null;
+let editingId = null;
+let existingDocs = [];
 let showMine = false;
-let typeFilter = "All";
-const geoCache = {};
 
-const getVal = id => document.getElementById(id)?.value?.trim() || "";
-const setVal = (id, val) => {
-  const el = document.getElementById(id);
-  if (el && !el.value && val) el.value = val;
+const getVal = id => document.getElementById(id)?.value || "";
+const setVal = (id,val)=>{ if(val && !getVal(id)) document.getElementById(id).value = val; };
+
+function localDateOnly(d){ return d ? d.slice(0,10) : ""; }
+
+// ---------------- LOGIN ----------------
+document.getElementById("loginBtn").onclick = async () => {
+  const { data,error } = await sb.auth.signInWithPassword({
+    email:getVal("loginEmail"),
+    password:getVal("loginPassword")
+  });
+  if(error) return alert(error.message);
+
+  user = data.user;
+  document.getElementById("loginScreen").style.display="none";
+  document.getElementById("app").style.display="grid";
+  document.getElementById("userEmail").textContent=user.email;
+  loadShipments();
 };
 
-function initials(email) {
-  return String(email || "GK").slice(0, 2).toUpperCase();
+// ---------------- LOAD ----------------
+async function loadShipments(){
+  const { data } = await sb.from("shipments").select("*");
+  shipments = data || [];
+  render();
 }
 
-function localDateOnly(value) {
-  if (!value) return "";
-  return String(value).slice(0, 10);
+// ---------------- RENDER ----------------
+function render(){
+  document.getElementById("rows").innerHTML = shipments.map(x=>{
+    return `
+    <tr>
+      <td>${x.shipment_ref}</td>
+      <td>${x.client}<br>${x.awb_number||""}</td>
+      <td>${x.shipment_type||""}</td>
+      <td>${x.origin} → ${x.destination}</td>
+      <td>${x.status}</td>
+      <td>${localDateOnly(x.eta)}</td>
+      <td>${(x.document_urls||[]).map(d=>`<a href="${d}" target="_blank">Doc</a>`).join("<br>")}</td>
+      <td>${x.assigned_to||"Unassigned"}</td>
+      <td>
+        <button onclick="editShipment('${x.id}')">✏️</button>
+        <button onclick="setStatus('${x.id}','In Transit')">🚚</button>
+        <button onclick="setStatus('${x.id}','Delivered')">✅</button>
+        <button onclick="deleteShipment('${x.id}')">🗑️</button>
+      </td>
+    </tr>`;
+  }).join("");
 }
 
-function renderLoginUsers() {
-  const select = document.getElementById("loginUserSelect");
-  if (!select) return;
-
-  select.innerHTML = `<option value="">Select user</option>` +
-    users.map(u => `<option value="${u.email}">${u.name}</option>`).join("");
-
-  select.onchange = () => {
-    document.getElementById("loginEmail").value = select.value;
-  };
+// ---------------- ACTIONS ----------------
+async function setStatus(id,status){
+  await sb.from("shipments").update({status}).eq("id",id);
+  loadShipments();
 }
 
-function renderTypeFilters() {
-  const top = document.getElementById("topTypeFilters");
-  const side = document.getElementById("sideTypeFilters");
-
-  top.innerHTML = shipmentTypes.map(t => `
-    <button class="type-chip ${typeFilter === t ? "active" : ""}" onclick="setTypeFilter('${t}')">${t}</button>
-  `).join("");
-
-  side.innerHTML = shipmentTypes.map(t => `
-    <button class="${typeFilter === t ? "active" : ""}" onclick="setTypeFilter('${t}')">${t}</button>
-  `).join("");
+async function deleteShipment(id){
+  if(!confirm("Delete?")) return;
+  await sb.from("shipments").delete().eq("id",id);
+  loadShipments();
 }
 
-function setTypeFilter(type) {
-  typeFilter = type;
-  renderTypeFilters();
-  renderAll();
-}
+function editShipment(id){
+  const x = shipments.find(s=>s.id===id);
+  editingId=id;
+  existingDocs=x.document_urls||[];
 
-function extractFirst(text, patterns) {
-  for (const p of patterns) {
-    const match = text.match(p);
-    if (match && match[1]) return match[1].trim().replace(/\s+/g, " ");
-  }
-  return "";
-}
-
-function normaliseDate(value) {
-  if (!value) return "";
-
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
-
-  const parts = value.split(/[\/.-]/);
-  if (parts.length !== 3) return "";
-
-  let [d, m, y] = parts;
-  if (y.length === 2) y = "20" + y;
-
-  return `${y.padStart(4, "0")}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-}
-
-async function readDocText(file) {
-  if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
-    const buffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
-    let text = "";
-
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      text += content.items.map(item => item.str).join(" ") + "\n";
-    }
-
-    return text;
-  }
-
-  return await file.text();
-}
-
-function parseShipmentText(text) {
-  const clean = text.replace(/\r/g, "\n");
-
-  setVal("awb", extractFirst(clean, [
-    /(?:AWB|Waybill|Waybill No|Waybill Number|Tracking No|Tracking Number)[:\s#-]+([A-Z0-9\-]+)/i
-  ]));
-
-  setVal("carrier", extractFirst(clean, [
-    /(?:Carrier|Courier|Airline|Forwarder)[:\s]+([^\n]+)/i
-  ]));
-
-  setVal("pieces", extractFirst(clean, [
-    /(?:Pieces|PCS|Packages|No\. of Pieces|Number of Pieces)[:\s]+([0-9]+)/i
-  ]));
-
-  setVal("weight", extractFirst(clean, [
-    /(?:Weight|Gross Weight|Chargeable Weight)[:\s]+([0-9.,]+\s?(?:KG|KGS|LB|LBS)?)/i
-  ]));
-
-  setVal("shipper", extractFirst(clean, [
-    /(?:Shipper|Sender|Exporter)[:\s]+([^\n]+)/i
-  ]));
-
-  setVal("consignee", extractFirst(clean, [
-    /(?:Consignee|Receiver|Importer)[:\s]+([^\n]+)/i
-  ]));
-
-  setVal("client", getVal("consignee") || getVal("shipper"));
-
-  setVal("origin", extractFirst(clean, [
-    /(?:Origin|From|POL|Port of Loading)[:\s]+([^\n]+)/i
-  ]));
-
-  setVal("destination", extractFirst(clean, [
-    /(?:Destination|To|POD|Port of Discharge)[:\s]+([^\n]+)/i
-  ]));
-
-  const etaRaw = extractFirst(clean, [
-    /(?:ETA|Arrival Date|Date of Arrival)[:\s]+([0-9]{4}-[0-9]{2}-[0-9]{2})/i,
-    /(?:ETA|Arrival Date|Date of Arrival)[:\s]+([0-9]{1,2}[\/.-][0-9]{1,2}[\/.-][0-9]{2,4})/i
-  ]);
-
-  setVal("eta", normaliseDate(etaRaw));
-}
-
-function initDocUpload() {
-  const input = document.getElementById("docUpload");
-  const list = document.getElementById("docList");
-  if (!input || !list) return;
-
-  input.addEventListener("change", async e => {
-    selectedDocs = Array.from(e.target.files || []);
-
-    list.innerHTML = selectedDocs.length
-      ? selectedDocs.map(f => "📄 " + f.name).join("<br>")
-      : "No documents";
-
-    for (const file of selectedDocs) {
-      try {
-        const text = await readDocText(file);
-        parseShipmentText(text);
-      } catch (err) {
-        console.warn("Could not parse:", file.name, err);
-      }
-    }
+  ["client","origin","destination","awb","carrier","pieces","weight","shipper","consignee"].forEach(f=>{
+    document.getElementById(f).value = x[f]||"";
   });
+
+  document.getElementById("eta").value=localDateOnly(x.eta);
+  document.getElementById("modal").classList.add("show");
 }
 
-async function uploadSelectedDocs() {
-  const urls = [];
+// ---------------- SAVE ----------------
+document.getElementById("saveBtn").onclick = async ()=>{
+  const newDocs = await uploadDocs();
+  const docs = [...existingDocs,...newDocs];
 
-  for (const file of selectedDocs) {
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const path = `${Date.now()}_${safeName}`;
+  const payload = {
+    client:getVal("client"),
+    origin:getVal("origin"),
+    destination:getVal("destination"),
+    awb_number:getVal("awb"),
+    carrier:getVal("carrier"),
+    pieces:getVal("pieces"),
+    weight:getVal("weight"),
+    shipper:getVal("shipper"),
+    consignee:getVal("consignee"),
+    eta:getVal("eta"),
+    shipment_type:getVal("shipmentType"),
+    assigned_to:getVal("assigned"),
+    status:getVal("status"),
+    document_urls:docs
+  };
 
-    const { error } = await sb.storage.from(BUCKET).upload(path, file);
+  if(editingId){
+    await sb.from("shipments").update(payload).eq("id",editingId);
+  }else{
+    await sb.from("shipments").insert([{...payload,shipment_ref:"SHP"+Date.now()}]);
+  }
 
-    if (error) {
-      alert("Document upload failed: " + error.message);
-      return urls;
-    }
+  editingId=null;
+  existingDocs=[];
+  selectedDocs=[];
+  document.getElementById("modal").classList.remove("show");
+  loadShipments();
+};
 
+// ---------------- DOC UPLOAD ----------------
+async function uploadDocs(){
+  const urls=[];
+  for(const file of selectedDocs){
+    const path=Date.now()+"_"+file.name;
+    await sb.storage.from(BUCKET).upload(path,file);
     const { data } = sb.storage.from(BUCKET).getPublicUrl(path);
     urls.push(data.publicUrl);
   }
-
   return urls;
 }
 
-function initMap() {
-  if (map) {
-    map.invalidateSize();
-    return;
-  }
-
-  map = L.map("map").setView([53.3498, -6.2603], 4);
-
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "© OpenStreetMap"
-  }).addTo(map);
-
-  mapLayer = L.layerGroup().addTo(map);
-  setTimeout(() => map.invalidateSize(), 300);
-}
-
-async function geocode(place) {
-  if (!place) return [53.3498, -6.2603];
-
-  const key = place.toLowerCase();
-  if (geoCache[key]) return geoCache[key];
-
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(place)}`
-    );
-    const data = await res.json();
-
-    if (data[0]) {
-      const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-      geoCache[key] = coords;
-      return coords;
-    }
-  } catch {}
-
-  return [53.3498, -6.2603];
-}
-
-async function renderMap(data) {
-  if (!mapLayer) return;
-
-  mapLayer.clearLayers();
-  const bounds = [];
-
-  for (const x of data.slice(0, 10)) {
-    const o = await geocode(x.origin);
-    const d = await geocode(x.destination);
-
-    bounds.push(o, d);
-
-    L.marker(o).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>${x.client || ""}<br>${x.origin || ""}`);
-    L.marker(d).addTo(mapLayer).bindPopup(`<strong>${x.shipment_ref || ""}</strong><br>${x.client || ""}<br>${x.destination || ""}`);
-
-    L.polyline([o, d], {
-      color: x.status === "Delayed" ? "red" : "#06b7a5",
-      weight: 4,
-      opacity: .85,
-      dashArray: x.status === "In Transit" ? "8,8" : null
-    }).addTo(mapLayer);
-  }
-
-  if (bounds.length) {
-    map.fitBounds(bounds, { padding: [30, 30], maxZoom: 6 });
-  }
-}
-
-function filteredShipments() {
-  let data = [...shipments];
-
-  if (showMine) {
-    data = data.filter(x => String(x.assigned_to || "").toLowerCase() === String(user?.email || "").toLowerCase());
-  }
-
-  if (typeFilter !== "All") {
-    data = data.filter(x => x.shipment_type === typeFilter);
-  }
-
-  return data;
-}
-
-function renderTimeline(data) {
-  const box = document.getElementById("timeline");
-  const today = new Date();
-  today.setHours(0,0,0,0);
-
-  const days = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    return d;
-  });
-
-  box.innerHTML = days.map(day => {
-    const key = day.getFullYear() + "-" +
-      String(day.getMonth() + 1).padStart(2, "0") + "-" +
-      String(day.getDate()).padStart(2, "0");
-
-    const events = data.filter(x =>
-      localDateOnly(x.eta) === key ||
-      localDateOnly(x.pickup_date) === key ||
-      localDateOnly(x.etd) === key
-    );
-
-    return `
-      <div>
-        <strong>${day.toLocaleDateString("en-GB", { weekday:"short", day:"2-digit", month:"short" })}</strong>
-        <br>
-        ${events.length ? events.map(x => `
-          <span>${x.client || "No customer"}<br>${x.shipment_ref || ""}</span><hr>
-        `).join("") : "<span>No events</span>"}
-      </div>
-    `;
-  }).join("");
-}
-
-function renderUnassigned() {
-  const box = document.getElementById("unassigned");
-  const list = shipments.filter(x => !x.assigned_to);
-
-  box.innerHTML = list.length ? list.slice(0, 8).map(x => `
-    <div style="padding:12px;border-bottom:1px solid #e4ebed;">
-      <strong>${x.client || "No customer"}</strong><br>
-      ${x.shipment_type || "Shipment"} · ${x.origin || ""} → ${x.destination || ""}
-      <br><button class="primary-btn" style="height:34px;margin-top:8px;" onclick="takeShipment('${x.id}')">Take</button>
-    </div>
-  `).join("") : `<div style="padding:16px;color:#6f7d93;">No unassigned shipments</div>`;
-}
-
-async function takeShipment(id) {
-  const { error } = await sb.from("shipments").update({ assigned_to: user.email }).eq("id", id);
-  if (error) {
-    alert("Could not take shipment: " + error.message);
-    return;
-  }
-  await loadShipments();
-}
-
-function statusClass(status) {
-  if (status === "In Transit") return "transit";
-  if (status === "Delayed") return "delayed";
-  return "pending";
-}
-
-function renderAll() {
-  const data = filteredShipments();
-
-  document.getElementById("totalStat").textContent = data.length;
-  document.getElementById("transitStat").textContent = data.filter(x => x.status === "In Transit").length;
-  document.getElementById("delayedStat").textContent = data.filter(x => x.status === "Delayed").length;
-
-  document.getElementById("rows").innerHTML = data.map(x => {
-    const docs = Array.isArray(x.document_urls) ? x.document_urls : [];
-
-    return `
-      <tr>
-        <td>${x.shipment_ref || ""}</td>
-        <td>${x.client || ""}<br><small>${x.awb_number || ""}</small></td>
-        <td>${x.origin || ""} → ${x.destination || ""}<br><small>${x.shipment_type || ""}</small></td>
-        <td><span class="pill ${statusClass(x.status)}">${x.status || "Pending"}</span></td>
-        <td>${localDateOnly(x.eta) || "-"}</td>
-        <td>${docs.length ? docs.map((u, i) => `<a href="${u}" target="_blank">Doc ${i + 1}</a>`).join("<br>") : "-"}</td>
-      </tr>
-    `;
-  }).join("");
-
-  renderTimeline(data);
-  renderUnassigned();
-  renderMap(data);
-}
-
-async function loadShipments() {
-  const { data, error } = await sb.from("shipments").select("*").order("created_at", { ascending: false });
-
-  if (error) {
-    alert("Load error: " + error.message);
-    return;
-  }
-
-  shipments = data || [];
-  renderAll();
-}
-
-async function login() {
-  const { data, error } = await sb.auth.signInWithPassword({
-    email: getVal("loginEmail"),
-    password: getVal("loginPassword")
-  });
-
-  if (error) {
-    document.getElementById("loginError").textContent = error.message;
-    return;
-  }
-
-  user = data.user;
-
-  document.getElementById("loginScreen").style.display = "none";
-  document.getElementById("app").style.display = "grid";
-  document.getElementById("userEmail").textContent = user.email;
-  document.getElementById("avatar").textContent = initials(user.email);
-
-  initMap();
-  await loadShipments();
-}
-
-async function logout() {
-  await sb.auth.signOut();
-  location.reload();
-}
-
-document.getElementById("loginBtn").onclick = login;
-document.getElementById("logoutBtn").onclick = logout;
-
-document.getElementById("openBtn").onclick = () => {
-  document.getElementById("modal").classList.add("show");
+document.getElementById("docUpload").onchange = e=>{
+  selectedDocs=[...e.target.files];
 };
 
-document.getElementById("myBtn").onclick = () => {
-  showMine = !showMine;
-  document.getElementById("myBtn").classList.toggle("active", showMine);
-  renderAll();
-};
+// ---------------- PARSER ----------------
+function parseShipmentText(text){
+  const clean=text.replace(/\s+/g," ");
 
-document.getElementById("saveBtn").onclick = async () => {
-  const documentUrls = await uploadSelectedDocs();
+  const awb = clean.match(/\b[0-9]{3}-[0-9]{8}\b/);
+  if(awb) setVal("awb",awb[0]);
+
+  const eta = clean.match(/(\d{4}-\d{2}-\d{2})/);
+  if(eta) setVal("eta",eta[0]);
+}
+
+// ---------------- AUTO CREATE ----------------
+document.getElementById("autoCreateBtn").onclick = async ()=>{
+  const docs = await uploadDocs();
 
   const payload = {
-    shipment_ref: "SHP" + Date.now(),
-    client: getVal("client"),
-    origin: getVal("origin"),
-    destination: getVal("destination"),
-    awb_number: getVal("awb"),
-    carrier: getVal("carrier"),
-    pieces: getVal("pieces"),
-    weight: getVal("weight"),
-    shipper: getVal("shipper"),
-    consignee: getVal("consignee"),
-    eta: getVal("eta") || null,
-    shipment_type: "Customs Clearance",
-    status: "Pending",
-    assigned_to: null,
-    document_urls: documentUrls,
-    created_by_email: user?.email || null,
-    source: "manual"
+    shipment_ref:"SHP"+Date.now(),
+    client:getVal("client")||"Parsed Shipment",
+    origin:getVal("origin")||"TBC",
+    destination:getVal("destination")||"TBC",
+    awb_number:getVal("awb"),
+    eta:getVal("eta"),
+    shipment_type:"Customs Clearance",
+    status:"Pending",
+    document_urls:docs
   };
 
-  if (!payload.client || !payload.origin || !payload.destination) {
-    alert("Fill Customer, Origin and Destination.");
-    return;
+  if(payload.awb_number){
+    const { data } = await sb.from("shipments")
+      .select("*")
+      .eq("awb_number",payload.awb_number)
+      .limit(1);
+
+    if(data && data.length){
+      await sb.from("shipments")
+        .update(payload)
+        .eq("id",data[0].id);
+
+      alert("Updated existing shipment");
+      loadShipments();
+      return;
+    }
   }
 
-  const { error } = await sb.from("shipments").insert([payload]);
-
-  if (error) {
-    alert("Save error: " + error.message);
-    return;
-  }
-
-  selectedDocs = [];
-  ["docUpload","client","origin","destination","awb","carrier","pieces","weight","shipper","consignee","eta"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = "";
-  });
-
-  document.getElementById("docList").innerHTML = "No documents";
-  document.getElementById("modal").classList.remove("show");
-
-  await loadShipments();
+  await sb.from("shipments").insert([payload]);
+  loadShipments();
 };
 
-renderLoginUsers();
-renderTypeFilters();
-initDocUpload();
 </script>
 </body>
 </html>
