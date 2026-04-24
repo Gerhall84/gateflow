@@ -31,6 +31,7 @@
     .topbar{display:flex;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
     .primary-btn{height:46px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:white;padding:0 20px;font-weight:800;cursor:pointer;box-shadow:0 12px 24px rgba(6,183,165,.24)}
     .secondary-btn{height:46px;border:1px solid var(--line);border-radius:12px;background:white;color:var(--text);padding:0 20px;font-weight:800;cursor:pointer}
+    .action-btn{border:0;border-radius:10px;padding:8px 10px;margin-right:6px;cursor:pointer;background:#f4f7f8}
     .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
     .card{background:white;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
     .stat-card{padding:20px}
@@ -113,7 +114,7 @@
           <table>
             <thead>
               <tr>
-                <th>ID</th><th>Client</th><th>Route</th><th>Status</th><th>ETA</th>
+                <th>ID</th><th>Client</th><th>Route</th><th>Status</th><th>ETA</th><th>Actions</th>
               </tr>
             </thead>
             <tbody id="rows"></tbody>
@@ -283,7 +284,7 @@
 
     function renderRows(data) {
       if (!data.length) {
-        rows.innerHTML = `<tr><td colspan="5">No shipments yet.</td></tr>`;
+        rows.innerHTML = `<tr><td colspan="6">No shipments yet.</td></tr>`;
       } else {
         rows.innerHTML = data.map(x => {
           const risk = riskLabel(x);
@@ -297,6 +298,10 @@
                 ${risk ? `<span class="pill ${risk === "Overdue" ? "delayed" : "pending"}">${risk}</span>` : ""}
               </td>
               <td>${x.eta || "-"}</td>
+              <td>
+                <button class="action-btn" onclick="setStatus('${x.id}', 'In Transit')">🚚</button>
+                <button class="action-btn" onclick="setStatus('${x.id}', 'Delivered')">✅</button>
+              </td>
             </tr>
           `;
         }).join("");
@@ -307,6 +312,21 @@
       document.getElementById("delayedStat").textContent = data.filter(x => x.status === "Delayed" || riskLabel(x)).length;
 
       renderMap(data);
+    }
+
+    async function setStatus(id, newStatus) {
+      const { error } = await sb
+        .from("shipments")
+        .update({ status: newStatus })
+        .eq("id", id);
+
+      if (error) {
+        alert("Update failed: " + error.message);
+        return;
+      }
+
+      statusMsg.textContent = "Shipment updated ✔";
+      await loadShipments();
     }
 
     async function loadShipments() {
