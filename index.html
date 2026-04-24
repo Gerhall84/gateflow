@@ -347,10 +347,10 @@
       border-radius:8px;
     }
 
-    .timeline-item.risk {
-      border-left-color:var(--warning);
-      background:#fff9f0;
-    }
+  tr.row-risk {
+  background:#fff4e0;
+  border-left:6px solid #f0a227;
+}
 
     .timeline-item.overdue {
   border-left-color:#ef5c5c;
@@ -361,7 +361,8 @@
 .timeline-item.risk {
   border-left-color:#f0a227;
   background:#fff4e0;
-}{
+}
+{
       border-left-color:var(--danger);
       background:#fff3f3;
     }
@@ -680,7 +681,6 @@ function getRiskLevel(shipment){
 
   const diff = (eta - today) / (1000*60*60*24);
 
-  // 🔥 AUTO UPDATE TO DELAYED
   if(diff < 0 && shipment.status !== "Delivered"){
     if(shipment.status !== "Delayed"){
       autoMarkDelayed(shipment.id);
@@ -691,18 +691,6 @@ function getRiskLevel(shipment){
   if(diff <= 2) return "risk";
   return "none";
 }
-  if(!shipment.eta || shipment.status === "Delivered") return "none";
-
-  const today = new Date();
-  const eta = new Date(shipment.eta);
-
-  const diff = (eta - today) / (1000*60*60*24);
-
-  if(diff < 0) return "overdue";
-  if(diff <= 2) return "risk";
-  return "none";
-}
-
 // ---------------- LOGIN ----------------
 document.getElementById("loginBtn").onclick = async () => {
   const { data,error } = await sb.auth.signInWithPassword({
