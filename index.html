@@ -1,32 +1,247 @@
-    .stats {
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:16px;
-      margin-bottom:16px;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GateKeeper Pro</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <style>
+    :root {
+      --nav:#04142e;
+      --text:#11213d;
+      --muted:#6f7d93;
+      --brand:#06b7a5;
+      --brand-dark:#069788;
+      --line:#e4ebed;
+      --danger:#ef5c5c;
+      --success:#18a66e;
+      --warning:#f0a227;
+      --shadow:0 25px 60px rgba(6,20,46,.08);
     }
 
-    .stat-card {
-      padding:22px;
+    * { box-sizing:border-box; }
+
+    body {
+      margin:0;
+      font-family:Arial,sans-serif;
+      background:linear-gradient(180deg,#f4f7f8,#eef4f5);
+      color:var(--text);
     }
 
-    .stat-label {
+    button { font-family:inherit; cursor:pointer; }
+
+    input,select {
+      width:100%;
+      height:46px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:0 12px;
+      margin-bottom:10px;
+      background:white;
+    }
+
+    .login-screen {
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(135deg,#04142e,#063b63);
+      padding:20px;
+    }
+
+    .login-card {
+      width:100%;
+      max-width:430px;
+      background:white;
+      border-radius:24px;
+      padding:32px;
+      box-shadow:0 30px 80px rgba(0,0,0,.28);
+    }
+
+    .login-card img {
+      display:block;
+      max-width:200px;
+      margin:0 auto 20px;
+    }
+
+    .login-card h1 {
+      text-align:center;
+      margin:0 0 8px;
+      color:var(--nav);
+    }
+
+    .login-card p {
+      text-align:center;
+      margin:0 0 24px;
       color:var(--muted);
-      font-size:13px;
-      font-weight:700;
-      margin-bottom:6px;
     }
 
-    .stat-value {
-      font-size:30px;
+    .app {
+      display:none;
+      min-height:100vh;
+      grid-template-columns:250px 1fr;
+    }
+
+    .sidebar {
+      background:linear-gradient(180deg,#04142e,#021127);
+      color:white;
+      padding:26px 16px;
+      display:flex;
+      flex-direction:column;
+      min-height:100vh;
+      box-shadow:4px 0 30px rgba(0,0,0,.25);
+    }
+
+    .brand {
+      text-align:center;
+      padding:10px 8px 22px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      margin-bottom:18px;
+    }
+
+    .brand img {
+      max-width:180px;
+      margin-bottom:12px;
+    }
+
+    .brand strong {
+      color:#3f73e8;
+      font-size:14px;
+    }
+
+    .nav a {
+      display:flex;
+      color:white;
+      padding:14px;
+      border-radius:16px;
+      font-weight:700;
+      margin-bottom:8px;
+      text-decoration:none;
+      cursor:pointer;
+    }
+
+    .nav a.active,
+    .nav a:hover {
+      background:rgba(6,183,165,.18);
+      color:#8efff1;
+    }
+
+    .sidebar-footer {
+      margin-top:auto;
+      padding-top:18px;
+      border-top:1px solid rgba(255,255,255,.08);
+      display:flex;
+      gap:12px;
+      align-items:center;
+      font-size:12px;
+    }
+
+    .avatar {
+      width:42px;
+      height:42px;
+      border-radius:50%;
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      display:flex;
+      align-items:center;
+      justify-content:center;
       font-weight:900;
     }
 
-    .operator-load {
-      padding:14px 18px;
-      font-size:13px;
-      color:var(--muted);
+    .main { padding:28px; }
+
+    .topbar {
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+    }
+
+    .topbar-left {
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .primary-btn {
+      height:46px;
+      border:0;
+      border-radius:14px;
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      color:white;
+      padding:0 22px;
+      font-weight:900;
+      box-shadow:0 12px 30px rgba(6,183,165,.3);
+    }
+
+    .secondary-btn {
+      height:46px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:white;
+      color:var(--text);
+      padding:0 20px;
+      font-weight:800;
+    }
+
+    .secondary-btn.active {
+      background:#dff7f3;
+      color:var(--brand-dark);
+      border-color:var(--brand);
+    }
+
+    .search-row {
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+      align-items:center;
+    }
+
+    .search-row input {
+      max-width:360px;
+      margin-bottom:0;
+    }
+
+    .quick-filters {
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .card {
+      background:white;
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(0,0,0,.03);
+      overflow:hidden;
+      margin-bottom:16px;
+    }
+
+    .section-head {
+      padding:20px 20px 12px;
       border-bottom:1px solid var(--line);
-      line-height:1.8;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+    }
+
+    .section-head h2 {
+      margin:0;
+      color:var(--brand-dark);
+      font-size:18px;
+    }
+
+    #map {
+      height:420px;
+      border-radius:18px;
+      margin:16px;
     }
 
     .calendar-grid {
@@ -53,9 +268,7 @@
       font-size:12px;
     }
 
-    .calendar-cell.muted {
-      opacity:.35;
-    }
+    .calendar-cell.muted { opacity:.35; }
 
     .calendar-date {
       font-weight:900;
@@ -86,7 +299,7 @@
       border-collapse:collapse;
     }
 
-    th, td {
+    th,td {
       padding:12px;
       border-bottom:1px solid var(--line);
       vertical-align:top;
@@ -122,9 +335,6 @@
     .delayed { background:#ffe4e4; color:#ef5c5c; }
     .risk-pill { background:#fff1da; color:#d88d10; }
     .overdue-pill { background:#ffe4e4; color:#ef5c5c; }
-    .sla-ok { background:#dff5eb; color:#18a66e; }
-    .sla-risk { background:#fff1da; color:#d88d10; }
-    .sla-breach { background:#ffe4e4; color:#ef5c5c; }
 
     .action-btn {
       border:0;
@@ -194,7 +404,7 @@
     @media(max-width:900px){
       .app { grid-template-columns:1fr; }
       .sidebar { display:none; }
-      .grid,.calendar-grid,.stats { grid-template-columns:1fr; }
+      .calendar-grid { grid-template-columns:1fr; }
       .main { padding:16px; }
     }
   </style>
@@ -228,10 +438,7 @@
 
     <div class="sidebar-footer">
       <div class="avatar" id="avatar">GK</div>
-      <div>
-        <div id="userEmail"></div>
-        <small id="userRole"></small>
-      </div>
+      <div id="userEmail"></div>
     </div>
   </aside>
 
@@ -254,319 +461,12 @@
     </div>
 
     <section id="screenDashboard" class="screen active">
-      <section class="stats">
-        <div class="card stat-card">
-          <div class="stat-label">Visible</div>
-          <div class="stat-value" id="visibleStat">0</div>
-        </div>
-        <div class="card stat-card">
-          <div class="stat-label">Unassigned</div>
-          <div class="stat-value" id="unassignedStat">0</div>
-        </div>
-        <div class="card stat-card">
-          <div class="stat-label">At Risk</div>
-          <div class="stat-value" id="riskStat">0</div>
-        </div>
-        <div class="card stat-card">
-          <div class="stat-label">SLA Breach</div>
-          <div class="stat-value" id="slaStat">0</div>
-        </div>
-      </section>
-
       <section class="card">
         <div class="section-head"><h2>Live Map</h2></div>
         <div id="map"></div>
       </section>
 
       <section class="card">
-        <div class="section-head"><h2>Operator Load</h2></div>
-        <div id="operatorLoad" class="operator-load"></div>
-      </section>
-          .stats {
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:16px;
-      margin-bottom:16px;
-    }
-
-    .stat-card {
-      padding:22px;
-    }
-
-    .stat-label {
-      color:var(--muted);
-      font-size:13px;
-      font-weight:700;
-      margin-bottom:6px;
-    }
-
-    .stat-value {
-      font-size:30px;
-      font-weight:900;
-    }
-
-    .operator-load {
-      padding:14px 18px;
-      font-size:13px;
-      color:var(--muted);
-      border-bottom:1px solid var(--line);
-      line-height:1.8;
-    }
-
-    .calendar-grid {
-      padding:16px;
-      display:grid;
-      grid-template-columns:repeat(7,1fr);
-      gap:10px;
-    }
-
-    .calendar-day-name {
-      color:var(--muted);
-      font-size:12px;
-      font-weight:900;
-      text-align:center;
-      text-transform:uppercase;
-    }
-
-    .calendar-cell {
-      min-height:125px;
-      background:#f8fbfc;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:8px;
-      font-size:12px;
-    }
-
-    .calendar-cell.muted {
-      opacity:.35;
-    }
-
-    .calendar-date {
-      font-weight:900;
-      margin-bottom:6px;
-    }
-
-    .calendar-item {
-      background:white;
-      border-left:4px solid var(--brand);
-      border-radius:8px;
-      padding:6px;
-      margin-top:6px;
-      line-height:1.25;
-    }
-
-    .calendar-item.overdue {
-      border-left-color:var(--danger);
-      background:#ffecec;
-    }
-
-    .calendar-item.risk {
-      border-left-color:var(--warning);
-      background:#fff4e0;
-    }
-
-    table {
-      width:100%;
-      border-collapse:collapse;
-    }
-
-    th, td {
-      padding:12px;
-      border-bottom:1px solid var(--line);
-      vertical-align:top;
-      text-align:left;
-      font-size:13px;
-    }
-
-    th { background:#f6f9fb; }
-
-    tr.row-risk {
-      background:#fff4e0;
-      border-left:6px solid var(--warning);
-    }
-
-    tr.row-overdue {
-      background:#ffe4e4;
-      border-left:6px solid var(--danger);
-      font-weight:700;
-    }
-
-    .pill {
-      display:inline-flex;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:800;
-      margin:0 4px 4px 0;
-    }
-
-    .pending { background:#fff1da; color:#d88d10; }
-    .transit { background:#dff7f3; color:#069788; }
-    .delivered { background:#dff5eb; color:#18a66e; }
-    .delayed { background:#ffe4e4; color:#ef5c5c; }
-    .risk-pill { background:#fff1da; color:#d88d10; }
-    .overdue-pill { background:#ffe4e4; color:#ef5c5c; }
-    .sla-ok { background:#dff5eb; color:#18a66e; }
-    .sla-risk { background:#fff1da; color:#d88d10; }
-    .sla-breach { background:#ffe4e4; color:#ef5c5c; }
-
-    .action-btn {
-      border:0;
-      border-radius:12px;
-      padding:9px 11px;
-      margin:2px;
-      background:#f4f7f8;
-    }
-
-    .doc-link {
-      color:var(--brand-dark);
-      font-weight:800;
-      text-decoration:none;
-      display:block;
-      margin-bottom:4px;
-    }
-
-    .screen { display:none; }
-    .screen.active { display:block; }
-
-    .modal {
-      display:none;
-      position:fixed;
-      inset:0;
-      background:rgba(3,12,28,.6);
-      align-items:center;
-      justify-content:center;
-      z-index:1000;
-      padding:20px;
-    }
-
-    .modal.show { display:flex; }
-
-    .modal-box {
-      width:min(760px,100%);
-      background:white;
-      border-radius:22px;
-      padding:24px;
-      box-shadow:0 30px 80px rgba(2,17,39,.28);
-      max-height:90vh;
-      overflow:auto;
-    }
-
-    .doc-upload-box {
-      border:2px dashed var(--line);
-      border-radius:18px;
-      padding:16px;
-      margin-bottom:14px;
-      background:#fbfdfd;
-      text-align:center;
-    }
-
-    .doc-list {
-      font-size:13px;
-      color:var(--muted);
-      margin-bottom:12px;
-    }
-
-    .modal-actions {
-      display:flex;
-      justify-content:flex-end;
-      gap:10px;
-      margin-top:10px;
-      flex-wrap:wrap;
-    }
-
-    @media(max-width:900px){
-      .app { grid-template-columns:1fr; }
-      .sidebar { display:none; }
-      .grid,.calendar-grid,.stats { grid-template-columns:1fr; }
-      .main { padding:16px; }
-    }
-  </style>
-</head>
-
-<body>
-<div class="login-screen" id="loginScreen">
-  <div class="login-card">
-    <img src="logo.png" alt="Logo">
-    <h1>GateKeeper</h1>
-    <p>Select your name</p>
-    <select id="loginUserSelect"></select>
-    <input id="loginEmail" style="display:none;">
-    <input id="loginPassword" type="password" placeholder="Password">
-    <button class="primary-btn" id="loginBtn">Login</button>
-  </div>
-</div>
-
-<div class="app" id="app">
-  <aside class="sidebar">
-    <div class="brand">
-      <img src="logo.png" alt="Logo">
-      <strong>Operations</strong>
-    </div>
-
-    <nav class="nav">
-      <a class="active" onclick="showScreen('dashboard')">Dashboard</a>
-      <a onclick="showScreen('shipments')">Shipments</a>
-      <a onclick="showScreen('calendar')">Calendar</a>
-    </nav>
-
-    <div class="sidebar-footer">
-      <div class="avatar" id="avatar">GK</div>
-      <div>
-        <div id="userEmail"></div>
-        <small id="userRole"></small>
-      </div>
-    </div>
-  </aside>
-
-  <main class="main">
-    <div class="topbar">
-      <div class="topbar-left">
-        <button class="primary-btn" id="openBtn">+ Add Shipment</button>
-        <button class="secondary-btn" id="logoutBtn">Logout</button>
-      </div>
-    </div>
-
-    <div class="search-row">
-      <input id="searchInput" placeholder="Search client, AWB, route...">
-      <div class="quick-filters">
-        <button class="secondary-btn" onclick="setQuick('all')">All</button>
-        <button class="secondary-btn" onclick="setQuick('mine')">My</button>
-        <button class="secondary-btn" onclick="setQuick('unassigned')">Unassigned</button>
-        <button class="secondary-btn" onclick="setQuick('risk')">At Risk</button>
-      </div>
-    </div>
-
-    <section id="screenDashboard" class="screen active">
-      <section class="stats">
-        <div class="card stat-card">
-          <div class="stat-label">Visible</div>
-          <div class="stat-value" id="visibleStat">0</div>
-        </div>
-        <div class="card stat-card">
-          <div class="stat-label">Unassigned</div>
-          <div class="stat-value" id="unassignedStat">0</div>
-        </div>
-        <div class="card stat-card">
-          <div class="stat-label">At Risk</div>
-          <div class="stat-value" id="riskStat">0</div>
-        </div>
-        <div class="card stat-card">
-          <div class="stat-label">SLA Breach</div>
-          <div class="stat-value" id="slaStat">0</div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="section-head"><h2>Live Map</h2></div>
-        <div id="map"></div>
-      </section>
-
-      <section class="card">
-        <div class="section-head"><h2>Operator Load</h2></div>
-        <div id="operatorLoad" class="operator-load"></div>
-      </section>
-            <section class="card">
         <div class="section-head"><h2>My + Unassigned</h2></div>
         <table>
           <tbody id="dashboardRows"></tbody>
@@ -584,7 +484,7 @@
             <th>Type</th>
             <th>Route</th>
             <th>Status</th>
-            <th>ETA / SLA</th>
+            <th>ETA</th>
             <th>Docs</th>
             <th>Assigned</th>
             <th>Actions</th>
@@ -613,7 +513,6 @@
     </div>
 
     <input id="client" placeholder="Customer">
-    <input id="customerEmail" placeholder="Customer Email (optional)">
     <input id="origin" placeholder="Origin">
     <input id="destination" placeholder="Destination">
     <input id="awb" placeholder="AWB">
@@ -633,6 +532,7 @@
     </div>
   </div>
 </div>
+
 <script>
 const sb = window.supabase.createClient(
   "https://edxgkwkdgvsajfmkejbk.supabase.co",
@@ -640,22 +540,22 @@ const sb = window.supabase.createClient(
 );
 
 const users = [
-  { name:"Gerard Hall", email:"gerard.hall@mauriceward.com", role:"admin" },
-  { name:"Balazs Bekes", email:"balazs.bekes@mauriceward.com", role:"admin" },
-  { name:"Ashley Nason", email:"ashley.nason@mauriceward.com", role:"operator" },
-  { name:"Lisa O'Neill", email:"lisa.oneill@mauriceward.com", role:"operator" },
-  { name:"Damian Halpin", email:"damian.halpin@mauriceward.com", role:"operator" },
-  { name:"Jason O'Neill", email:"jason.o.neill@mauriceward.com", role:"operator" },
-  { name:"Ciara Burns", email:"ciara.burns@mauriceward.com", role:"operator" },
-  { name:"Dominic Martins", email:"dominic.martins@mauriceward.com", role:"operator" },
-  { name:"Roisin Hogan", email:"roisin.hogan@mauriceward.com", role:"operator" },
-  { name:"Lee Hodges", email:"lee.hodges@mauriceward.com", role:"operator" },
-  { name:"Allanah O'Brien", email:"allanah.obrien@mauriceward.com", role:"operator" },
-  { name:"Darragh O Neill", email:"darragh.oneill@mauriceward.com", role:"operator" },
-  { name:"Tea Pitanti-Ivanac", email:"tea.pitanti-ivanac@mauriceward.com", role:"operator" },
-  { name:"Gary Mc Gettrick", email:"gary.mcgettrick@mauriceward.com", role:"operator" },
-  { name:"Eoin Ryan", email:"eoin.ryan@mauriceward.com", role:"operator" },
-  { name:"Natacha Martins", email:"natacha.martins@mauriceward.com", role:"operator" }
+  { name:"Gerard Hall", email:"gerard.hall@mauriceward.com" },
+  { name:"Balazs Bekes", email:"balazs.bekes@mauriceward.com" },
+  { name:"Ashley Nason", email:"ashley.nason@mauriceward.com" },
+  { name:"Lisa O'Neill", email:"lisa.oneill@mauriceward.com" },
+  { name:"Damian Halpin", email:"damian.halpin@mauriceward.com" },
+  { name:"Jason O'Neill", email:"jason.o.neill@mauriceward.com" },
+  { name:"Ciara Burns", email:"ciara.burns@mauriceward.com" },
+  { name:"Dominic Martins", email:"dominic.martins@mauriceward.com" },
+  { name:"Roisin Hogan", email:"roisin.hogan@mauriceward.com" },
+  { name:"Lee Hodges", email:"lee.hodges@mauriceward.com" },
+  { name:"Allanah O'Brien", email:"allanah.obrien@mauriceward.com" },
+  { name:"Darragh O Neill", email:"darragh.oneill@mauriceward.com" },
+  { name:"Tea Pitanti-Ivanac", email:"tea.pitanti-ivanac@mauriceward.com" },
+  { name:"Gary Mc Gettrick", email:"gary.mcgettrick@mauriceward.com" },
+  { name:"Eoin Ryan", email:"eoin.ryan@mauriceward.com" },
+  { name:"Natacha Martins", email:"natacha.martins@mauriceward.com" }
 ];
 
 const shipmentTypes = [
@@ -664,7 +564,6 @@ const shipmentTypes = [
 ];
 
 let user = null;
-let currentUser = null;
 let shipments = [];
 let editingId = null;
 let selectedDocs = [];
@@ -676,7 +575,6 @@ let mapLayer = null;
 
 const getVal = id => document.getElementById(id)?.value?.trim() || "";
 const localDateOnly = d => d ? String(d).slice(0,10) : "";
-const isAdmin = () => currentUser?.role === "admin";
 
 if (window.pdfjsLib) {
   pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -684,15 +582,19 @@ if (window.pdfjsLib) {
 }
 
 function initDropdowns(){
-  loginUserSelect.innerHTML = `<option value="">Select your name</option>`;
+  const loginSelect = document.getElementById("loginUserSelect");
+  const loginEmail = document.getElementById("loginEmail");
+
+  loginSelect.innerHTML = `<option value="">Select your name</option>`;
+
   users.forEach(u => {
     const opt = document.createElement("option");
     opt.value = u.email;
     opt.textContent = u.name;
-    loginUserSelect.appendChild(opt);
+    loginSelect.appendChild(opt);
   });
 
-  loginUserSelect.onchange = e => {
+  loginSelect.onchange = e => {
     loginEmail.value = e.target.value;
   };
 
@@ -725,21 +627,6 @@ function getRiskLevel(x){
   return "none";
 }
 
-function getSlaLevel(x){
-  if(x.status === "Delivered") return "ok";
-  const risk = getRiskLevel(x);
-  if(risk === "overdue") return "breach";
-  if(risk === "risk") return "risk";
-  return "ok";
-}
-
-function getSlaText(x){
-  const level = getSlaLevel(x);
-  if(level === "breach") return "SLA Breach";
-  if(level === "risk") return "SLA Risk";
-  return "SLA OK";
-}
-
 async function login(){
   const { data, error } = await sb.auth.signInWithPassword({
     email:getVal("loginEmail"),
@@ -752,16 +639,11 @@ async function login(){
   }
 
   user = data.user;
-  currentUser =
-    users.find(u => u.email.toLowerCase() === user.email.toLowerCase()) ||
-    { name:user.email, email:user.email, role:"operator" };
 
   loginScreen.style.display = "none";
   app.style.display = "grid";
-
-  userEmail.textContent = currentUser.name;
-  userRole.textContent = currentUser.role.toUpperCase();
-  avatar.textContent = currentUser.name.slice(0,2).toUpperCase();
+  userEmail.textContent = displayUser(user.email);
+  avatar.textContent = displayUser(user.email).slice(0,2).toUpperCase();
 
   initMap();
   await loadShipments();
@@ -830,22 +712,12 @@ function filteredAll(){
 }
 
 function dashboardData(){
-  if(isAdmin()) return filteredAll();
   return filteredAll().filter(x => !x.assigned_to || x.assigned_to === user?.email);
-}
-
-function canEditShipment(x){
-  return isAdmin() || !x.assigned_to || x.assigned_to === user?.email;
-}
-
-function canDeleteShipment(){
-  return isAdmin();
 }
 
 function rowHtml(x){
   const risk = getRiskLevel(x);
   const docs = Array.isArray(x.document_urls) ? x.document_urls : [];
-  const sla = getSlaLevel(x);
 
   return `
     <tr class="${risk === "overdue" ? "row-overdue" : risk === "risk" ? "row-risk" : ""}">
@@ -862,54 +734,24 @@ function rowHtml(x){
         ${risk === "overdue" ? `<span class="pill overdue-pill">⚠ OVERDUE</span>` : ""}
         ${risk === "risk" ? `<span class="pill risk-pill">⚠ AT RISK</span>` : ""}
       </td>
-      <td>
-        ${localDateOnly(x.eta) || "-"}<br>
-        <span class="pill ${
-          sla === "breach" ? "sla-breach" :
-          sla === "risk" ? "sla-risk" : "sla-ok"
-        }">${getSlaText(x)}</span>
-      </td>
+      <td>${localDateOnly(x.eta) || "-"}</td>
       <td>${docs.length ? docs.map((u,i)=>`<a class="doc-link" href="${u}" target="_blank">Doc ${i+1}</a>`).join("") : "-"}</td>
       <td>${displayUser(x.assigned_to)}</td>
       <td>
-        ${canEditShipment(x) ? `<button class="action-btn" onclick="editShipment('${x.id}')">✏️</button>` : ""}
-        ${canEditShipment(x) ? `<button class="action-btn" onclick="setStatus('${x.id}','In Transit')">🚚</button>` : ""}
-        ${canEditShipment(x) ? `<button class="action-btn" onclick="setStatus('${x.id}','Delivered')">✅</button>` : ""}
+        <button class="action-btn" onclick="editShipment('${x.id}')">✏️</button>
+        <button class="action-btn" onclick="setStatus('${x.id}','In Transit')">🚚</button>
+        <button class="action-btn" onclick="setStatus('${x.id}','Delivered')">✅</button>
         ${!x.assigned_to ? `<button class="action-btn" onclick="takeShipment('${x.id}')">🙋</button>` : ""}
-        <button class="action-btn" onclick="customerUpdate('${x.id}')">✉️</button>
-        ${canDeleteShipment() ? `<button class="action-btn" onclick="deleteShipment('${x.id}')">🗑️</button>` : ""}
+        <button class="action-btn" onclick="deleteShipment('${x.id}')">🗑️</button>
       </td>
     </tr>`;
 }
 
 function render(){
-  const dash = dashboardData();
-  const all = filteredAll();
-
-  dashboardRows.innerHTML = dash.map(rowHtml).join("");
-  shipmentRows.innerHTML = all.map(rowHtml).join("");
-
-  visibleStat.textContent = dash.length;
-  unassignedStat.textContent = shipments.filter(x => !x.assigned_to).length;
-  riskStat.textContent = dash.filter(x => getRiskLevel(x) === "risk").length;
-  slaStat.textContent = dash.filter(x => getSlaLevel(x) === "breach").length;
-
-  renderOperatorLoad();
+  dashboardRows.innerHTML = dashboardData().map(rowHtml).join("");
+  shipmentRows.innerHTML = filteredAll().map(rowHtml).join("");
   renderCalendar();
-  renderMap(dash);
-}
-
-function renderOperatorLoad(){
-  const counts = {};
-
-  shipments.forEach(s => {
-    const key = s.assigned_to || "Unassigned";
-    counts[key] = (counts[key] || 0) + 1;
-  });
-
-  operatorLoad.innerHTML = Object.entries(counts)
-    .map(([k,v]) => `<b>${displayUser(k)}</b>: ${v}`)
-    .join(" | ");
+  renderMap(dashboardData());
 }
 
 function renderCalendar(){
@@ -1008,25 +850,12 @@ async function takeShipment(id){
 }
 
 async function setStatus(id,status){
-  const x = shipments.find(s => s.id === id);
-
-  if(x && !canEditShipment(x)){
-    alert("You do not have permission to update this shipment.");
-    return;
-  }
-
   await sb.from("shipments").update({status}).eq("id",id);
   await loadShipments();
 }
 
 async function deleteShipment(id){
-  if(!canDeleteShipment()){
-    alert("Only admins can delete shipments.");
-    return;
-  }
-
   if(!confirm("Delete this shipment?")) return;
-
   await sb.from("shipments").delete().eq("id",id);
   await loadShipments();
 }
@@ -1035,11 +864,6 @@ function editShipment(id){
   const x = shipments.find(s => s.id === id);
   if(!x) return;
 
-  if(!canEditShipment(x)){
-    alert("You do not have permission to edit this shipment.");
-    return;
-  }
-
   editingId = id;
   existingDocs = Array.isArray(x.document_urls) ? x.document_urls : [];
 
@@ -1047,7 +871,6 @@ function editShipment(id){
   modalTitle.textContent = "Edit Shipment";
 
   client.value = x.client || "";
-  customerEmail.value = x.customer_email || "";
   origin.value = x.origin || "";
   destination.value = x.destination || "";
   awb.value = x.awb_number || "";
@@ -1092,7 +915,6 @@ async function saveShipment(){
 
   const payload = {
     client:getVal("client"),
-    customer_email:getVal("customerEmail") || null,
     origin:getVal("origin"),
     destination:getVal("destination"),
     awb_number:getVal("awb"),
@@ -1158,35 +980,6 @@ async function saveShipment(){
 
   modal.classList.remove("show");
   await loadShipments();
-}
-
-function customerUpdate(id){
-  const x = shipments.find(s => s.id === id);
-  if(!x) return;
-
-  const subject = `Shipment Update ${x.shipment_ref || ""}`;
-
-  const body =
-`Hello,
-
-Please see the latest update for your shipment.
-
-Customer: ${x.client || ""}
-Reference: ${x.shipment_ref || ""}
-AWB / Waybill: ${x.awb_number || ""}
-Route: ${x.origin || ""} to ${x.destination || ""}
-ETA: ${localDateOnly(x.eta) || "TBC"}
-Status: ${x.status || "Pending"}
-SLA: ${getSlaText(x)}
-
-Kind regards,`;
-
-  navigator.clipboard?.writeText(body);
-
-  const to = x.customer_email || "";
-
-  window.location.href =
-    `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 async function readDocText(file) {
@@ -1332,7 +1125,7 @@ openBtn.onclick = () => {
   modalTitle.textContent = "Add Shipment";
 
   [
-    "client","customerEmail","origin","destination","awb","carrier",
+    "client","origin","destination","awb","carrier",
     "pieces","weight","shipper","consignee","eta"
   ].forEach(id => {
     document.getElementById(id).value = "";
