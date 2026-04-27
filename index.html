@@ -7,7 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--nav:#04142e;--nav2:#0a1f43;--brand:#06b7a5;--brand2:#069788;--gold:#d99a00;--gold2:#f7c948;--bg:#f4f7f8;--text:#11213d;--muted:#6f7d93;--line:#e4ebed;--danger:#ef5c5c;--warning:#f0a227;--success:#18a66e;--shadow:0 22px 60px rgba(6,20,46,.07)}
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}button,input,select,textarea{font-family:inherit}button{border:0;border-radius:11px;padding:11px 14px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--brand),var(--brand2));color:white}button.secondary{background:white;color:var(--text);border:1px solid var(--line)}button.gold{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#221500;box-shadow:0 10px 26px rgba(217,154,0,.28)}input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:11px;margin-top:8px;font-size:14px;background:white}textarea{min-height:170px;resize:vertical}.login-screen{display:flex;min-height:100vh;align-items:center;justify-content:center;background:radial-gradient(circle at 20% 25%,#0d2152,var(--nav) 60%);padding:20px}.login-card{background:white;padding:34px;border-radius:24px;width:min(440px,100%);box-shadow:0 35px 90px rgba(0,0,0,.28)}.login-card h2{margin:0 0 6px;color:var(--nav)}.login-card p{margin:0 0 18px;color:var(--muted);font-size:13px}#loginMsg{margin-top:12px;font-size:13px;color:var(--danger)}.app{display:none;min-height:100vh}.app.show{display:block}.sidebar{position:fixed;left:0;top:0;width:238px;background:var(--nav);color:white;height:100vh;padding:18px 12px;overflow:auto}.logo{font-weight:900;font-size:20px;margin:6px 8px 20px;letter-spacing:.3px}.logo span{background:var(--brand);border-radius:10px;padding:7px 10px;margin-right:8px}.vip-upload{margin:14px 8px 18px;padding:13px 12px;border-radius:16px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#221500;font-weight:900;text-align:center;cursor:pointer;box-shadow:0 14px 30px rgba(217,154,0,.25)}.vip-upload small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;color:#4b3000}.nav{padding:12px 14px;cursor:pointer;border-radius:12px;margin:4px 0;font-weight:800;font-size:14px;color:rgba(255,255,255,.86)}.nav:hover,.nav.active{background:var(--nav2);color:white}.content{margin-left:238px;padding:24px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.top h1{margin:0;color:var(--nav)}.sub{color:var(--muted);margin:4px 0 0;font-size:13px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}.two-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}.card{background:white;border:1px solid rgba(0,0,0,.04);border-radius:20px;box-shadow:var(--shadow);padding:18px;margin-bottom:16px}.card h3{margin:0 0 8px;color:var(--brand2);font-size:15px}.metric{font-size:30px;font-weight:900;color:var(--nav)}table{width:100%;border-collapse:collapse;background:white;border-radius:18px;overflow:hidden}th,td{padding:12px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);background:#f8fbfc}.table-wrap{overflow:auto}.badge{display:inline-block;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:900}.vip{background:#ffe8a3;color:#6c4300}.ok{background:#dff5eb;color:var(--success)}.warn{background:#fff1da;color:#d88d10}.bad{background:#ffe4e4;color:var(--danger)}.muted{background:#f4f7f8;color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.notice{padding:12px 14px;border-radius:14px;background:#fff1da;color:#a66a00;font-size:13px;margin:10px 0}.success-msg{padding:12px 14px;border-radius:14px;background:#dff5eb;color:var(--success);font-size:13px;margin:10px 0}.kanban{display:grid;grid-template-columns:repeat(5,minmax(230px,1fr));gap:14px;overflow-x:auto;padding-bottom:10px}.kanban-col{background:#eef4f5;border:1px solid var(--line);border-radius:18px;padding:12px;min-height:520px}.kanban-col h3{margin:0 0 10px;color:var(--nav);font-size:14px;display:flex;justify-content:space-between}.kanban-col.over{outline:2px dashed var(--brand)}.kanban-card{background:white;border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px;box-shadow:0 10px 22px rgba(6,20,46,.06);cursor:grab}.kanban-card strong{color:var(--nav)}.kanban-card .mini{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35}.kanban-card.vip-card{border-left:5px solid var(--gold);background:#fff9e8}.preview{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.preview-item{background:#f8fbfc;border:1px solid var(--line);border-radius:14px;padding:11px}.preview-item small{display:block;text-transform:uppercase;font-weight:900;color:var(--muted);font-size:10px;margin-bottom:4px}.preview-item strong{font-size:14px;color:var(--nav);word-break:break-word}.modal{display:none;position:fixed;inset:0;background:rgba(3,12,28,.55);align-items:center;justify-content:center;padding:20px;z-index:100}.modal.show{display:flex}.modal-box{width:min(760px,100%);max-height:90vh;overflow:auto;background:white;border-radius:22px;padding:24px;box-shadow:0 30px 80px rgba(2,17,39,.28)}@media(max-width:1000px){.sidebar{position:static;width:100%;height:auto}.content{margin-left:0}.grid,.two-grid{grid-template-columns:1fr 1fr}}@media(max-width:700px){.grid,.two-grid,.preview{grid-template-columns:1fr}}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}button,input,select,textarea{font-family:inherit}button{border:0;border-radius:11px;padding:11px 14px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--brand),var(--brand2));color:white}button.secondary{background:white;color:var(--text);border:1px solid var(--line)}button.gold{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#221500;box-shadow:0 10px 26px rgba(217,154,0,.28)}input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:11px;margin-top:8px;font-size:14px;background:white}textarea{min-height:170px;resize:vertical}.login-screen{display:flex;min-height:100vh;align-items:center;justify-content:center;background:radial-gradient(circle at 20% 25%,#0d2152,var(--nav) 60%);padding:20px}.login-card{background:white;padding:34px;border-radius:24px;width:min(440px,100%);box-shadow:0 35px 90px rgba(0,0,0,.28)}.login-card h2{margin:0 0 6px;color:var(--nav)}.login-card p{margin:0 0 18px;color:var(--muted);font-size:13px}#loginMsg{margin-top:12px;font-size:13px;color:var(--danger)}.app{display:none;min-height:100vh}.app.show{display:block}.sidebar{position:fixed;left:0;top:0;width:238px;background:var(--nav);color:white;height:100vh;padding:18px 12px;overflow:auto}.logo{font-weight:900;font-size:20px;margin:6px 8px 20px;letter-spacing:.3px}.logo span{background:var(--brand);border-radius:10px;padding:7px 10px;margin-right:8px}.vip-upload{margin:14px 8px 18px;padding:13px 12px;border-radius:16px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#221500;font-weight:900;text-align:center;cursor:pointer;box-shadow:0 14px 30px rgba(217,154,0,.25)}.vip-upload small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;color:#4b3000}.nav{padding:12px 14px;cursor:pointer;border-radius:12px;margin:4px 0;font-weight:800;font-size:14px;color:rgba(255,255,255,.86)}.nav:hover,.nav.active{background:var(--nav2);color:white}.content{margin-left:238px;padding:24px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.top h1{margin:0;color:var(--nav)}.sub{color:var(--muted);margin:4px 0 0;font-size:13px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}.two-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}.card{background:white;border:1px solid rgba(0,0,0,.04);border-radius:20px;box-shadow:var(--shadow);padding:18px;margin-bottom:16px}.card h3{margin:0 0 8px;color:var(--brand2);font-size:15px}.metric{font-size:30px;font-weight:900;color:var(--nav)}table{width:100%;border-collapse:collapse;background:white;border-radius:18px;overflow:hidden}th,td{padding:12px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);background:#f8fbfc}.table-wrap{overflow:auto}.badge{display:inline-block;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:900}.vip{background:#ffe8a3;color:#6c4300}.ok{background:#dff5eb;color:var(--success)}.warn{background:#fff1da;color:#d88d10}.bad{background:#ffe4e4;color:var(--danger)}.muted{background:#f4f7f8;color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.notice{padding:12px 14px;border-radius:14px;background:#fff1da;color:#a66a00;font-size:13px;margin:10px 0}.success-msg{padding:12px 14px;border-radius:14px;background:#dff5eb;color:var(--success);font-size:13px;margin:10px 0}.kanban{display:grid;grid-template-columns:repeat(5,minmax(230px,1fr));gap:14px;overflow-x:auto;padding-bottom:10px}.kanban-col{background:#eef4f5;border:1px solid var(--line);border-radius:18px;padding:12px;min-height:520px}.kanban-col h3{margin:0 0 10px;color:var(--nav);font-size:14px;display:flex;justify-content:space-between}.kanban-col.over{outline:2px dashed var(--brand)}.kanban-card{background:white;border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px;box-shadow:0 10px 22px rgba(6,20,46,.06);cursor:grab}.kanban-card strong{color:var(--nav)}.kanban-card .mini{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35}.kanban-card.vip-card{border-left:5px solid var(--gold);background:#fff9e8}.preview{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.preview-item{background:#f8fbfc;border:1px solid var(--line);border-radius:14px;padding:11px}.preview-item small{display:block;text-transform:uppercase;font-weight:900;color:var(--muted);font-size:10px;margin-bottom:4px}.preview-item strong{font-size:14px;color:var(--nav);word-break:break-word}.modal{display:none;position:fixed;inset:0;background:rgba(3,12,28,.55);align-items:center;justify-content:center;padding:20px;z-index:100}.modal.show{display:flex}.modal-box{width:min(860px,100%);max-height:90vh;overflow:auto;background:white;border-radius:22px;padding:24px;box-shadow:0 30px 80px rgba(2,17,39,.28)}.detail-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}.timeline{position:relative;margin:16px 0;padding-left:24px}.timeline:before{content:"";position:absolute;left:7px;top:4px;bottom:4px;width:2px;background:var(--line)}.tl{position:relative;margin-bottom:14px}.tl:before{content:"";position:absolute;left:-22px;top:2px;width:14px;height:14px;border-radius:50%;background:var(--brand);border:2px solid white;box-shadow:0 0 0 2px rgba(6,183,165,.18)}.tl strong{display:block;color:var(--nav);font-size:13px}.tl small{color:var(--muted);font-size:11px}.note{border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px;background:#f8fbfc}.note strong{font-size:12px;color:var(--nav)}.note p{margin:5px 0 0;font-size:13px;color:var(--text);white-space:pre-wrap}.quick-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}@media(max-width:1000px){.sidebar{position:static;width:100%;height:auto}.content{margin-left:0}.grid,.two-grid{grid-template-columns:1fr 1fr}}@media(max-width:700px){.grid,.two-grid,.preview{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -70,6 +70,89 @@ async function unassignShipment(id){const {error}=await sb.from('shipments').upd
 async function setShipmentStatus(id,status){const {error}=await sb.from('shipments').update({status,assigned_to:appUser.id}).eq('id',id);if(error)alert(error.message);else openDetail(id);}
 async function markDelivered(id){const ships=await getShipments();const s=ships.find(x=>x.id===id);const ms=[...(s?.milestones||[]),{code:'DELIVERED',label:'Delivered',completed_at:new Date().toISOString(),completed_by:appUser.email,note:'Marked delivered from detail screen'}];const {error}=await sb.from('shipments').update({status:'done',assigned_to:appUser.id,milestones:ms,milestone_updated_at:new Date().toISOString()}).eq('id',id);if(error)alert(error.message);else openDetail(id);}
 function closeDetail(){document.getElementById('detailModal').classList.remove('show')}document.getElementById('detailModal').addEventListener('click',e=>{if(e.target.id==='detailModal')closeDetail()});
+// =========================
+// SMART AUTO ASSIGNMENT
+// =========================
+async function smartAssign(shipment){
+  const users = await getUsers();
+  const ships = await getShipments();
+
+  const workload = users.map(u=>{
+    const count = ships.filter(s=>s.assigned_to===u.id).length;
+    return {...u, load:count};
+  });
+
+  // VIP → manager
+  if(shipment.vip){
+    const manager = workload.find(u=>u.role==='manager');
+    return manager?.id || workload[0]?.id;
+  }
+
+  // Lowest workload
+  workload.sort((a,b)=>a.load-b.load);
+  return workload[0]?.id;
+}
+
+// =========================
+// SLA + ALERT EXTENSION
+// =========================
+function slaStatus(s){
+  if(!s.created_at) return 'ok';
+  const hours = (Date.now() - new Date(s.created_at).getTime())/3600000;
+  if(!s.assigned_to && hours>24) return 'breach';
+  return 'ok';
+}
+
+// =========================
+// EMAIL GENERATOR
+// =========================
+function generateEmail(s){
+  return `Subject: Shipment Update - ${s.shipment_ref}
+
+Dear Customer,
+
+Your shipment (${s.shipment_ref}) is currently ${s.status||'in progress'}.
+
+Route: ${s.origin} → ${s.destination}
+ETA: ${s.eta || 'TBC'}
+
+We will keep you updated.
+
+Kind regards,\nOperations Team`;
+}
+
+// =========================
+// DOCUMENTS (LIGHT)
+// =========================
+async function uploadDoc(id,file){
+  const path = `docs/${id}/${file.name}`;
+  const {error} = await sb.storage.from('docs').upload(path,file);
+  if(error) alert(error.message);
+}
+
+// =========================
+// KPI PANEL
+// =========================
+async function renderKPIs(){
+  const ships = await getShipments();
+  const users = await getUsers();
+
+  const perUser = users.map(u=>{
+    const count = ships.filter(s=>s.assigned_to===u.id).length;
+    return `<div>${u.full_name}: ${count}</div>`;
+  }).join('');
+
+  return `<div class="card"><h3>Team Workload</h3>${perUser}</div>`;
+}
+
+// Inject KPI into dashboard
+const oldRenderDashboard = renderDashboard;
+renderDashboard = async function(){
+  await oldRenderDashboard();
+  const kpi = await renderKPIs();
+  document.getElementById('content').innerHTML += kpi;
+}
+
 init();
 </script>
 </body>
