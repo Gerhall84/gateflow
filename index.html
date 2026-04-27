@@ -3,6 +3,131 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GateFlow Pro</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{font-family:Arial;margin:0;background:#f4f7f8}
+.login{display:flex;height:100vh;align-items:center;justify-content:center}
+.card{background:white;padding:30px;border-radius:12px;width:320px}
+input,button{width:100%;padding:10px;margin-top:10px}
+.app{display:none}
+.sidebar{width:220px;background:#04142e;color:white;height:100vh;float:left;padding:10px}
+.nav{padding:12px;cursor:pointer}
+.nav:hover{background:#0a1f43}
+.content{margin-left:220px;padding:20px}
+.kanban{display:flex;gap:12px}
+.col{background:#eef4f5;padding:10px;border-radius:10px;width:250px}
+.card-job{background:white;padding:10px;border-radius:8px;margin-bottom:8px;cursor:grab}
+.vip{border-left:4px solid gold;background:#fff9e8}
+.alert{background:#ffe4e4;padding:10px;border-radius:8px;margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<div class="login" id="login">
+  <div class="card">
+    <h2>GateFlow</h2>
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <div id="msg"></div>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <div class="sidebar">
+    <div class="nav" onclick="view='dashboard';render()">Dashboard</div>
+    <div class="nav" onclick="view='kanban';render()">Kanban</div>
+    <div class="nav" onclick="view='bd';render()">BD Upload</div>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+
+<script>
+const SUPABASE_URL='https://edxgkwkdgvsajfmkejbk.supabase.co';
+const SUPABASE_ANON_KEY='PASTE_KEY';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+let user=null,view='dashboard';
+
+async function login(){
+ const {data,error}=await sb.auth.signInWithPassword({
+  email:email.value,password:password.value
+ });
+ if(error){msg.innerText=error.message;return}
+ user=data.user;start();
+}
+
+function start(){login.style.display='none';app.style.display='block';render()}
+
+async function render(){
+ if(view==='dashboard') dash();
+ if(view==='kanban') kanban();
+ if(view==='bd') bd();
+}
+
+async function dash(){
+ const {data}=await sb.from('shipments').select('*');
+ const mine=data.filter(s=>s.assigned_to===user.id);
+ const unassigned=data.filter(s=>!s.assigned_to);
+ const alerts=data.filter(s=>!s.assigned_to);
+ content.innerHTML=`
+ <h1>Dashboard</h1>
+ <div class="alert">Unassigned: ${alerts.length}</div>
+ <h3>My Shipments</h3>
+ ${mine.map(s=>s.shipment_ref).join('<br>')}
+ <h3>Unassigned</h3>
+ ${unassigned.map(s=>s.shipment_ref).join('<br>')}
+ `;
+}
+
+async function kanban(){
+ const {data}=await sb.from('shipments').select('*');
+ const cols={
+  new:data.filter(s=>!s.assigned_to),
+  progress:data.filter(s=>s.assigned_to),
+  done:data.filter(s=>s.status==='done')
+ };
+ content.innerHTML=`<h1>Kanban</h1><div class="kanban">
+ ${Object.keys(cols).map(c=>`
+ <div class="col" ondrop="drop(event,'${c}')" ondragover="allow(event)">
+ <h3>${c}</h3>
+ ${cols[c].map(s=>`
+  <div draggable="true" ondragstart="drag(event,'${s.id}')" class="card-job ${s.vip?'vip':''}">
+   ${s.shipment_ref}
+  </div>`).join('')}
+ </div>`).join('')}
+ </div>`;
+}
+
+function drag(e,id){e.dataTransfer.setData('id',id)}
+function allow(e){e.preventDefault()}
+async function drop(e,col){
+ e.preventDefault();
+ const id=e.dataTransfer.getData('id');
+ await sb.from('shipments').update({status:col}).eq('id',id);
+ render();
+}
+
+function bd(){
+ content.innerHTML=`
+ <h1>BD Upload</h1>
+ <textarea id="raw"></textarea>
+ <button onclick="parse()">Parse</button>
+ <div id="out"></div>`;
+}
+
+function parse(){
+ const t=raw.value;
+ const vip=/vip/i.test(t);
+ out.innerText=JSON.stringify({vip},null,2);
+}
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GateFlow</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
