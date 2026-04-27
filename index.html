@@ -1,38 +1,223 @@
-// MULTI-UPLOAD PARSER OVERRIDE
-// Supports BD Handover, General Cargo, Customs Clearance
-parseHandover = function(raw){
-  const text = String(raw || '').replaceAll('\r','');
-  const lower = text.toLowerCase();
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>GateFlow Pro</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  const find = (patterns) => {
-    for (const pattern of patterns) {
-      const m = text.match(pattern);
-      if (m && (m[1] || m[0])) return clean(m[1] || m[0]);
-    }
-    return null;
+<style>
+body{margin:0;font-family:Arial;background:#f4f7f8}
+.sidebar{width:230px;background:#04142e;color:white;height:100vh;float:left;padding:10px}
+.nav{padding:12px;cursor:pointer}
+.nav:hover{background:#0a1f43}
+.content{margin-left:230px;padding:20px}
+.card{background:white;padding:15px;border-radius:10px;margin-bottom:10px}
+button{padding:8px;margin-top:5px}
+.vip{color:gold;font-weight:bold}
+.kanban{display:flex;gap:10px}
+.col{background:#eef4f5;padding:10px;border-radius:10px;width:260px}
+.job{background:white;margin:5px;padding:8px;border-radius:8px;cursor:grab}
+.alert{background:#ffe4e4;padding:10px;border-radius:8px;margin-bottom:10px}
+textarea{width:100%;height:120px;margin-top:10px}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <h2>GateFlow Login</h2>
+  <select id="userSelect"></select>
+  <input id="password" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <div id="msg"></div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <div class="sidebar">
+    <div class="nav" onclick="view='dashboard';render()">Dashboard</div>
+    <div class="nav" onclick="view='kanban';render()">Kanban</div>
+    <div class="nav" onclick="view='upload';render()">Uploads</div>
+  </div>
+
+  <div class="content" id="content"></div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://edxgkwkdgvsajfmkejbk.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek
+';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let user=null, view='dashboard', uploadType='BD';
+
+// LOAD USERS
+async function loadUsers(){
+  const {data}=await sb.from('users').select('*');
+  userSelect.innerHTML='<option>Select User</option>';
+  data.forEach(u=>{
+    let o=document.createElement('option');
+    o.value=u.email;
+    o.textContent=u.full_name;
+    userSelect.appendChild(o);
+  });
+}
+loadUsers();
+
+// LOGIN
+async function login(){
+  const {data,error}=await sb.auth.signInWithPassword({
+    email:userSelect.value,
+    password:password.value
+  });
+
+  if(error){msg.innerText=error.message;return;}
+
+  user=data.user;
+  login.style.display='none';
+  app.style.display='block';
+  render();
+}
+
+// DASHBOARD
+async function dashboard(){
+  const {data}=await sb.from('shipments').select('*');
+
+  const mine=data.filter(s=>s.assigned_to===user.id);
+  const unassigned=data.filter(s=>!s.assigned_to);
+
+  content.innerHTML=`
+    <h2>Dashboard</h2>
+
+    <div class="alert">Unassigned: ${unassigned.length}</div>
+
+    <div class="card">
+      <b>My Shipments</b><br>
+      ${mine.map(s=>s.shipment_ref).join('<br>')}
+    </div>
+
+    <div class="card">
+      <b>Unassigned</b><br>
+      ${unassigned.map(s=>s.shipment_ref).join('<br>')}
+    </div>
+  `;
+}
+
+// KANBAN
+async function kanban(){
+  const {data}=await sb.from('shipments').select('*');
+
+  const newJobs=data.filter(s=>!s.assigned_to);
+  const booked=data.filter(s=>s.status==='booked');
+  const done=data.filter(s=>s.status==='done');
+
+  content.innerHTML=`
+    <h2>Kanban</h2>
+    <div class="kanban">
+      ${column('New',newJobs)}
+      ${column('Booked',booked)}
+      ${column('Done',done)}
+    </div>
+  `;
+}
+
+function column(name,list){
+  return `
+  <div class="col" ondrop="drop(event,'${name}')" ondragover="allow(event)">
+    <h3>${name}</h3>
+    ${list.map(s=>`
+      <div class="job" draggable="true" ondragstart="drag(event,'${s.id}')">
+        ${s.vip ? '<span class="vip">VIP</span>' : ''}
+        ${s.shipment_ref}
+        <br>
+        <button onclick="assign('${s.id}')">Assign to me</button>
+      </div>
+    `).join('')}
+  </div>`;
+}
+
+// DRAG
+function drag(e,id){e.dataTransfer.setData("id",id)}
+function allow(e){e.preventDefault()}
+
+async function drop(e,status){
+  e.preventDefault();
+  const id=e.dataTransfer.getData("id");
+
+  let payload={status:status};
+  if(status==="New") payload.assigned_to=null;
+
+  await sb.from('shipments').update(payload).eq('id',id);
+  render();
+}
+
+// ASSIGN
+async function assign(id){
+  await sb.from('shipments').update({
+    assigned_to:user.id,
+    status:'booked'
+  }).eq('id',id);
+
+  render();
+}
+
+// UPLOAD
+function upload(){
+  content.innerHTML=`
+    <h2>Uploads</h2>
+
+    <select onchange="uploadType=this.value">
+      <option>BD</option>
+      <option>General Cargo</option>
+      <option>Customs</option>
+    </select>
+
+    <textarea id="raw"></textarea>
+    <button onclick="parse()">Parse</button>
+    <button onclick="create()">Create Shipment</button>
+
+    <pre id="out"></pre>
+  `;
+}
+
+// PARSER
+let parsed=null;
+
+function parse(){
+  const t=raw.value;
+
+  parsed={
+    type:uploadType,
+    vip:/vip/i.test(t),
+    shipment_ref:(t.match(/SHP\d+/)||['AUTO-'+Date.now()])[0]
   };
 
-  const out = {
-    raw_text: raw,
-    upload_type: uploadType,
-    client: null,
-    shipment_ref: null,
-    origin: null,
-    destination: null,
-    shipment_type: null,
-    cargo_description: null,
-    customs_ref: null,
-    etd: null,
-    eta: null,
-    pickup_date: null,
-    vip: /(vip|urgent|priority|high value|key account|critical|time critical)/i.test(text),
-    notes: text.slice(0,1500)
-  };
+  out.innerText=JSON.stringify(parsed,null,2);
+}
 
-  // parser now changes behaviour based on:
-  // BD Handover
-  // General Cargo
-  // Customs Clearance
+// CREATE SHIPMENT
+async function create(){
+  if(!parsed)return alert("Parse first");
 
-  return out;
-};
+  await sb.from('shipments').insert({
+    shipment_ref:parsed.shipment_ref,
+    shipment_type:parsed.type,
+    vip:parsed.vip,
+    status:'new'
+  });
+
+  alert("Created");
+  render();
+}
+
+// ROUTER
+function render(){
+  if(view==='dashboard') dashboard();
+  if(view==='kanban') kanban();
+  if(view==='upload') upload();
+}
+</script>
+
+</body>
+</html>
