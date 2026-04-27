@@ -17,7 +17,7 @@
 <script>
 // IMPORTANT: URL + anon key must come from the SAME Supabase project.
 const SUPABASE_URL = 'https://edxgkwkdgvsajfmkejbk.supabase.co';
-const SUPABASE_ANON_KEY = 'PASTE_YOUR_ANON_PUBLIC_KEY_FROM_THIS_PROJECT_HERE';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let authUser=null, appUser=null, view='dashboard', allUsers=[], lastParsed=null;
 
