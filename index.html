@@ -1,159 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>GateFlow Pro</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-:root{--nav:#04142e;--nav2:#0a1f43;--brand:#06b7a5;--brand2:#069788;--gold:#d99a00;--gold2:#f7c948;--bg:#f4f7f8;--text:#11213d;--muted:#6f7d93;--line:#e4ebed;--danger:#ef5c5c;--warning:#f0a227;--success:#18a66e;--shadow:0 22px 60px rgba(6,20,46,.07)}
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}button,input,select,textarea{font-family:inherit}button{border:0;border-radius:11px;padding:11px 14px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--brand),var(--brand2));color:white}button.secondary{background:white;color:var(--text);border:1px solid var(--line)}button.gold{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#221500;box-shadow:0 10px 26px rgba(217,154,0,.28)}input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:11px;margin-top:8px;font-size:14px;background:white}textarea{min-height:170px;resize:vertical}.login-screen{display:flex;min-height:100vh;align-items:center;justify-content:center;background:radial-gradient(circle at 20% 25%,#0d2152,var(--nav) 60%);padding:20px}.login-card{background:white;padding:34px;border-radius:24px;width:min(440px,100%);box-shadow:0 35px 90px rgba(0,0,0,.28)}.login-card h2{margin:0 0 6px;color:var(--nav)}.login-card p{margin:0 0 18px;color:var(--muted);font-size:13px}#loginMsg{margin-top:12px;font-size:13px;color:var(--danger)}.app{display:none;min-height:100vh}.app.show{display:block}.sidebar{position:fixed;left:0;top:0;width:238px;background:var(--nav);color:white;height:100vh;padding:18px 12px;overflow:auto}.logo{font-weight:900;font-size:20px;margin:6px 8px 20px;letter-spacing:.3px}.logo span{background:var(--brand);border-radius:10px;padding:7px 10px;margin-right:8px}.vip-upload{margin:14px 8px 18px;padding:13px 12px;border-radius:16px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#221500;font-weight:900;text-align:center;cursor:pointer;box-shadow:0 14px 30px rgba(217,154,0,.25)}.vip-upload small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;color:#4b3000}.nav{padding:12px 14px;cursor:pointer;border-radius:12px;margin:4px 0;font-weight:800;font-size:14px;color:rgba(255,255,255,.86)}.nav:hover,.nav.active{background:var(--nav2);color:white}.content{margin-left:238px;padding:24px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.top h1{margin:0;color:var(--nav)}.sub{color:var(--muted);margin:4px 0 0;font-size:13px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}.two-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}.card{background:white;border:1px solid rgba(0,0,0,.04);border-radius:20px;box-shadow:var(--shadow);padding:18px;margin-bottom:16px}.card h3{margin:0 0 8px;color:var(--brand2);font-size:15px}.metric{font-size:30px;font-weight:900;color:var(--nav)}table{width:100%;border-collapse:collapse;background:white;border-radius:18px;overflow:hidden}th,td{padding:12px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);background:#f8fbfc}.table-wrap{overflow:auto}.badge{display:inline-block;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:900}.vip{background:#ffe8a3;color:#6c4300}.ok{background:#dff5eb;color:var(--success)}.warn{background:#fff1da;color:#d88d10}.bad{background:#ffe4e4;color:var(--danger)}.muted{background:#f4f7f8;color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.notice{padding:12px 14px;border-radius:14px;background:#fff1da;color:#a66a00;font-size:13px;margin:10px 0}.success-msg{padding:12px 14px;border-radius:14px;background:#dff5eb;color:var(--success);font-size:13px;margin:10px 0}.kanban{display:grid;grid-template-columns:repeat(5,minmax(230px,1fr));gap:14px;overflow-x:auto;padding-bottom:10px}.kanban-col{background:#eef4f5;border:1px solid var(--line);border-radius:18px;padding:12px;min-height:520px}.kanban-col h3{margin:0 0 10px;color:var(--nav);font-size:14px;display:flex;justify-content:space-between}.kanban-col.over{outline:2px dashed var(--brand)}.kanban-card{background:white;border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px;box-shadow:0 10px 22px rgba(6,20,46,.06);cursor:grab}.kanban-card strong{color:var(--nav)}.kanban-card .mini{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35}.kanban-card.vip-card{border-left:5px solid var(--gold);background:#fff9e8}.preview{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.preview-item{background:#f8fbfc;border:1px solid var(--line);border-radius:14px;padding:11px}.preview-item small{display:block;text-transform:uppercase;font-weight:900;color:var(--muted);font-size:10px;margin-bottom:4px}.preview-item strong{font-size:14px;color:var(--nav);word-break:break-word}.modal{display:none;position:fixed;inset:0;background:rgba(3,12,28,.55);align-items:center;justify-content:center;padding:20px;z-index:100}.modal.show{display:flex}.modal-box{width:min(860px,100%);max-height:90vh;overflow:auto;background:white;border-radius:22px;padding:24px;box-shadow:0 30px 80px rgba(2,17,39,.28)}.detail-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}.timeline{position:relative;margin:16px 0;padding-left:24px}.timeline:before{content:"";position:absolute;left:7px;top:4px;bottom:4px;width:2px;background:var(--line)}.tl{position:relative;margin-bottom:14px}.tl:before{content:"";position:absolute;left:-22px;top:2px;width:14px;height:14px;border-radius:50%;background:var(--brand);border:2px solid white;box-shadow:0 0 0 2px rgba(6,183,165,.18)}.tl strong{display:block;color:var(--nav);font-size:13px}.tl small{color:var(--muted);font-size:11px}.note{border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px;background:#f8fbfc}.note strong{font-size:12px;color:var(--nav)}.note p{margin:5px 0 0;font-size:13px;color:var(--text);white-space:pre-wrap}.quick-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}@media(max-width:1000px){.sidebar{position:static;width:100%;height:auto}.content{margin-left:0}.grid,.two-grid{grid-template-columns:1fr 1fr}}@media(max-width:700px){.grid,.two-grid,.preview{grid-template-columns:1fr}}
-</style>
-</head>
-<body>
-<div class="login-screen" id="loginScreen"><div class="login-card"><h2>GateFlow</h2><p>Select your name and enter your password. No magic links.</p><select id="userSelect"><option value="">Loading users...</option></select><input id="loginPassword" type="password" placeholder="Password" /><button onclick="doLogin()">Login</button><div id="loginMsg"></div></div></div>
-<div class="app" id="app"><aside class="sidebar"><div class="logo"><span>G</span>GateFlow</div><div class="vip-upload" onclick="setView('bd');setTimeout(()=>document.getElementById('raw')?.focus(),100)"><small>VIP / BD</small>Upload Handover</div><div class="nav active" data-view="dashboard" onclick="setView('dashboard')">Dashboard</div><div class="nav" data-view="kanban" onclick="setView('kanban')">Kanban Board</div><div class="nav" data-view="jobs" onclick="setView('jobs')">My Shipments</div><div class="nav" data-view="assign" onclick="setView('assign')">Jobs to Assign</div><div class="nav" data-view="bd" onclick="setView('bd')">BD Handovers</div><div class="nav" onclick="logout()">Sign out</div></aside><main class="content" id="content"></main></div>
-<div class="modal" id="detailModal"><div class="modal-box" id="detailBox"></div></div>
-<script>
-// IMPORTANT: URL + anon key must come from the SAME Supabase project.
-const SUPABASE_URL = 'https://edxgkwkdgvsajfmkejbk.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let authUser=null, appUser=null, view='dashboard', allUsers=[], lastParsed=null;
+// MULTI-UPLOAD PARSER OVERRIDE
+// Supports BD Handover, General Cargo, Customs Clearance
+parseHandover = function(raw){
+  const text = String(raw || '').replaceAll('\r','');
+  const lower = text.toLowerCase();
 
-async function init(){await loadLoginUsers();const {data:{session}}=await sb.auth.getSession();if(session){authUser=session.user;await startApp();}}
-async function loadLoginUsers(){const select=document.getElementById('userSelect');const {data,error}=await sb.from('users').select('email,full_name,active').eq('active',true).order('full_name');if(error){select.innerHTML='<option value="">Could not load users</option>';document.getElementById('loginMsg').innerText=error.message;return;}allUsers=data||[];select.innerHTML='<option value="">Select your name...</option>'+allUsers.map(u=>`<option value="${u.email}">${escapeHtml(u.full_name||u.email)}</option>`).join('');}
-async function doLogin(){const email=document.getElementById('userSelect').value;const password=document.getElementById('loginPassword').value;const msg=document.getElementById('loginMsg');if(!email){msg.innerText='Select your name first.';return;}if(!password){msg.innerText='Enter your password.';return;}msg.innerText='Signing in...';const {data,error}=await sb.auth.signInWithPassword({email,password});if(error){msg.innerText=error.message;return;}authUser=data.user;await startApp();}
-async function startApp(){const {data,error}=await sb.from('users').select('*').eq('email',authUser.email).maybeSingle();if(error||!data){document.getElementById('loginMsg').innerText=(authUser?.email||'This user')+' is not in the users table.';return;}appUser=data;document.getElementById('loginScreen').style.display='none';document.getElementById('app').classList.add('show');render();}
-async function logout(){await sb.auth.signOut();location.reload();}
-function setView(v){view=v;document.querySelectorAll('.nav[data-view]').forEach(n=>n.classList.toggle('active',n.dataset.view===v));render();}
-async function getShipments(){const {data,error}=await sb.from('shipments').select('*').order('created_at',{ascending:false});if(error){alert(error.message);return [];}return data||[];}
-async function getHandovers(){const {data,error}=await sb.from('bd_handovers').select('*').order('created_at',{ascending:false});if(error){return [];}return data||[];}
-async function getUsers(){const {data}=await sb.from('users').select('*').eq('active',true).order('full_name');return data||[];}
-async function render(){if(!appUser)return;if(view==='dashboard')await renderDashboard();if(view==='kanban')await renderKanban();if(view==='jobs')await renderJobs();if(view==='assign')await renderAssign();if(view==='bd')await renderBD();}
-function fmtDate(d){return d?new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—';}
-function escapeHtml(s){return String(s||'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m]));}
-function isDelivered(s){return (s.status==='done')||(s.milestones||[]).some(m=>['DELIVERED','POD','RELEASED'].includes(m.code));}
-function stageOf(s){if(s.status)return s.status;const ms=s.milestones||[];if(!ms.length)return 'new';return [...ms].sort((a,b)=>new Date(b.completed_at)-new Date(a.completed_at))[0].code||'new';}
-function isVip(s){return !!s.vip||String(s.bd_notes||s.notes||'').toLowerCase().includes('vip');}
-function miniTable(ships){return `<div class="table-wrap"><table><thead><tr><th>Ref</th><th>Client</th><th>Route</th><th>ETA</th></tr></thead><tbody>${ships.map(s=>`<tr onclick="openDetail('${s.id}')" style="cursor:pointer"><td>${isVip(s)?'<span class="badge vip">VIP</span> ':''}<strong>${escapeHtml(s.shipment_ref||'—')}</strong></td><td>${escapeHtml(s.client||'—')}</td><td>${escapeHtml(s.origin||'—')} → ${escapeHtml(s.destination||'—')}</td><td>${fmtDate(s.eta)}</td></tr>`).join('')||'<tr><td colspan="4">None.</td></tr>'}</tbody></table></div>`;}
-function calendarRows(ships){const rows=[];ships.forEach(s=>{if(s.pickup_date)rows.push({date:s.pickup_date,type:'Pickup',s});if(s.etd)rows.push({date:s.etd,type:'ETD',s});if(s.eta)rows.push({date:s.eta,type:'ETA',s});});rows.sort((a,b)=>(a.date||'').localeCompare(b.date||''));return rows.slice(0,60).map(r=>`<tr><td><strong>${fmtDate(r.date)}</strong></td><td>${r.type}</td><td>${escapeHtml(r.s.shipment_ref||'—')}</td><td>${escapeHtml(r.s.client||'—')}</td><td>${escapeHtml(r.s.origin||'—')} → ${escapeHtml(r.s.destination||'—')}</td></tr>`).join('')||'<tr><td colspan="5">No calendar dates yet.</td></tr>';}
+  const find = (patterns) => {
+    for (const pattern of patterns) {
+      const m = text.match(pattern);
+      if (m && (m[1] || m[0])) return clean(m[1] || m[0]);
+    }
+    return null;
+  };
 
-async function renderDashboard(){const ships=await getShipments();const open=ships.filter(s=>!isDelivered(s));const mine=ships.filter(s=>s.assigned_to===appUser.id);const unassigned=ships.filter(s=>!s.assigned_to);const vip=ships.filter(isVip).length;document.getElementById('content').innerHTML=`<div class="top"><div><h1>Operations Dashboard</h1><p class="sub">My shipments, unassigned shipments, VIP handovers and alerts.</p></div><button class="gold" onclick="setView('bd')">+ VIP BD Upload</button></div><div class="grid"><div class="card"><h3>Open Shipments</h3><div class="metric">${open.length}</div></div><div class="card"><h3>My Shipments</h3><div class="metric">${mine.length}</div></div><div class="card"><h3>Unassigned Shipments</h3><div class="metric">${unassigned.length}</div></div><div class="card"><h3>VIP Jobs</h3><div class="metric">${vip}</div></div></div>${alertsPanel(ships)}<div class="two-grid"><div class="card"><h3>My Shipments</h3>${miniTable(mine.slice(0,8))}<div class="actions"><button class="secondary" onclick="setView('jobs')">View My Shipments</button></div></div><div class="card"><h3>Unassigned Shipments</h3>${miniTable(unassigned.slice(0,8))}<div class="actions"><button class="secondary" onclick="setView('assign')">Open Jobs to Assign</button></div></div></div><div class="card"><h3>Calendar: Pickup / ETD / ETA</h3><div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Ref</th><th>Client</th><th>Route</th></tr></thead><tbody>${calendarRows(ships)}</tbody></table></div></div>`;}
-function daysSince(d){if(!d)return 0;return Math.floor((Date.now()-new Date(d).getTime())/(1000*60*60*24));}
-function isToday(d){if(!d)return false;const a=new Date(d+'T00:00:00');const b=new Date();return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
-function isPast(d){if(!d)return false;const a=new Date(d+'T23:59:59');return a.getTime()<Date.now();}
-function alertsPanel(ships){const unassigned24=ships.filter(s=>!s.assigned_to&&daysSince(s.created_at)>0);const etaToday=ships.filter(s=>!isDelivered(s)&&isToday(s.eta));const overdue=ships.filter(s=>!isDelivered(s)&&isPast(s.eta));const vipUntouched=ships.filter(s=>isVip(s)&&!s.assigned_to);const total=unassigned24.length+etaToday.length+overdue.length+vipUntouched.length;return `<div class="card"><h3>Attention Required ${total?`<span class="badge bad">${total}</span>`:'<span class="badge ok">Clear</span>'}</h3><div class="grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:0"><div><span class="badge bad">${unassigned24.length}</span><p class="sub"><strong>Unassigned &gt; 24h</strong><br>${unassigned24.slice(0,3).map(s=>escapeHtml(s.shipment_ref||s.client||'Shipment')).join('<br>')||'None'}</p></div><div><span class="badge warn">${etaToday.length}</span><p class="sub"><strong>ETA Today</strong><br>${etaToday.slice(0,3).map(s=>escapeHtml(s.shipment_ref||s.client||'Shipment')).join('<br>')||'None'}</p></div><div><span class="badge bad">${overdue.length}</span><p class="sub"><strong>Overdue</strong><br>${overdue.slice(0,3).map(s=>escapeHtml(s.shipment_ref||s.client||'Shipment')).join('<br>')||'None'}</p></div><div><span class="badge vip">${vipUntouched.length}</span><p class="sub"><strong>VIP Not Assigned</strong><br>${vipUntouched.slice(0,3).map(s=>escapeHtml(s.shipment_ref||s.client||'Shipment')).join('<br>')||'None'}</p></div></div></div>`;}
-async function renderJobs(){const ships=(await getShipments()).filter(s=>s.assigned_to===appUser.id);document.getElementById('content').innerHTML=`<div class="top"><div><h1>My Shipments</h1><p class="sub">Only jobs assigned to you.</p></div></div><div class="card">${miniTable(ships)}</div>`;}
-async function renderAssign(){const ships=(await getShipments()).filter(s=>!s.assigned_to);const users=(await getUsers()).filter(u=>['ops','manager','admin'].includes(u.role));document.getElementById('content').innerHTML=`<div class="top"><div><h1>Jobs to Assign</h1><p class="sub">BD uploads land here first. Assign them manually.</p></div></div><div class="card"><div class="table-wrap"><table><thead><tr><th>Ref</th><th>Client</th><th>Route</th><th>ETA</th><th>Assign</th></tr></thead><tbody>${ships.map(s=>`<tr><td>${isVip(s)?'<span class="badge vip">VIP</span> ':''}<strong>${escapeHtml(s.shipment_ref||'—')}</strong></td><td>${escapeHtml(s.client||'—')}</td><td>${escapeHtml(s.origin||'—')} → ${escapeHtml(s.destination||'—')}</td><td>${fmtDate(s.eta)}</td><td><select onchange="assignJob('${s.id}',this.value)"><option value="">Choose...</option>${users.map(u=>`<option value="${u.id}">${escapeHtml(u.full_name||u.email)}</option>`).join('')}</select></td></tr>`).join('')||'<tr><td colspan="5">No unassigned jobs.</td></tr>'}</tbody></table></div></div>`;}
-async function assignJob(id,userId){if(!userId)return;const {error}=await sb.from('shipments').update({assigned_to:userId,status:'booked'}).eq('id',id);if(error)alert(error.message);else renderAssign();}
+  const out = {
+    raw_text: raw,
+    upload_type: uploadType,
+    client: null,
+    shipment_ref: null,
+    origin: null,
+    destination: null,
+    shipment_type: null,
+    cargo_description: null,
+    customs_ref: null,
+    etd: null,
+    eta: null,
+    pickup_date: null,
+    vip: /(vip|urgent|priority|high value|key account|critical|time critical)/i.test(text),
+    notes: text.slice(0,1500)
+  };
 
-async function renderKanban(){const ships=await getShipments();const cols=[{key:'new',title:'New / To Assign',filter:s=>!s.assigned_to||stageOf(s)==='new'},{key:'booked',title:'Booked',filter:s=>s.assigned_to&&stageOf(s)==='booked'},{key:'transit',title:'In Transit',filter:s=>stageOf(s)==='transit'},{key:'customs',title:'Customs / Clearance',filter:s=>stageOf(s)==='customs'},{key:'done',title:'Delivered / Closed',filter:s=>stageOf(s)==='done'||isDelivered(s)}];document.getElementById('content').innerHTML=`<div class="top"><div><h1>Kanban Board</h1><p class="sub">Drag jobs between stages. VIP handovers are highlighted in gold.</p></div><button class="gold" onclick="setView('bd')">+ VIP BD Upload</button></div><div class="kanban">${cols.map(col=>{const items=ships.filter(col.filter);return `<div class="kanban-col" ondragover="kanbanOver(event)" ondragleave="kanbanLeave(event)" ondrop="kanbanDrop(event,'${col.key}')"><h3>${col.title}<span class="badge muted">${items.length}</span></h3>${items.map(kanbanCard).join('')||'<div class="sub">No jobs here.</div>'}</div>`}).join('')}</div>`;}
-function kanbanCard(s){return `<div class="kanban-card ${isVip(s)?'vip-card':''}" draggable="true" ondragstart="kanbanDrag(event,'${s.id}')" onclick="openDetail('${s.id}')"><div>${isVip(s)?'<span class="badge vip">VIP</span> ':''}<strong>${escapeHtml(s.shipment_ref||'No Ref')}</strong></div><div class="mini"><b>${escapeHtml(s.client||'Unknown Client')}</b></div><div class="mini">${escapeHtml(s.shipment_type||'—')} • ${escapeHtml(s.origin||'—')} → ${escapeHtml(s.destination||'—')}</div><div class="mini">ETA: ${fmtDate(s.eta)} • Stage: ${stageOf(s).replaceAll('_',' ')}</div></div>`;}
-function kanbanDrag(e,id){e.dataTransfer.setData('shipmentId',id)}function kanbanOver(e){e.preventDefault();e.currentTarget.classList.add('over')}function kanbanLeave(e){e.currentTarget.classList.remove('over')}async function kanbanDrop(e,status){e.preventDefault();e.currentTarget.classList.remove('over');const id=e.dataTransfer.getData('shipmentId');if(!id)return;const payload={status};if(status==='new'){payload.assigned_to=null;}else{payload.assigned_to=appUser.id;}const {error}=await sb.from('shipments').update(payload).eq('id',id);if(error)alert(error.message);else renderKanban();}
+  // parser now changes behaviour based on:
+  // BD Handover
+  // General Cargo
+  // Customs Clearance
 
-async function renderBD(){const handovers=await getHandovers();document.getElementById('content').innerHTML=`<div class="top"><div><h1>BD Handovers</h1><p class="sub">Paste handover text, preview extracted fields, then create an unassigned shipment.</p></div></div><div class="card"><h3>Gold VIP Handover Upload</h3><textarea id="raw" placeholder="Paste BD handover or email text here..."></textarea><div class="actions"><button class="gold" onclick="doParse()">Preview Parse</button><button class="secondary" onclick="clearParse()">Clear</button></div><div id="parseMsg"></div><div id="preview"></div></div><div class="card"><h3>Recent Handovers</h3><div class="table-wrap"><table><thead><tr><th>VIP</th><th>Ref</th><th>Client</th><th>Type</th><th>Route</th><th>ETA</th></tr></thead><tbody>${handovers.map(h=>`<tr><td>${h.vip?'<span class="badge vip">VIP</span>':'<span class="badge muted">Normal</span>'}</td><td>${escapeHtml(h.shipment_ref||'—')}</td><td>${escapeHtml(h.client||'—')}</td><td>${escapeHtml(h.shipment_type||'—')}</td><td>${escapeHtml(h.origin||'—')} → ${escapeHtml(h.destination||'—')}</td><td>${fmtDate(h.eta)}</td></tr>`).join('')||'<tr><td colspan="6">No handovers yet.</td></tr>'}</tbody></table></div></div>`;}
-function clearParse(){lastParsed=null;document.getElementById('raw').value='';document.getElementById('preview').innerHTML='';document.getElementById('parseMsg').innerHTML='';}
-function doParse(){const text=document.getElementById('raw').value.trim();if(!text){document.getElementById('parseMsg').innerHTML='<div class="notice">Paste handover text first.</div>';return;}lastParsed=parseHandover(text);renderPreview(lastParsed);}
-function renderPreview(p){const item=(label,val)=>`<div class="preview-item"><small>${label}</small><strong>${escapeHtml(val||'—')}</strong></div>`;document.getElementById('preview').innerHTML=`<div class="preview">${item('Client',p.client)}${item('Reference',p.shipment_ref)}${item('Shipment Type',p.shipment_type)}${item('Origin',p.origin)}${item('Destination',p.destination)}${item('Pickup',fmtDate(p.pickup_date))}${item('ETD',fmtDate(p.etd))}${item('ETA',fmtDate(p.eta))}${item('Priority',p.vip?'VIP / Urgent':'Normal')}</div><label>Notes</label><textarea id="parsedNotes">${escapeHtml(p.notes||'')}</textarea><div class="actions"><button class="gold" onclick="createFromParse()">Create Unassigned Shipment</button></div>`;}
-function parseHandover(raw){const text=raw.replace(/\r/g,'');const out={raw_text:raw,client:null,shipment_ref:null,origin:null,destination:null,shipment_type:null,etd:null,eta:null,pickup_date:null,vip:/\b(vip|urgent|priority|high value|key account|critical|time critical)\b/i.test(text),notes:text.slice(0,1500)};const get=(re)=>{const m=text.match(re);return m?clean(m[1]||m[0]):null};out.client=get(/\b(?:client|customer|company|account)\s*[:\-]\s*([^\n,;]+)/i);out.shipment_ref=get(/\b(?:shipment|job|ref|booking|awb|mawb|hawb|bl|container)\s*(?:no\.?|#|:)?\s*([A-Z0-9\-\/]{5,})/i)||get(/\b(SHP[- ]?\d{3,}|JOB[- ]?\d{3,}|MW[- ]?\d{3,})\b/i);const mode=/\bair|awb|flight\b/i.test(text)?'Air':/\bocean|sea|vessel|container|sailing|bl\b/i.test(text)?'Ocean':/\broad|truck|collection|pickup\b/i.test(text)?'Road':/\bcustoms|clearance\b/i.test(text)?'Customs':'Air';const dir=/\bexport|exp\b/i.test(text)?'Export':/\bimport|imp\b/i.test(text)?'Import':'Import';out.shipment_type=mode==='Customs'?'Customs':mode+' '+dir;const route=text.match(/\bfrom\s+([^\n,;]+?)\s+(?:to|->|→)\s+([^\n,;]+)/i)||text.match(/\b([^\n,;]{2,40})\s*(?:->|→)\s*([^\n,;]{2,40})/i);if(route){out.origin=clean(route[1]);out.destination=clean(route[2]);}out.origin=out.origin||get(/\b(?:origin|pol|from)\s*[:\-]\s*([^\n,;]+)/i);out.destination=out.destination||get(/\b(?:destination|pod|to)\s*[:\-]\s*([^\n,;]+)/i);out.pickup_date=parseDate(get(/(?:pickup|pick up|collection|collect|cargo ready)\s*(?:date|on|:|-)?\s*([0-3]?\d[\/\-.][01]?\d[\/\-.](?:20)?\d{2})/i));out.etd=parseDate(get(/(?:etd|departure|departing|flight|sailing)\s*(?:date|on|:|-)?\s*([0-3]?\d[\/\-.][01]?\d[\/\-.](?:20)?\d{2})/i));out.eta=parseDate(get(/(?:eta|arrival|arriving|delivery date|due date)\s*(?:date|on|:|-)?\s*([0-3]?\d[\/\-.][01]?\d[\/\-.](?:20)?\d{2})/i));return out;}
-function clean(v){return String(v||'').replace(/^[\s:#-]+|[\s,;]+$/g,'').replace(/\s+/g,' ').trim().slice(0,160)}
-function parseDate(v){if(!v)return null;let s=String(v).trim().replace(/\./g,'/').replace(/-/g,'/');const m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);if(!m)return null;let y=+m[3];if(y<100)y+=2000;return `${y}-${String(+m[2]).padStart(2,'0')}-${String(+m[1]).padStart(2,'0')}`;}
-async function createFromParse(){if(!lastParsed){alert('Parse first.');return;}const notes=document.getElementById('parsedNotes')?.value||lastParsed.notes||'';const handover={raw_text:lastParsed.raw_text,client:lastParsed.client,shipment_ref:lastParsed.shipment_ref,origin:lastParsed.origin,destination:lastParsed.destination,shipment_type:lastParsed.shipment_type,etd:lastParsed.etd,eta:lastParsed.eta,pickup_date:lastParsed.pickup_date,vip:lastParsed.vip,notes,created_by:appUser.id};const {error:hErr}=await sb.from('bd_handovers').insert(handover);if(hErr){alert('Handover save failed: '+hErr.message);return;}const shipment={shipment_ref:lastParsed.shipment_ref||('BD-'+Date.now()),client:lastParsed.client||'Unknown Client',origin:lastParsed.origin,destination:lastParsed.destination,shipment_type:lastParsed.shipment_type||'Air Import',eta:lastParsed.eta,assigned_to:null,status:'new',pickup_date:lastParsed.pickup_date,etd:lastParsed.etd,vip:lastParsed.vip,bd_notes:notes,milestones:[{code:'BOOKED',label:'Booked from BD handover',completed_at:new Date().toISOString(),completed_by:appUser.email,note:lastParsed.vip?'VIP handover':''}],milestone_updated_at:new Date().toISOString()};let {error:sErr}=await sb.from('shipments').insert(shipment);if(sErr&&/column .* does not exist/i.test(sErr.message)){const fallback={shipment_ref:shipment.shipment_ref,client:shipment.client,origin:shipment.origin,destination:shipment.destination,shipment_type:shipment.shipment_type,eta:shipment.eta,assigned_to:null,milestones:shipment.milestones,milestone_updated_at:shipment.milestone_updated_at};const r=await sb.from('shipments').insert(fallback);sErr=r.error;}if(sErr){alert('Handover saved, but shipment create failed: '+sErr.message);return;}document.getElementById('parseMsg').innerHTML='<div class="success-msg">Created unassigned shipment. It is now in Jobs to Assign.</div>';setTimeout(()=>setView('assign'),800);}
-async function openDetail(id){const ships=await getShipments();const s=ships.find(x=>x.id===id);if(!s)return;const users=await getUsers();const notes=await getShipmentNotes(id);const assignee=users.find(u=>u.id===s.assigned_to);document.getElementById('detailBox').innerHTML=`<div class="detail-head"><div><h2 style="margin:0">${isVip(s)?'<span class="badge vip">VIP</span> ':''}${escapeHtml(s.shipment_ref||'Shipment')}</h2><p class="sub">${escapeHtml(s.client||'—')} • ${escapeHtml(s.shipment_type||'—')} • Assigned: ${escapeHtml(assignee?.full_name||'Unassigned')}</p></div><button class="secondary" onclick="closeDetail()">Close</button></div><div class="preview">${['origin','destination','eta','status'].map(k=>`<div class="preview-item"><small>${k}</small><strong>${escapeHtml(k==='eta'?fmtDate(s[k]):(s[k]||'—'))}</strong></div>`).join('')}</div><div class="quick-actions"><button onclick="assignToMe('${s.id}')">Assign to me</button><button onclick="markDelivered('${s.id}')">Mark delivered</button><button class="secondary" onclick="setShipmentStatus('${s.id}','customs')">Move to Customs</button><button class="secondary" onclick="setShipmentStatus('${s.id}','transit')">Move to Transit</button><button class="secondary" onclick="unassignShipment('${s.id}')">Unassign</button></div><div class="two-grid"><div class="card" style="box-shadow:none"><h3>Timeline</h3>${timelineHtml(s)}</div><div class="card" style="box-shadow:none"><h3>Notes</h3><textarea id="newNote" placeholder="Add an update, issue, customer note, or handover detail..."></textarea><div class="actions"><button onclick="addShipmentNote('${s.id}')">Add note</button></div><div id="notesList">${notesHtml(notes)}</div></div></div><label>Original BD / Handover Notes</label><textarea readonly>${escapeHtml(s.bd_notes||s.notes||'')}</textarea>`;document.getElementById('detailModal').classList.add('show');}
-function timelineHtml(s){const ms=s.milestones||[];if(!ms.length)return '<p class="sub">No milestone history yet.</p>';return `<div class="timeline">${[...ms].sort((a,b)=>new Date(a.completed_at)-new Date(b.completed_at)).map(m=>`<div class="tl"><strong>${escapeHtml(m.label||m.code||'Update')}</strong><small>${new Date(m.completed_at).toLocaleString('en-GB')} • ${escapeHtml(m.completed_by||'system')}</small>${m.note?`<p class="sub">${escapeHtml(m.note)}</p>`:''}</div>`).join('')}</div>`;}
-function notesHtml(notes){return notes.length?notes.map(n=>`<div class="note"><strong>${escapeHtml(n.by_email||'User')} • ${new Date(n.created_at).toLocaleString('en-GB')}</strong><p>${escapeHtml(n.note)}</p></div>`).join(''):'<p class="sub">No notes yet.</p>';}
-async function getShipmentNotes(id){const {data,error}=await sb.from('shipment_notes').select('*').eq('shipment_id',id).order('created_at',{ascending:false});if(error)return [];return data||[];}
-async function addShipmentNote(id){const note=document.getElementById('newNote').value.trim();if(!note)return;const {error}=await sb.from('shipment_notes').insert({shipment_id:id,note,by_user:appUser.id,by_email:appUser.email});if(error){alert(error.message);return;}openDetail(id);}
-async function assignToMe(id){const {error}=await sb.from('shipments').update({assigned_to:appUser.id,status:'booked'}).eq('id',id);if(error)alert(error.message);else openDetail(id);}
-async function unassignShipment(id){const {error}=await sb.from('shipments').update({assigned_to:null,status:'new'}).eq('id',id);if(error)alert(error.message);else openDetail(id);}
-async function setShipmentStatus(id,status){const {error}=await sb.from('shipments').update({status,assigned_to:appUser.id}).eq('id',id);if(error)alert(error.message);else openDetail(id);}
-async function markDelivered(id){const ships=await getShipments();const s=ships.find(x=>x.id===id);const ms=[...(s?.milestones||[]),{code:'DELIVERED',label:'Delivered',completed_at:new Date().toISOString(),completed_by:appUser.email,note:'Marked delivered from detail screen'}];const {error}=await sb.from('shipments').update({status:'done',assigned_to:appUser.id,milestones:ms,milestone_updated_at:new Date().toISOString()}).eq('id',id);if(error)alert(error.message);else openDetail(id);}
-function closeDetail(){document.getElementById('detailModal').classList.remove('show')}document.getElementById('detailModal').addEventListener('click',e=>{if(e.target.id==='detailModal')closeDetail()});
-// =========================
-// SMART AUTO ASSIGNMENT
-// =========================
-async function smartAssign(shipment){
-  const users = await getUsers();
-  const ships = await getShipments();
-
-  const workload = users.map(u=>{
-    const count = ships.filter(s=>s.assigned_to===u.id).length;
-    return {...u, load:count};
-  });
-
-  // VIP → manager
-  if(shipment.vip){
-    const manager = workload.find(u=>u.role==='manager');
-    return manager?.id || workload[0]?.id;
-  }
-
-  // Lowest workload
-  workload.sort((a,b)=>a.load-b.load);
-  return workload[0]?.id;
-}
-
-// =========================
-// SLA + ALERT EXTENSION
-// =========================
-function slaStatus(s){
-  if(!s.created_at) return 'ok';
-  const hours = (Date.now() - new Date(s.created_at).getTime())/3600000;
-  if(!s.assigned_to && hours>24) return 'breach';
-  return 'ok';
-}
-
-// =========================
-// EMAIL GENERATOR
-// =========================
-function generateEmail(s){
-  return `Subject: Shipment Update - ${s.shipment_ref}
-
-Dear Customer,
-
-Your shipment (${s.shipment_ref}) is currently ${s.status||'in progress'}.
-
-Route: ${s.origin} → ${s.destination}
-ETA: ${s.eta || 'TBC'}
-
-We will keep you updated.
-
-Kind regards,\nOperations Team`;
-}
-
-// =========================
-// DOCUMENTS (LIGHT)
-// =========================
-async function uploadDoc(id,file){
-  const path = `docs/${id}/${file.name}`;
-  const {error} = await sb.storage.from('docs').upload(path,file);
-  if(error) alert(error.message);
-}
-
-// =========================
-// KPI PANEL
-// =========================
-async function renderKPIs(){
-  const ships = await getShipments();
-  const users = await getUsers();
-
-  const perUser = users.map(u=>{
-    const count = ships.filter(s=>s.assigned_to===u.id).length;
-    return `<div>${u.full_name}: ${count}</div>`;
-  }).join('');
-
-  return `<div class="card"><h3>Team Workload</h3>${perUser}</div>`;
-}
-
-// Inject KPI into dashboard
-const oldRenderDashboard = renderDashboard;
-renderDashboard = async function(){
-  await oldRenderDashboard();
-  const kpi = await renderKPIs();
-  document.getElementById('content').innerHTML += kpi;
-}
-
-init();
-</script>
-</body>
-</html>
+  return out;
+};
