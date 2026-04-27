@@ -24,6 +24,7 @@ input,select,textarea,button{font-family:inherit}
 input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:11px;margin-top:8px;font-size:14px;background:white}
 textarea{min-height:170px;resize:vertical}
 button{border:0;border-radius:11px;padding:11px 14px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--brand),var(--brand2));color:white}
+button.gold{background:linear-gradient(135deg,#f7c948,#d99a00);color:#221500;box-shadow:0 10px 26px rgba(217,154,0,.28)}
 button.secondary{background:white;color:var(--text);border:1px solid var(--line)}
 button.danger{background:var(--danger)}
 #msg{margin-top:12px;font-size:13px;color:var(--danger)}
@@ -32,6 +33,8 @@ button.danger{background:var(--danger)}
 .logo{font-weight:900;font-size:20px;margin:6px 8px 20px;letter-spacing:.3px}.logo span{background:var(--brand);border-radius:10px;padding:7px 10px;margin-right:8px}
 .nav{padding:12px 14px;cursor:pointer;border-radius:12px;margin:4px 0;font-weight:800;font-size:14px;color:rgba(255,255,255,.86)}
 .nav:hover,.nav.active{background:var(--nav2);color:white}
+.vip-upload{margin:14px 8px 18px;padding:13px 12px;border-radius:16px;background:linear-gradient(135deg,#f7c948,#d99a00);color:#221500;font-weight:900;text-align:center;cursor:pointer;box-shadow:0 14px 30px rgba(217,154,0,.25)}
+.vip-upload small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;color:#4b3000}
 .content{margin-left:230px;padding:24px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.top h1{margin:0;color:var(--nav)}.sub{color:var(--muted);margin:4px 0 0;font-size:13px}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}@media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}.sidebar{position:static;width:100%;height:auto}.content{margin-left:0}}
 .card{background:white;border:1px solid rgba(0,0,0,.04);border-radius:20px;box-shadow:0 22px 60px rgba(6,20,46,.07);padding:18px;margin-bottom:16px}.card h3{margin:0 0 8px;color:var(--brand2);font-size:15px}.metric{font-size:30px;font-weight:900;color:var(--nav)}
@@ -41,6 +44,7 @@ label{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.5p
 .preview-item{background:#f8fbfc;border:1px solid var(--line);border-radius:14px;padding:11px}.preview-item small{display:block;text-transform:uppercase;font-weight:900;color:var(--muted);font-size:10px;margin-bottom:4px}.preview-item strong{font-size:14px;color:var(--nav);word-break:break-word}
 .notice{padding:12px 14px;border-radius:14px;background:#fff1da;color:#a66a00;font-size:13px;margin:10px 0}.success-msg{padding:12px 14px;border-radius:14px;background:#dff5eb;color:var(--success);font-size:13px;margin:10px 0}
 #map{height:430px;border-radius:18px;overflow:hidden}
+.kanban{display:grid;grid-template-columns:repeat(5,minmax(230px,1fr));gap:14px;overflow-x:auto;padding-bottom:10px}.kanban-col{background:#eef4f5;border:1px solid var(--line);border-radius:18px;padding:12px;min-height:520px}.kanban-col h3{margin:0 0 10px;color:var(--nav);font-size:14px;display:flex;justify-content:space-between}.kanban-card{background:white;border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px;box-shadow:0 10px 22px rgba(6,20,46,.06)}.kanban-card strong{color:var(--nav)}.kanban-card .mini{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35}.kanban-card.vip-card{border-left:5px solid #d99a00;background:#fff9e8}
 </style>
 </head>
 <body>
@@ -59,10 +63,12 @@ label{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.5p
 <div class="app" id="app">
   <aside class="sidebar">
     <div class="logo"><span>G</span>GateFlow</div>
+    <div class="vip-upload" onclick="setView('bd');setTimeout(()=>document.getElementById('raw')?.focus(),100)"><small>VIP / BD</small>Upload Handover</div>
     <div class="nav active" data-view="dashboard" onclick="setView('dashboard')">Dashboard</div>
     <div class="nav" data-view="jobs" onclick="setView('jobs')">Assigned Jobs</div>
     <div class="nav" data-view="assign" onclick="setView('assign')">Jobs to Assign</div>
     <div class="nav" data-view="bd" onclick="setView('bd')">BD Handovers</div>
+    <div class="nav" data-view="kanban" onclick="setView('kanban')">Kanban Board</div>
     <div class="nav" onclick="logout()">Sign out</div>
   </aside>
   <main class="content" id="content"></main>
@@ -117,6 +123,7 @@ async function render(){
   if(view==='jobs') await renderJobs();
   if(view==='assign') await renderAssign();
   if(view==='bd') await renderBD();
+  if(view==='kanban') await renderKanban();
 }
 
 async function renderDashboard(){
@@ -127,13 +134,32 @@ async function renderDashboard(){
   const handovers=await getHandovers();
   const vip=handovers.filter(h=>h.vip).length;
   document.getElementById('content').innerHTML=`
-    <div class="top"><div><h1>Operations Dashboard</h1><p class="sub">Map, calendar dates, assigned jobs, and BD handover intake.</p></div><button onclick="setView('bd')">+ Parse Handover</button></div>
+    <div class="top"><div><h1>Operations Dashboard</h1><p class="sub">Map, calendar dates, my shipments, unassigned shipments, and BD handover intake.</p></div><button onclick="setView('bd')">+ Parse Handover</button></div>
     <div class="grid">
       <div class="card"><h3>Open Shipments</h3><div class="metric">${open.length}</div></div>
-      <div class="card"><h3>Assigned to Me</h3><div class="metric">${mine.length}</div></div>
-      <div class="card"><h3>Jobs to Assign</h3><div class="metric">${unassigned.length}</div></div>
+      <div class="card"><h3>My Shipments</h3><div class="metric">${mine.length}</div></div>
+      <div class="card"><h3>Unassigned Shipments</h3><div class="metric">${unassigned.length}</div></div>
       <div class="card"><h3>VIP Handovers</h3><div class="metric">${vip}</div></div>
     </div>
+
+    <div class="grid" style="grid-template-columns:1fr 1fr;">
+      <div class="card">
+        <h3>My Shipments</h3>
+        <p class="sub">Only jobs assigned to you appear here.</p>
+        <div style="overflow:auto"><table><thead><tr><th>Ref</th><th>Client</th><th>Route</th><th>ETA</th></tr></thead><tbody>
+          ${mine.slice(0,8).map(s=>`<tr><td><strong>${s.shipment_ref||'—'}</strong></td><td>${s.client||'—'}</td><td>${s.origin||'—'} → ${s.destination||'—'}</td><td>${fmtDate(s.eta)}</td></tr>`).join('')||'<tr><td colspan="4">No shipments assigned to you.</td></tr>'}
+        </tbody></table></div>
+      </div>
+      <div class="card">
+        <h3>Unassigned Shipments</h3>
+        <p class="sub">New BD uploads land here first. Assign them manually from Jobs to Assign.</p>
+        <div style="overflow:auto"><table><thead><tr><th>Ref</th><th>Client</th><th>Route</th><th>ETA</th></tr></thead><tbody>
+          ${unassigned.slice(0,8).map(s=>`<tr><td><strong>${s.shipment_ref||'—'}</strong></td><td>${s.client||'—'}</td><td>${s.origin||'—'} → ${s.destination||'—'}</td><td>${fmtDate(s.eta)}</td></tr>`).join('')||'<tr><td colspan="4">No unassigned shipments.</td></tr>'}
+        </tbody></table></div>
+        <div class="actions"><button class="secondary" onclick="setView('assign')">Open Jobs to Assign</button></div>
+      </div>
+    </div>
+
     <div class="card"><h3>Shipment Map</h3><div id="map"></div><p class="sub">Markers use rough demo positioning unless locations are cached/geocoded later.</p></div>
     <div class="card"><h3>Calendar: Pickup / ETD / ETA</h3><div style="overflow:auto"><table><thead><tr><th>Date</th><th>Type</th><th>Ref</th><th>Client</th><th>Route</th></tr></thead><tbody>${calendarRows(ships)}</tbody></table></div></div>
   `;
@@ -171,6 +197,39 @@ async function renderAssign(){
   document.getElementById('content').innerHTML=`<div class="top"><div><h1>Jobs to Assign</h1><p class="sub">New shipments waiting for an owner.</p></div></div><div class="card"><table><thead><tr><th>Ref</th><th>Client</th><th>Route</th><th>Assign</th></tr></thead><tbody>${ships.map(s=>`<tr><td><strong>${s.shipment_ref||'—'}</strong></td><td>${s.client||'—'}</td><td>${s.origin||'—'} → ${s.destination||'—'}</td><td><select onchange="assignJob('${s.id}',this.value)"><option value="">Choose...</option>${users.map(u=>`<option value="${u.id}">${u.full_name||u.email}</option>`).join('')}</select></td></tr>`).join('')||'<tr><td colspan="4">No unassigned jobs.</td></tr>'}</tbody></table></div>`;
 }
 async function assignJob(id,userId){if(!userId)return;const {error}=await sb.from('shipments').update({assigned_to:userId}).eq('id',id);if(error)alert(error.message);else renderAssign();}
+
+async function renderKanban(){
+  const ships=await getShipments();
+  const cols=[
+    {key:'new',title:'New / To Assign',filter:s=>!s.assigned_to},
+    {key:'booked',title:'Booked',filter:s=>stageOf(s)==='BOOKED'&&s.assigned_to},
+    {key:'transit',title:'In Transit',filter:s=>['PICKED_UP','DEPARTED','SAILED','IN_TRANSIT','LOADED'].includes(stageOf(s))},
+    {key:'customs',title:'Customs / Clearance',filter:s=>['CUSTOMS','SUBMITTED','CLEARED','DISCHARGED','ARRIVED'].includes(stageOf(s))},
+    {key:'done',title:'Delivered / Closed',filter:s=>isDelivered(s)}
+  ];
+  document.getElementById('content').innerHTML=`
+    <div class="top"><div><h1>Kanban Board</h1><p class="sub">Shipment workflow at a glance. VIP handovers are highlighted in gold.</p></div><button class="gold" onclick="setView('bd')">+ VIP BD Upload</button></div>
+    <div class="kanban">
+      ${cols.map(col=>{
+        const items=ships.filter(col.filter);
+        return `<div class="kanban-col"><h3>${col.title}<span class="badge muted">${items.length}</span></h3>${items.map(kanbanCard).join('')||'<div class="sub">No jobs here.</div>'}</div>`;
+      }).join('')}
+    </div>`;
+}
+function stageOf(s){
+  const ms=s.milestones||[];
+  if(!ms.length)return 'NEW';
+  return [...ms].sort((a,b)=>new Date(b.completed_at)-new Date(a.completed_at))[0].code||'NEW';
+}
+function kanbanCard(s){
+  const vip=s.vip||String(s.bd_notes||s.notes||'').toLowerCase().includes('vip');
+  return `<div class="kanban-card ${vip?'vip-card':''}">
+    <div>${vip?'<span class="badge vip">VIP</span> ':''}<strong>${s.shipment_ref||'No Ref'}</strong></div>
+    <div class="mini"><b>${s.client||'Unknown Client'}</b></div>
+    <div class="mini">${s.shipment_type||'—'} • ${s.origin||'—'} → ${s.destination||'—'}</div>
+    <div class="mini">ETA: ${fmtDate(s.eta)} • Stage: ${stageOf(s).replaceAll('_',' ')}</div>
+  </div>`;
+}
 
 async function renderBD(){
   const handovers=await getHandovers();
