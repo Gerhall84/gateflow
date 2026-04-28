@@ -1,148 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GateFlow Pro</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
-<style>
-:root{
-  --nav:#04142e;
-  --brand:#06b7a5;
-  --gold:#d99a00;
-  --bg:#f4f7f8;
-  --line:#e4ebed;
-}
-
-body{margin:0;font-family:Arial;background:var(--bg);}
-
-.sidebar{
-  width:240px;
-  height:100vh;
-  background:var(--nav);
-  color:white;
-  position:fixed;
-  padding:15px;
-}
-
-.nav{
-  padding:12px;
-  cursor:pointer;
-  border-radius:8px;
-}
-.nav:hover{background:#0a1f43}
-
-.content{
-  margin-left:240px;
-  padding:20px;
-}
-
-.card{
-  background:white;
-  padding:15px;
-  border-radius:12px;
-  margin-bottom:15px;
-}
-
-button{
-  padding:10px;
-  border:0;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-.gold{background:var(--gold);color:black}
-
-.kanban{display:flex;gap:10px}
-.col{background:#eef4f5;padding:10px;border-radius:10px;width:260px}
-.job{background:white;padding:8px;margin-bottom:8px;border-radius:8px}
-
-#map{height:300px;border-radius:10px;margin-top:10px}
-
-textarea{width:100%;height:140px}
-</style>
-</head>
-
-<body>
-
-<!-- LOGIN -->
-<div id="login" style="padding:40px">
-  <h2>GateFlow</h2>
-  <select id="userSelect"></select>
-  <input id="password" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
-</div>
-
-<!-- APP -->
-<div id="app" style="display:none">
-
-  <div class="sidebar">
-    <h3>GateFlow</h3>
-
-    <div class="nav" onclick="view='dashboard';render()">Dashboard</div>
-    <div class="nav" onclick="view='kanban';render()">Kanban</div>
-    <div class="nav" onclick="view='calendar';render()">Calendar</div>
-    <div class="nav" onclick="view='upload';render()">Uploads</div>
-
-    <hr>
-
-    <div class="nav" onclick="logout()">Logout</div>
-  </div>
-
-  <div class="content" id="content"></div>
-
-</div>
-<script>
-const SUPABASE_URL = 'https://edxgkwkdgvsajfmkejbk.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = window.supabase.createClient(
+  "https://edxgkwkdgvsajfmkejbk.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkeGdrd2tkZ3ZzYWpmbWtlamJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3MTIzMzIsImV4cCI6MjA5MjI4ODMzMn0.hZZg78n6DgwiBNrdI34wVmBYia8PsLMnT-vEJr20fek"
+);
 
 let user = null;
-let appUser = null;
-let users = [];
 let shipments = [];
-let view = 'dashboard';
-let uploadType = 'BD Handover';
-let parsed = null;
-let map = null;
-let mapLayer = null;
 
-async function loadUsers(){
-  const { data, error } = await sb
-    .from('users')
-    .select('*')
-    .eq('active', true)
-    .order('full_name');
-
-  if(error){
-    alert('Users load error: ' + error.message);
-    return;
-  }
-
-  users = data || [];
-
-  userSelect.innerHTML =
-    '<option value="">Select your name</option>' +
-    users.map(u => `<option value="${u.email}">${u.full_name || u.email}</option>`).join('');
-}
-
-async function login(){
-  const email = userSelect.value;
-  const pwd = password.value;
+/* ---------- LOGIN FIX ---------- */
+loginBtn.onclick = async () => {
+  const email = loginUserSelect.value;
+  const password = loginPassword.value;
 
   if(!email){
-    alert('Select your name first');
+    alert("Select your name");
     return;
   }
 
   const { data, error } = await sb.auth.signInWithPassword({
     email,
-    password: pwd
+    password
   });
 
   if(error){
@@ -152,525 +28,54 @@ async function login(){
 
   user = data.user;
 
-  const { data: profile, error: profileError } = await sb
-    .from('users')
-    .select('*')
-    .eq('email', user.email)
-    .maybeSingle();
+  loginScreen.style.display = "none";
+  app.style.display = "grid";
 
-  if(profileError || !profile){
-    alert(user.email + ' is not in the users table');
-    return;
-  }
-
-  appUser = profile;
-
-  document.getElementById('login').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
+  userEmail.textContent = email;
 
   await loadShipments();
+};
+
+/* ---------- LOAD USERS (FIXED) ---------- */
+async function initDropdowns(){
+  const { data } = await sb.from("users").select("*");
+
+  loginUserSelect.innerHTML =
+    `<option value="">Select your name</option>` +
+    data.map(u => `<option value="${u.email}">${u.full_name}</option>`).join("");
+
+  assigned.innerHTML =
+    `<option value="">Unassigned</option>` +
+    data.map(u => `<option value="${u.email}">${u.full_name}</option>`).join("");
 }
 
-async function logout(){
-  await sb.auth.signOut();
-  location.reload();
-}
-
+/* ---------- LOAD SHIPMENTS ---------- */
 async function loadShipments(){
-  const { data, error } = await sb
-    .from('shipments')
-    .select('*')
-    .order('created_at', { ascending:false });
-
-  if(error){
-    alert('Shipment load error: ' + error.message);
-    return;
-  }
+  const { data } = await sb
+    .from("shipments")
+    .select("*")
+    .order("created_at", { ascending:false });
 
   shipments = data || [];
   render();
 }
 
-function nameOf(id){
-  if(!id) return 'Unassigned';
-  return users.find(u => u.id === id || u.email === id)?.full_name || id;
-}
-
-function isVip(s){
-  return !!s.vip || String(s.bd_notes || '').toLowerCase().includes('vip');
-}
-
-function isDelivered(s){
-  return s.status === 'done' || s.status === 'Delivered';
-}
-
-function riskOf(s){
-  if(!s.eta || isDelivered(s)) return 'none';
-
-  const today = new Date();
-  today.setHours(0,0,0,0);
-
-  const eta = new Date(s.eta);
-  eta.setHours(0,0,0,0);
-
-  const diff = (eta - today) / 86400000;
-
-  if(diff < 0) return 'overdue';
-  if(diff <= 2) return 'risk';
-
-  return 'none';
-}
-
-function fmtDate(d){
-  if(!d) return '-';
-  return String(d).slice(0,10);
-}
-
+/* ---------- SIMPLE RENDER ---------- */
 function render(){
-  if(view === 'dashboard') renderDashboard();
-  if(view === 'kanban') renderKanban();
-  if(view === 'calendar') renderCalendar();
-  if(view === 'upload') renderUpload();
+  dashboardRows.innerHTML = shipments.map(s => `
+    <tr>
+      <td>${s.shipment_ref || ""}</td>
+      <td>${s.client || ""}</td>
+      <td>${s.origin || ""} → ${s.destination || ""}</td>
+      <td>${s.status || "Pending"}</td>
+    </tr>
+  `).join("");
 }
 
-function renderDashboard(){
-  const mine = shipments.filter(s => s.assigned_to === appUser.id);
-  const unassigned = shipments.filter(s => !s.assigned_to);
-  const atRisk = shipments.filter(s => riskOf(s) !== 'none');
-  const vip = shipments.filter(isVip);
+/* ---------- LOGOUT ---------- */
+logoutBtn.onclick = async () => {
+  await sb.auth.signOut();
+  location.reload();
+};
 
-  content.innerHTML = `
-    <h2>Dashboard</h2>
-
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
-      <div class="card"><b>My Shipments</b><h1>${mine.length}</h1></div>
-      <div class="card"><b>Unassigned</b><h1>${unassigned.length}</h1></div>
-      <div class="card"><b>At Risk</b><h1>${atRisk.length}</h1></div>
-      <div class="card"><b>VIP</b><h1>${vip.length}</h1></div>
-    </div>
-
-    <div class="card">
-      <h3>Live Map</h3>
-      <div id="map"></div>
-    </div>
-
-    <div class="card">
-      <h3>My Shipments</h3>
-      ${shipmentTable(mine)}
-    </div>
-
-    <div class="card">
-      <h3>Unassigned Shipments</h3>
-      ${shipmentTable(unassigned)}
-    </div>
-  `;
-
-  drawMap([...mine, ...unassigned]);
-}
-
-function shipmentTable(list){
-  if(!list.length) return '<p>None</p>';
-
-  return `
-    <table width="100%" cellpadding="8">
-      <tr>
-        <th>Ref</th>
-        <th>Client</th>
-        <th>Type</th>
-        <th>Route</th>
-        <th>ETA</th>
-        <th>Assigned</th>
-      </tr>
-      ${list.map(s => `
-        <tr>
-          <td>${isVip(s) ? '⭐ ' : ''}${s.shipment_ref || '-'}</td>
-          <td>${s.client || '-'}</td>
-          <td>${s.shipment_type || '-'}</td>
-          <td>${s.origin || '-'} → ${s.destination || '-'}</td>
-          <td>${fmtDate(s.eta)}</td>
-          <td>${nameOf(s.assigned_to)}</td>
-        </tr>
-      `).join('')}
-    </table>
-  `;
-}
-
-function drawMap(list){
-  if(map){
-    map.remove();
-    map = null;
-  }
-
-  map = L.map('map').setView([53.3498, -6.2603], 4);
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution:'© OpenStreetMap'
-  }).addTo(map);
-
-  mapLayer = L.layerGroup().addTo(map);
-
-  const samplePoints = [
-    [53.3498,-6.2603],
-    [51.5072,-0.1276],
-    [52.52,13.405],
-    [48.8566,2.3522],
-    [40.7128,-74.006],
-    [25.2048,55.2708]
-  ];
-
-  list.slice(0,20).forEach((s, i) => {
-    const p = samplePoints[i % samplePoints.length];
-    L.marker(p).addTo(mapLayer).bindPopup(`
-      <b>${s.shipment_ref || 'Shipment'}</b><br>
-      ${s.client || ''}<br>
-      ${s.origin || ''} → ${s.destination || ''}
-    `);
-  });
-}
-function renderKanban(){
-  const cols = [
-    {
-      key:'new',
-      title:'New / To Assign',
-      items:shipments.filter(s => !s.assigned_to || s.status === 'new')
-    },
-    {
-      key:'booked',
-      title:'Booked',
-      items:shipments.filter(s => s.assigned_to && (s.status === 'booked' || !s.status))
-    },
-    {
-      key:'transit',
-      title:'In Transit',
-      items:shipments.filter(s => s.status === 'transit' || s.status === 'In Transit')
-    },
-    {
-      key:'customs',
-      title:'Customs',
-      items:shipments.filter(s => s.status === 'customs' || s.shipment_type === 'Customs Clearance')
-    },
-    {
-      key:'done',
-      title:'Done',
-      items:shipments.filter(s => s.status === 'done' || s.status === 'Delivered')
-    }
-  ];
-
-  content.innerHTML = `
-    <h2>Kanban Board</h2>
-    <div class="kanban">
-      ${cols.map(c => `
-        <div class="col" ondragover="event.preventDefault()" ondrop="dropKanban(event,'${c.key}')">
-          <h3>${c.title} (${c.items.length})</h3>
-          ${c.items.map(s => `
-            <div class="job" draggable="true" ondragstart="event.dataTransfer.setData('id','${s.id}')">
-              <b>${isVip(s) ? '⭐ ' : ''}${s.shipment_ref || 'No Ref'}</b><br>
-              ${s.client || 'Unknown Client'}<br>
-              <small>${s.origin || '-'} → ${s.destination || '-'}</small><br>
-              <button onclick="assignToMe('${s.id}')">Assign to me</button>
-              <button onclick="markDone('${s.id}')">Done</button>
-            </div>
-          `).join('') || '<p>No jobs</p>'}
-        </div>
-      `).join('')}
-    </div>
-  `;
-}
-
-async function dropKanban(e,status){
-  e.preventDefault();
-
-  const id = e.dataTransfer.getData('id');
-  if(!id) return;
-
-  const payload = { status };
-
-  if(status === 'new'){
-    payload.assigned_to = null;
-  }
-
-  const { error } = await sb
-    .from('shipments')
-    .update(payload)
-    .eq('id', id);
-
-  if(error){
-    alert(error.message);
-    return;
-  }
-
-  await loadShipments();
-}
-
-async function assignToMe(id){
-  const { error } = await sb
-    .from('shipments')
-    .update({
-      assigned_to: appUser.id,
-      status:'booked'
-    })
-    .eq('id', id);
-
-  if(error){
-    alert(error.message);
-    return;
-  }
-
-  await loadShipments();
-}
-
-async function markDone(id){
-  const { error } = await sb
-    .from('shipments')
-    .update({
-      status:'done'
-    })
-    .eq('id', id);
-
-  if(error){
-    alert(error.message);
-    return;
-  }
-
-  await loadShipments();
-}
-
-function renderCalendar(){
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
-
-  const first = new Date(year, month, 1);
-  const start = new Date(first);
-  start.setDate(first.getDate() - first.getDay());
-
-  let html = `
-    <h2>Calendar</h2>
-    <div class="card">
-      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px">
-        ${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => `
-          <div><b>${d}</b></div>
-        `).join('')}
-  `;
-
-  for(let i=0;i<42;i++){
-    const d = new Date(start);
-    d.setDate(start.getDate()+i);
-
-    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-
-    const events = shipments.filter(s =>
-      fmtDate(s.eta) === key ||
-      fmtDate(s.pickup_date) === key ||
-      fmtDate(s.etd) === key
-    );
-
-    html += `
-      <div style="min-height:100px;background:#f8fbfc;border:1px solid #ddd;border-radius:8px;padding:6px">
-        <b>${d.getDate()}</b>
-        ${events.map(s => `
-          <div style="background:white;border-left:4px solid ${riskOf(s)==='overdue' ? 'red' : '#06b7a5'};margin-top:5px;padding:5px;border-radius:6px">
-            ${s.client || ''}<br>
-            <small>${s.shipment_ref || ''}</small>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  }
-
-  html += `
-      </div>
-    </div>
-  `;
-
-  content.innerHTML = html;
-}
-function renderUpload(){
-  content.innerHTML = `
-    <h2>Uploads</h2>
-
-    <div class="card">
-      <button class="${uploadType === 'BD Handover' ? 'gold' : ''}" onclick="setUploadType('BD Handover')">BD Handover</button>
-      <button class="${uploadType === 'General Cargo' ? 'gold' : ''}" onclick="setUploadType('General Cargo')">General Cargo</button>
-      <button class="${uploadType === 'Customs Clearance' ? 'gold' : ''}" onclick="setUploadType('Customs Clearance')">Customs Clearance</button>
-
-      <h3>${uploadType}</h3>
-      <textarea id="raw" placeholder="Paste ${uploadType} text here..."></textarea>
-      <br>
-      <button onclick="parseUpload()">Parse</button>
-      <button onclick="createFromUpload()">Create Unassigned Shipment</button>
-
-      <pre id="parseOutput"></pre>
-    </div>
-  `;
-}
-
-function setUploadType(type){
-  uploadType = type;
-  renderUpload();
-}
-
-function findMatch(text, patterns){
-  for(const p of patterns){
-    const m = text.match(p);
-    if(m && m[1]) return m[1].trim();
-  }
-  return '';
-}
-
-function normaliseDate(value){
-  if(!value) return null;
-
-  const parts = value.replace(/\./g,'/').replace(/-/g,'/').split('/');
-
-  if(parts.length !== 3) return null;
-
-  let [d,m,y] = parts;
-  if(y.length === 2) y = '20' + y;
-
-  return `${y.padStart(4,'0')}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
-}
-
-function parseUpload(){
-  const text = document.getElementById('raw').value;
-
-  if(!text.trim()){
-    alert('Paste text first');
-    return;
-  }
-
-  const route =
-    text.match(/from\s+([^,\n]+?)\s+(?:to|->|→)\s+([^,\n]+)/i) ||
-    text.match(/([^,\n]{2,40})\s*(?:->|→)\s*([^,\n]{2,40})/i);
-
-  let shipmentType = uploadType;
-
-  if(uploadType === 'BD Handover'){
-    if(/ocean|vessel|container|sailing/i.test(text)) shipmentType = 'Ocean Import';
-    else if(/road|truck|collection/i.test(text)) shipmentType = 'Road Import';
-    else if(/customs|clearance|mrn|entry/i.test(text)) shipmentType = 'Customs Clearance';
-    else shipmentType = 'Air Import';
-  }
-
-  parsed = {
-    upload_type: uploadType,
-    client: findMatch(text, [
-      /client[:\s-]+([^\n,;]+)/i,
-      /customer[:\s-]+([^\n,;]+)/i,
-      /company[:\s-]+([^\n,;]+)/i,
-      /importer[:\s-]+([^\n,;]+)/i,
-      /consignee[:\s-]+([^\n,;]+)/i,
-      /shipper[:\s-]+([^\n,;]+)/i
-    ]),
-    shipment_ref: findMatch(text, [
-      /shipment(?:\s+ref|\s+no)?[:\s#-]+([A-Z0-9/-]{5,})/i,
-      /job(?:\s+ref|\s+no)?[:\s#-]+([A-Z0-9/-]{5,})/i,
-      /booking(?:\s+ref|\s+no)?[:\s#-]+([A-Z0-9/-]{5,})/i,
-      /awb[:\s#-]+([A-Z0-9/-]{5,})/i,
-      /mawb[:\s#-]+([A-Z0-9/-]{5,})/i,
-      /hawb[:\s#-]+([A-Z0-9/-]{5,})/i,
-      /container[:\s#-]+([A-Z]{4}\d{7})/i,
-      /mrn[:\s#-]+([A-Z0-9/-]{5,})/i,
-      /(SHP[- ]?\d{3,}|JOB[- ]?\d{3,}|MW[- ]?\d{3,}|\d{3}[- ]?\d{7,8})/i
-    ]),
-    origin: route ? route[1].trim() : findMatch(text, [
-      /origin[:\s-]+([^\n,;]+)/i,
-      /from[:\s-]+([^\n,;]+)/i,
-      /pol[:\s-]+([^\n,;]+)/i,
-      /pickup location[:\s-]+([^\n,;]+)/i
-    ]),
-    destination: route ? route[2].trim() : findMatch(text, [
-      /destination[:\s-]+([^\n,;]+)/i,
-      /to[:\s-]+([^\n,;]+)/i,
-      /pod[:\s-]+([^\n,;]+)/i,
-      /delivery location[:\s-]+([^\n,;]+)/i,
-      /clearance location[:\s-]+([^\n,;]+)/i
-    ]),
-    shipment_type: shipmentType,
-    pickup_date: normaliseDate(findMatch(text, [
-      /pickup[^0-9]{0,20}(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/i,
-      /collection[^0-9]{0,20}(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/i,
-      /cargo ready[^0-9]{0,20}(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/i
-    ])),
-    etd: normaliseDate(findMatch(text, [
-      /etd[^0-9]{0,20}(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/i,
-      /departure[^0-9]{0,20}(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/i,
-      /sailing[^0-9]{0,20}(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/i,
-      /flight[^0-9]{0,20}(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/i
-    ])),
-    eta: normaliseDate(findMatch(text, [
-      /eta[^0-9]{0,20}(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/i,
-      /arrival[^0-9]{0,20}(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/i,
-      /delivery date[^0-9]{0,20}(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/i,
-      /clearance date[^0-9]{0,20}(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})/i
-    ])),
-    vip: /vip|urgent|priority|high value|critical|time critical/i.test(text),
-    notes: text.slice(0,1500)
-  };
-
-  document.getElementById('parseOutput').textContent =
-    JSON.stringify(parsed, null, 2);
-}
-
-async function createFromUpload(){
-  if(!parsed){
-    alert('Parse first');
-    return;
-  }
-
-  const ref = parsed.shipment_ref || 'BD-' + Date.now();
-
-  await sb.from('bd_handovers').insert({
-    raw_text: parsed.notes,
-    client: parsed.client,
-    shipment_ref: ref,
-    origin: parsed.origin,
-    destination: parsed.destination,
-    shipment_type: parsed.shipment_type,
-    etd: parsed.etd,
-    eta: parsed.eta,
-    pickup_date: parsed.pickup_date,
-    vip: parsed.vip,
-    notes: parsed.notes,
-    created_by: appUser.id
-  });
-
-  const { error } = await sb.from('shipments').insert({
-    shipment_ref: ref,
-    client: parsed.client || 'Unknown Client',
-    origin: parsed.origin,
-    destination: parsed.destination,
-    shipment_type: parsed.shipment_type,
-    pickup_date: parsed.pickup_date,
-    etd: parsed.etd,
-    eta: parsed.eta,
-    vip: parsed.vip,
-    bd_notes: parsed.notes,
-    assigned_to: null,
-    status: 'new',
-    milestones: [{
-      code:'BOOKED',
-      label:'Booked from upload',
-      completed_at:new Date().toISOString(),
-      completed_by:appUser.email,
-      note: parsed.vip ? 'VIP upload' : ''
-    }],
-    milestone_updated_at:new Date().toISOString()
-  });
-
-  if(error){
-    alert(error.message);
-    return;
-  }
-
-  alert('Shipment created as unassigned');
-  parsed = null;
-  await loadShipments();
-  view = 'dashboard';
-  render();
-}
-
-loadUsers();
-</script>
-</body>
-</html>
+window.onload = initDropdowns;
